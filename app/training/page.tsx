@@ -57,10 +57,6 @@ export default function TrainingPage() {
                     </div>
                 )}
 
-                import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
-
-                // ... (inside component)
-
                 {activeTab === 'analytics' && (
                     <div className="animate-in zoom-in-95 duration-300">
                         <AnalyticsDashboard />

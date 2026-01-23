@@ -26,7 +26,12 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = async () => {
         try {
             // 1. Fetch Lead Stats
-            const { data: leads } = await supabase.from('leads').select('status');
+            // Explicitly cast the return type to help TypeScript inference
+            const { data: leads } = await supabase
+                .from('leads')
+                .select('status')
+                .returns<{ status: string }[]>();
+
             const totalLeads = leads?.length || 0;
             const wins = leads?.filter(l => l.status === 'Booked' || l.status === 'Booking_Offered').length || 0;
 
@@ -41,7 +46,11 @@ export default function AnalyticsDashboard() {
             }));
 
             // 2. Fetch Feedback Stats
-            const { data: feedback } = await supabase.from('training_feedback').select('is_gold_standard');
+            const { data: feedback } = await supabase
+                .from('training_feedback')
+                .select('is_gold_standard')
+                .returns<{ is_gold_standard: boolean }[]>();
+
             const totalFeedback = feedback?.length || 0;
             const goldCount = feedback?.filter(f => f.is_gold_standard).length || 0;
             const goldRatio = totalFeedback > 0 ? (goldCount / totalFeedback) * 100 : 0;
