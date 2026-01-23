@@ -137,7 +137,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                                     className={`text-xs px-2 py-1 rounded text-white ${STATUS_COLORS[lead.status as LeadStatus]
                                         }`}
                                 >
-                                    {STATUS_LABELS[lead.status]}
+                                    {STATUS_LABELS[lead.status as LeadStatus]}
                                 </span>
                                 <span className="text-xs text-text-secondary">{lead.lead_code}</span>
                             </div>
