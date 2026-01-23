@@ -105,8 +105,8 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                             key={lead.id}
                             onClick={() => onSelectLead(lead.id)}
                             className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLeadId === lead.id
-                                    ? 'glow-active border-electric-cyan/50'
-                                    : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
+                                ? 'glow-active border-electric-cyan/50'
+                                : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
                                 }`}
                         >
                             <div className="flex items-start justify-between mb-2">
@@ -134,7 +134,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
 
                             <div className="flex items-center justify-between">
                                 <span
-                                    className={`text-xs px-2 py-1 rounded text-white ${STATUS_COLORS[lead.status]
+                                    className={`text-xs px-2 py-1 rounded text-white ${STATUS_COLORS[lead.status as LeadStatus]
                                         }`}
                                 >
                                     {STATUS_LABELS[lead.status]}
