@@ -153,6 +153,27 @@ CRITICAL CONTEXT RULES:
                 analysis_context = "\n\nDETECTED OBJECTION: DISTANCE/TOO FAR\nUse the '90% of pros started by traveling to us' rebuttal. Emphasize that the best opportunities are worth the journey."
             elif analysis["objection_type"] != "none":
                 analysis_context = f"\n\nDETECTED OBJECTION: {analysis['objection_type']}\nUse your training to handle this objection professionally and convert them."
+            
+            # FAQ Detection
+            if analysis["intent"] == "question":
+                from .sales_prompts import FAQ_RESPONSES
+                msg_lower = incoming_message.lower()
+                
+                if any(x in msg_lower for x in ["clothes", "wear", "bring", "outfit", "dress"]):
+                    analysis_context += f"\n\nFAQ DETECTED (CLOTHES): Use this info: {FAQ_RESPONSES['clothes']}"
+                elif any(x in msg_lower for x in ["portfolio", "photos", "pictures", "book"]):
+                    analysis_context += f"\n\nFAQ DETECTED (PORTFOLIO): Use this info: {FAQ_RESPONSES['portfolio']}"
+                elif any(x in msg_lower for x in ["cost", "price", "pay", "money", "free", "charge", "fee", "deposit"]):
+                    analysis_context += f"\n\nFAQ DETECTED (COST): Use this info: {FAQ_RESPONSES['deposit']}"
+                elif any(x in msg_lower for x in ["sell", "pressure", "buy"]):
+                    analysis_context += f"\n\nFAQ DETECTED (PRESSURE): Use this info: {FAQ_RESPONSES['sell']}"
+                elif any(x in msg_lower for x in ["scam", "legit", "real", "fake"]):
+                    analysis_context += f"\n\nFAQ DETECTED (LEGITIMACY): Use this info: {FAQ_RESPONSES['scam']}"
+                elif any(x in msg_lower for x in ["makeup", "hair"]):
+                    analysis_context += f"\n\nFAQ DETECTED (MAKEUP): Use this info: {FAQ_RESPONSES['makeup']}"
+                elif any(x in msg_lower for x in ["friend", "parent", "mum", "mom", "dad", "someone"]):
+                    analysis_context += f"\n\nFAQ DETECTED (COMPANION): Use this info: {FAQ_RESPONSES['someone_else']}"
+
             if analysis["intent"] == "stop":
                 analysis_context += "\n\nIMPORTANT: Customer wants to opt out. Acknowledge politely and confirm removal."
         

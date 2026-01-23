@@ -202,7 +202,12 @@ Location: {STUDIO_NAME}
 Duration: 20 minutes
 Cost: FREE
 
-You'll receive a confirmation email shortly with the full address and what to bring.
+IMPORTANT - WHAT TO BRING:
+1. Blue jeans & white T-shirt/shirt (Required)
+2. Two other outfits that show your personality 👗👔
+3. Clean hair & natural makeup (if any)
+
+You'll receive a confirmation email shortly with the full address.
 
 Excited to meet you! Any questions before then?"""
 
@@ -220,3 +225,16 @@ def get_qualification_questions() -> list[str]:
         "Where are you based? Just so I can suggest the best times for you!",
         "What's your availability like? We have slots throughout the week, including evenings.",
     ]
+
+
+# Knowledge base from FAQs
+FAQ_RESPONSES = {
+    "clothes": "Bring 3 looks: 1) Blue jeans + white T-shirt (classic look). 2) Two outfits that show your style! 👗 Keep makeup natural.",
+    "portfolio": "No portfolio needed! That's what the assessment is for. If you match a category, we might not even need one. Let's see how you do first! 📸",
+    "sell": "No pressure at all! The assessment is 100% FREE. It's just to see if you have potential. If you like the photos, you can buy them, but no obligation. 👍",
+    "hard_sell": "No pressure at all! The assessment is 100% FREE. It's just to see if you have potential. If you like the photos, you can buy them, but no obligation. 👍",
+    "deposit": "No deposit! Unlike other studios, we don't charge a booking fee. We invite people we believe in. Ready to book? 📅",
+    "scam": "I totally get the caution! We're a legitimate studio looking for new faces. The assessment is completely free, so there's zero risk for you to come check it out.",
+    "makeup": "Keep it natural! We want to see the real you. Clean hair and light/no makeup is best for the assessment. ✨",
+    "someone_else": "If you're under 18, bring a parent/guardian. Otherwise, friends/family can wait in our reception area while you shoot! 🛋️"
+}
