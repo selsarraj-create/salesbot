@@ -74,6 +74,17 @@ export default function LiveStatus() {
                     </Badge>
                 </div>
 
+                {/* Thameslink Status */}
+                <div className="flex items-center justify-between p-2 bg-charcoal rounded border border-surface-light">
+                    <div className="flex items-center gap-2">
+                        <Train className="w-4 h-4 text-text-secondary" />
+                        <span className="text-sm text-text-primary">Thameslink</span>
+                    </div>
+                    <Badge variant={status.tfl.find(t => t.line === 'Thameslink')?.status === 'Good Service' ? 'outline' : 'destructive'}>
+                        {status.tfl.find(t => t.line === 'Thameslink')?.status || 'Unknown'}
+                    </Badge>
+                </div>
+
                 {/* Weather Status */}
                 <div className="flex items-center justify-between p-2 bg-charcoal rounded border border-surface-light">
                     <div className="flex items-center gap-2">

@@ -9,6 +9,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
     try {
         console.log('[Concierge] Checking stats...');
@@ -20,10 +22,13 @@ export async function GET(req: Request) {
         ]);
 
         const northernLine = tfl.find(t => t.line === 'Northern Line');
+        const thameslink = tfl.find(t => t.line === 'Thameslink');
+
         const isTubeDelay = northernLine?.status !== 'Good Service';
+        const isRailDelay = thameslink?.status !== 'Good Service';
         const isBadWeather = ['Rain', 'Heavy Rain', 'Storm'].includes(weather.condition);
 
-        if (!isTubeDelay && !isBadWeather) {
+        if (!isTubeDelay && !isRailDelay && !isBadWeather) {
             console.log('[Concierge] All clear. No alerts needed.');
             return NextResponse.json({ status: 'No Alerts', tfl, weather });
         }
@@ -55,6 +60,9 @@ Studio Name: London Photography Studio.
             if (isTubeDelay) {
                 prompt += `Alert: Northern Line has ${northernLine?.status}.
 Instruction: Advise them to leave 15 mins early. Be helpful.`;
+            } else if (isRailDelay) {
+                prompt += `Alert: Thameslink has ${thameslink?.status}.
+Instruction: Advise checking train times as delays are expected. Suggest Northern Line as backup if possible.`;
             } else if (isBadWeather) {
                 prompt += `Alert: Current weather is ${weather.condition}.
 Instruction: Remind them to bring an umbrella for the walk from the station. Reassure them we have styling kits so "helmet hair" isn't an issue.`;

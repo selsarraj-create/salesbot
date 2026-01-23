@@ -8,6 +8,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+export const dynamic = 'force-dynamic';
+
 // Time Window Configuration (Server Time UTC)
 // Assuming UK Business Hours (London is UTC+0/1)
 // 11 AM - 2 PM (Lunch)

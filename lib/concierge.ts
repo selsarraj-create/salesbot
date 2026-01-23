@@ -16,6 +16,7 @@ export async function getTflStatus(): Promise<TflStatus[]> {
     // In production, fetch from https://api.tfl.gov.uk/Line/northern/Status
     // Mocking random delays for demo purposes
     const isDelay = Math.random() > 0.7; // 30% chance of delay
+    const isThameslinkDelay = Math.random() > 0.8; // 20% chance
 
     return [
         {
@@ -25,7 +26,8 @@ export async function getTflStatus(): Promise<TflStatus[]> {
         },
         {
             line: 'Thameslink',
-            status: 'Good Service'
+            status: isThameslinkDelay ? 'Minor Delays' : 'Good Service',
+            details: isThameslinkDelay ? 'Delays expected due to crew availability.' : undefined
         }
     ];
 }

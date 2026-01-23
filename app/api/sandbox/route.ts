@@ -44,14 +44,19 @@ CORE PRINCIPLES:
    - **"Is this a scam?"**: "I completely understand your caution—there are many bad actors in this industry. A real scam will ask for 'registration fees'. We are a professional studio; you are paying for high-end service (hair, makeup, portfolio) that you own and can take to any agency."
    - **"Guarantee work?"**: "No professional studio or agency can ever guarantee work. What we do is ensure you have the absolute best chance by providing agency-standard 'digitals' and a portfolio that meets UK casting requirements."
 
-5. **NATURAL TRANSITIONS**: 
-   - Use: "That makes sense...", "I see what you mean...", "Great choice..."
+6. **ETHICS & TRANSPARENCY PROTOCOLS (STRICT)**:
+   - **THE 'AGENCY' FILTER**: NEVER describe us as an agency.
+     * IF asked "Are you an agency?": "Great question—we are a professional photography studio that specializes in creating agency-standard portfolios. We aren't an agency ourselves, but we give you the tools and the roadmap to apply to the top London agencies."
+     * IF user says "join your agency": IMMEDIATELY CORRECT THEM. "Just to be clear, we are a studio, not an agency. We create the portfolio you need to apply to agencies."
+   - **NO GUARANTEE RULE**:
+     * IF asked "Will I get work?" or "Is money guaranteed?": "I have to be honest with you—no one in this industry can guarantee work. What we guarantee is that you’ll leave us with a professional portfolio that meets exactly what London bookers are looking for right now."
 
 CONVERSATION FLOW:
 1. Contact → Acknowledge & Validate
 2. Discovery → Ask Goal/Experience (Required)
-3. Value → Explain Assessment (Fun/Safe/Professional)
-4. Soft Ask → "Would you like to schedule something?"
+3. Transparency Check → Correct 'Agency' misconceptions if present
+4. Value → Explain Assessment (Fun/Safe/Professional)
+5. Soft Ask → "Would you like to schedule something?"
 
 Remember: You are helpful, professional, and British. You are NOT a pushy salesperson.`;
 
@@ -206,6 +211,59 @@ The user is asking about location/travel.
 3. BE HELPFUL: Do not push for booking in this specific response. Focus on helping them arrive stress-free.`;
         }
 
+        // --- ETHICS & COMPLIANCE LOGIC (STRICT) ---
+        const lowerMsg = message.toLowerCase();
+
+        // 1. AGENCY AUTO-CORRECTION
+        let agencyCorrectionInstruction = "";
+        if (lowerMsg.includes('agency')) {
+            agencyCorrectionInstruction = `
+CRITICAL INSTRUCTION - AGENCY CORRECTION REQUIRED:
+The user referred to us as an 'agency'. 
+YOU MUST CORRECT THIS IMMEDIATELY in a polite, professional way.
+Script: "Just to be clear, we are a professional photography studio, not an agency. We don't find work for you, but we create the industry-standard portfolio you need to apply to agencies yourself."
+DO NOT proceed with booking until you have made this distinction clear.`;
+        }
+
+        // 2. HIGH-RISK KEYWORDS & GUARANTEE TRACKING
+        const RISK_KEYWORDS = ['guarantee', 'job', 'work', 'money', 'income', 'paid', 'earnings'];
+        const isRiskMsg = RISK_KEYWORDS.some(w => lowerMsg.includes(w));
+
+        let ethicsContext = "";
+        let guaranteeCounter = contextMemory.guarantee_asks || 0;
+
+        if (isRiskMsg) {
+            // Increment counter
+            guaranteeCounter++;
+
+            // 3. HUMAN ALERT TRIGGER (If > 2 asks)
+            if (guaranteeCounter > 2) {
+                console.log('⚠️ ETHICS TRIGGER: Persistent Guarantee Asks. STOPPING BOT.');
+                const interventionMsg = "I want to be completely transparent with you. Since you've asked about guaranteed work multiple times, I think it's best if a senior manager speaks with you directly to explain exactly how the industry works. I've flagged this for them to give you a call.";
+
+                await supabase.from('messages').insert({
+                    lead_id: lead_id, content: interventionMsg, sender_type: 'bot'
+                });
+                await supabase.from('leads').update({ status: 'Human_Intervention', context_memory: { ...contextMemory, guarantee_asks: guaranteeCounter } }).eq('id', lead_id);
+
+                return NextResponse.json({ response: interventionMsg });
+            }
+
+            // Otherwise, inject Ethics Guidelines
+            ethicsContext = `
+WARNING - HIGH RISK TOPIC DETECTED:
+The user is asking about guarantees, jobs, or money.
+REFER TO ETHICS GUIDELINES:
+- "No legitimate company can guarantee work."
+- "We provide the TOOLS (photos), not the JOBS."
+- "Success depends on market demand."
+You must be transparent. DO NOT promise success.`;
+        }
+
+        // Update memory with new counter (will be saved after generation)
+        contextMemory.guarantee_asks = guaranteeCounter;
+        // ------------------------------------------
+
         // 6. Generate Response with Gemini
         console.log('Step 6: Calling Gemini (gemini-3-flash-preview)...');
         try {
@@ -223,6 +281,8 @@ ${knowledgeContext}
 ${goldStandardContext}
 
 ${localGuideInstruction}
+${agencyCorrectionInstruction}
+${ethicsContext}
 
 Customer's Last Message: "${message}"
 
@@ -237,6 +297,28 @@ Respond as Alex:`;
             const responseText = result.response.text().trim();
             console.log('Step 5: Gemini response received');
 
+            // 6. ETHICS GUARDRAIL: Forbidden Words Scan
+            const FORBIDDEN_WORDS = ['guarantee', 'guaranteed', 'job', 'income', 'salary', 'promise'];
+            const FORBIDDEN_PHRASES = ['our agency', 'we are an agency', 'join the agency', 'signed to the agency'];
+
+            const lowerResponse = responseText.toLowerCase();
+
+            let foundViolation = FORBIDDEN_WORDS.find(word => lowerResponse.includes(word));
+
+            if (!foundViolation) {
+                foundViolation = FORBIDDEN_PHRASES.find(phrase => lowerResponse.includes(phrase));
+            }
+
+            if (foundViolation) {
+                console.warn(`⚠️ ETHICS VIOLATION: Bot used forbidden term '${foundViolation}'`);
+                // Flag the lead for review
+                await supabase
+                    .from('leads')
+                    .update({
+                        review_reason: `Flagged: Used forbidden term "${foundViolation}" in conversation.`
+                    })
+                    .eq('id', lead_id);
+            }
             // 7. Update Context Memory (Async)
             try {
                 const memoryPrompt = `Analyze this conversation turn.
@@ -253,6 +335,7 @@ Return ONLY the updated JSON memory object.`;
                 const jsonMatch = newMemoryText.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     const newMemory = JSON.parse(jsonMatch[0]);
+                    newMemory.guarantee_asks = contextMemory.guarantee_asks; // Persist guarantee counter
                     await supabase.from('leads').update({ context_memory: newMemory }).eq('id', lead_id);
                     console.log('Step 7: Memory updated:', newMemory);
                 }
