@@ -94,6 +94,34 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing lead_id or message' }, { status: 400 });
         }
 
+        // 0. Analyze Sentiment & Check Guardrails
+        console.log('Step 0: Analyzing sentiment...');
+        let sentimentScore = 0;
+        try {
+            const { analyzeSentiment } = await import('@/lib/utils/ai');
+            sentimentScore = await analyzeSentiment(message);
+            console.log('Step 0: User Sentiment:', sentimentScore);
+
+            // SENTIMENT GUARDRAIL: If < -0.5, trigger Human Callback
+            if (sentimentScore < -0.5) {
+                console.log('⚠️ SENTIMENT GUARDRAIL TRIGGERED');
+                const humanHandoffMsg = "I feel I might not be explaining this well. Would you prefer a quick call from one of our senior team members to clear things up?";
+
+                // Save bot response
+                await supabase.from('messages').insert({
+                    lead_id: lead_id,
+                    content: humanHandoffMsg,
+                    sender_type: 'bot'
+                });
+
+                await supabase.from('leads').update({ status: 'Human_Required' }).eq('id', lead_id);
+
+                return NextResponse.json({ response: humanHandoffMsg });
+            }
+        } catch (e) {
+            console.error('Sentiment check failed', e);
+        }
+
         // 1. Get Lead Details
         console.log('Step 1: Fetching lead...');
         const { data: lead, error: leadError } = await supabase
@@ -110,6 +138,8 @@ export async function POST(req: Request) {
 
         const leadName = lead.name || 'there';
         const currentStatus = lead.status || 'New';
+        const contextMemory = lead.context_memory || {};
+        console.log('Step 1: Context Memory:', contextMemory);
 
         // 2. Save User Message
         console.log('Step 2: Saving user message...');
@@ -193,7 +223,8 @@ export async function POST(req: Request) {
 
 CUSTOMER CONTEXT:
 Name: ${leadName}
-Current Status: ${currentStatus}
+Status: ${currentStatus}
+Memory (Concerns/Goals): ${JSON.stringify(contextMemory)}
 
 ${chatHistory}
 ${knowledgeContext}
@@ -201,25 +232,52 @@ ${goldStandardContext}
 
 Customer's Last Message: "${message}"
 
-Respond as Alex (keep it under 160 chars, end with question):`;
+INSTRUCTION:
+1. CHECK MEMORY: Reference their specific goals/concerns if relevant.
+2. FORMULA: Use [Acknowledge] -> [Value Statement] -> [Discovery Question]
+3. SHORT: Keep response under 160 chars.
+
+Respond as Alex:`;
 
             const result = await model.generateContent(prompt);
             const responseText = result.response.text().trim();
             console.log('Step 5: Gemini response received');
 
-            // 6. Save Bot Response
-            console.log('Step 6: Saving bot response...');
+            // 7. Update Context Memory (Async)
+            try {
+                const memoryPrompt = `Analyze this conversation turn.
+User: "${message}"
+Bot: "${responseText}"
+Current Memory: ${JSON.stringify(contextMemory)}
+
+Update the memory with any new specific goals (e.g. "fashion model"), concerns (e.g. "student", "cost"), or key facts.
+Return ONLY the updated JSON memory object.`;
+
+                const memoryResult = await model.generateContent(memoryPrompt);
+                const newMemoryText = memoryResult.response.text();
+                // Extract JSON
+                const jsonMatch = newMemoryText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    const newMemory = JSON.parse(jsonMatch[0]);
+                    await supabase.from('leads').update({ context_memory: newMemory }).eq('id', lead_id);
+                    console.log('Step 7: Memory updated:', newMemory);
+                }
+            } catch (memSafeError) {
+                console.error('Memory update failed (non-fatal):', memSafeError);
+            }
+
+            // 8. Save Bot Response
+            console.log('Step 8: Saving bot response...');
             const { error: botMsgError } = await supabase
                 .from('messages')
                 .insert({
                     lead_id: lead_id,
                     content: responseText,
                     sender_type: 'bot'
-                    // metadata removed
                 });
 
             if (botMsgError) console.error('Error saving bot message:', botMsgError);
-            else console.log('Step 6: Bot response saved');
+            else console.log('Step 8: Bot response saved');
 
             return NextResponse.json({
                 success: true,
