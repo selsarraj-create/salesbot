@@ -53,7 +53,40 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         }
     };
 
-    // ... existing handleSendMessage ...
+    const handleSendMessage = async () => {
+        if (!lead || !inputMessage.trim()) return;
+
+        setSending(true);
+        setThinking(true);
+
+        try {
+            const response = await fetch('/api/test_chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lead_id: lead.id,
+                    message: inputMessage.trim(),
+                    simulate_latency: simulateLatency
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to send message');
+            }
+
+            const data = await response.json();
+            console.log('Test chat response:', data);
+
+            setInputMessage('');
+        } catch (error: any) {
+            console.error('Error sending test message:', error);
+            alert(`Error: ${error.message}`);
+            setThinking(false);
+        } finally {
+            setSending(false);
+        }
+    };
 
     if (!lead) {
         return (
