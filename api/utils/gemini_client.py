@@ -91,6 +91,10 @@ Suggested_Status: [New/Qualifying/Booking_Offered/Booked/Objection_Distance/Huma
             if any(keyword in message.lower() for keyword in distance_keywords):
                 objection_type = "distance"
             
+            # Detect disqualification (Recent test shoot)
+            if "test shoot" in message.lower() and ("yes" in message.lower() or "recently" in message.lower() or "last month" in message.lower()):
+                analysis_prompt += "\n\nNOTE: Lead indicated recent test shoot. Check if it was in the last 6 months. If so, SUGGEST DISQUALIFICATION."
+
             return {
                 "intent": intent_match.group(1).lower() if intent_match else "unknown",
                 "objection_type": objection_type,
