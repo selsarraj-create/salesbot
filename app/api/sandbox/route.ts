@@ -105,8 +105,8 @@ export async function POST(req: Request) {
             .insert({
                 lead_id: lead_id,
                 content: message,
-                sender_type: 'lead',
-                metadata: { is_test: true } // Should verify if DB column accepts this JSON
+                sender_type: 'lead'
+                // metadata removed to fix PGRST204
             });
 
         if (msgError) console.error('Error saving user message:', msgError);
@@ -135,7 +135,7 @@ export async function POST(req: Request) {
         }
 
         // 5. Generate Response with Gemini
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use efficient model
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Using gemini-pro for better compatibility
 
         const prompt = `${SALES_PERSONA_PROMPT}
 
@@ -158,8 +158,8 @@ Respond as Alex (keep it under 160 chars, end with question):`;
             .insert({
                 lead_id: lead_id,
                 content: responseText,
-                sender_type: 'bot',
-                metadata: { is_test: true }
+                sender_type: 'bot'
+                // metadata removed
             });
 
         if (botMsgError) console.error('Error saving bot message:', botMsgError);
@@ -167,7 +167,7 @@ Respond as Alex (keep it under 160 chars, end with question):`;
         return NextResponse.json({
             success: true,
             response: responseText,
-            status: currentStatus, // Note: Logic to update status is simple here, can enhance later
+            status: currentStatus,
             analysis: {} // Placeholder
         });
 
