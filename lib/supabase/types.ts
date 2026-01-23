@@ -32,6 +32,27 @@ export interface Message {
     timestamp: string;
 }
 
+export interface TrainingFeedback {
+    id: string;
+    message_id: string | null;
+    original_prompt: string;
+    ai_response: string;
+    manager_correction: string | null;
+    objection_type: string | null;
+    confidence_score: number | null;
+    is_gold_standard: boolean;
+    created_at: string;
+}
+
+export interface SimulatedScenario {
+    id: string;
+    scenario_name: string;
+    lead_persona: string;
+    target_outcome: string | null;
+    difficulty_level: string;
+    created_at: string;
+}
+
 export interface Database {
     public: {
         Tables: {
@@ -44,6 +65,16 @@ export interface Database {
                 Row: Message;
                 Insert: Omit<Message, 'id' | 'timestamp'>;
                 Update: Partial<Omit<Message, 'id' | 'timestamp'>>;
+            };
+            training_feedback: {
+                Row: TrainingFeedback;
+                Insert: Omit<TrainingFeedback, 'id' | 'created_at'>;
+                Update: Partial<Omit<TrainingFeedback, 'id' | 'created_at'>>;
+            };
+            simulated_scenarios: {
+                Row: SimulatedScenario;
+                Insert: Omit<SimulatedScenario, 'id' | 'created_at'>;
+                Update: Partial<Omit<SimulatedScenario, 'id' | 'created_at'>>;
             };
         };
     };
