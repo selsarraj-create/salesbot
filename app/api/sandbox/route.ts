@@ -219,6 +219,20 @@ export async function POST(req: Request) {
             console.error('Step 5: Vector search failed:', error);
         }
 
+        // Detect Local Guide Keywords
+        const locationKeywords = ['parking', 'driving', 'location', 'get there', 'directions', 'train', 'tube', 'bus'];
+        const needsLocationHelp = locationKeywords.some(w => message.toLowerCase().includes(w));
+
+        let localGuideInstruction = "";
+        if (needsLocationHelp) {
+            localGuideInstruction = `
+SPECIAL INSTRUCTION - LOCAL GUIDE TRIGGERED:
+The user is asking about location/travel.
+1. MENTION: "I've just sent over a quick guide on the best ways to get to our Kentish Town studio. Most people find the Northern Line easiest, but if you're driving, definitely check out Regis Road for parking!"
+2. LANDMARKS: Mention "The O2 Forum" or "Kentish Town Station" to orient them.
+3. BE HELPFUL: Do not push for booking in this specific response. Focus on helping them arrive stress-free.`;
+        }
+
         // 6. Generate Response with Gemini
         console.log('Step 6: Calling Gemini (gemini-3-flash-preview)...');
         try {
@@ -234,6 +248,8 @@ Memory (Concerns/Goals): ${JSON.stringify(contextMemory)}
 ${chatHistory}
 ${knowledgeContext}
 ${goldStandardContext}
+
+${localGuideInstruction}
 
 Customer's Last Message: "${message}"
 
