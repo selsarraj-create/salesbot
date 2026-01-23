@@ -19,6 +19,7 @@ export interface Lead {
     lead_code: string;
     status: LeadStatus;
     is_manual_mode: boolean;
+    is_test: boolean;
     created_at: string;
     updated_at: string;
 }
