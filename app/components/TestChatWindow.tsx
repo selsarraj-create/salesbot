@@ -60,7 +60,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         setThinking(true);
 
         try {
-            const response = await fetch('/api/test_chat', {
+            const response = await fetch('/api/sandbox', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

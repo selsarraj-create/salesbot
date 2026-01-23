@@ -6,10 +6,6 @@
   },
   "rewrites": [
     {
-      "source": "/api/test_chat",
-      "destination": "/api/index_test_chat.py"
-    },
-    {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
