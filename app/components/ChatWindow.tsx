@@ -165,7 +165,7 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                                 >
                                     <p className="text-sm text-text-primary">{message.content}</p>
                                     <p className="text-xs mt-1 text-text-secondary">
-                                        {message.timestamp && new Date(message.timestamp).toLocaleTimeString()} •{' '}
+                                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
                                         {isLead ? 'Lead' : 'Bot'}
                                     </p>
                                 </div>
