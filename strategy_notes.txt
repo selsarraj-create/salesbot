@@ -1,0 +1,83 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .webhook import app as webhook_app
+from .manual_message import app as manual_message_app
+from .toggle_takeover import app as toggle_takeover_app
+
+# Import the router/function from test_chat, not the app 
+# (assuming we'll refactor test_chat to be a router or just include it)
+# Actually, let's keep test_chat independent logic but mount it here?
+# Better: Make test_chat define a router or just add the route here for simplicity in one main app.
+
+from fastapi import APIRouter
+# We'll just importing the handler function if possible, but test_chat defined 'app'.
+# Let's import 'app' from test_chat as 'test_chat_app' and mount it? 
+# Vercel doesn't like sub-apps as much as routers. 
+# Best practice: One main 'app' in index.py that includes routers.
+
+# Let's create a NEW main app that enables all routes.
+app = FastAPI(title="SalesBot API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount sub-apps (this works on Vercel if configured right, but routes might be /api/api/webhook)
+# safer to include routers. But our existing files are "app = FastAPI()".
+# We should refactor them to be routers, BUT that's a big change.
+
+# Alternative: Vercel supports independent functions if "api/**/*.py" is in vercel.json.
+# The error "issubclass() arg 1 must be a class" is weird for a standard FastAPI app.
+# It often happens if 'app' is not a FastAPI instance.
+
+# Let's try to just fix test_chat.py to be compliant without a full refactor first?
+# No, user wants a fix. 
+# Let's Create api/index.py which forwards requests? No.
+
+# Let's REWRITE `api/test_chat.py` to be a simple HTTP handler using Vercel's legacy BaseHTTPRequestHandler? 
+# NO, we want FastAPI features.
+
+# LIKELY CAUSE: Vercel's Python runtime trying to wrap "handler = app" but failing on some dependency or type check.
+# Sometimes `fastapi` version is involved.
+# In requirements.txt we have `fastapi` and `mangum` (implied? no).
+# Vercel handles FastAPI automatically if we expose `app`.
+
+# Wait, `api/webhook.py` works fine. What's different?
+# `api/webhook.py` has `handler = app` at the end.
+# `api/test_chat.py` has `handler = app` at the end.
+
+# Difference: `test_chat.py` uses `async def`. Webhook uses `async def`.
+# Imports: test_chat imports `get_gemini_agent`.
+# Maybe circular import in `utils`? 
+
+# Let's try to minimalize `test_chat.py` to debug. 
+# But first, I will create `api/index.py` which is a known good pattern.
+# AND I will create a `api/debug.py` to test basic connectivity.
+
+# STRATEGY: 
+# 1. Create `api/index.py` that mounts a simple router for test_chat.
+# 2. Update `api/test_chat.py` to be just a router, not an app.
+# 3. Point Vercel to use `api/index.py`.
+
+# REFACTORING test_chat.py to use APIRouter
+from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import JSONResponse
+import asyncio
+import time
+from .utils.supabase_client import get_supabase_client
+from .utils.gemini_client import get_gemini_agent
+
+router = APIRouter()
+
+@router.post("/api/test_chat")
+async def test_chat_handler(request: Request):
+    # ... logic ...
+    pass
+
+# But this changes the entry point.
+# Let's try to just make `test_chat` robust.
+pass

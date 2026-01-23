@@ -10,17 +10,11 @@ export async function GET(req: Request) {
     try {
         console.log('[Training Queue API] Starting fetch...');
 
-        // Fetch recent bot messages
+        // Fetch recent bot messages (without join to avoid FK issues)
         console.log('[Training Queue API] Querying messages table...');
         const { data: messages, error } = await supabase
             .from('messages')
-            .select(`
-                *,
-                leads (
-                    lead_code,
-                    status
-                )
-            `)
+            .select('*')
             .eq('sender_type', 'bot')
             .order('timestamp', { ascending: false })
             .limit(50);
@@ -36,6 +30,23 @@ export async function GET(req: Request) {
             console.log('[Training Queue API] No messages found, returning empty queue');
             return NextResponse.json({ queue: [] });
         }
+
+        // Fetch lead data separately
+        const leadIds = [...new Set(messages.map(m => m.lead_id))];
+        console.log(`[Training Queue API] Fetching ${leadIds.length} unique leads...`);
+
+        const { data: leads, error: leadsError } = await supabase
+            .from('leads')
+            .select('id, lead_code, status')
+            .in('id', leadIds);
+
+        if (leadsError) {
+            console.error('[Training Queue API] Leads fetch error:', leadsError);
+            // Don't throw, just continue without lead data
+        }
+
+        const leadsMap = new Map(leads?.map(l => [l.id, l]) || []);
+        console.log(`[Training Queue API] Fetched ${leads?.length || 0} leads`);
 
         // Fetch existing feedback to filter or annotate
         const messageIds = messages.map(m => m.id);

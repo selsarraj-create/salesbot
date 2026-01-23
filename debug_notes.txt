@@ -1,0 +1,38 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .webhook import app as webhook_app
+from .test_chat import app as test_chat_app
+from .manual_message import app as manual_message_app
+from .toggle_takeover import app as toggle_takeover_app
+
+app = FastAPI()
+
+# Allow CORS for local development and Vercel
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount the other apps? No, that's messy.
+# Better to have one main app that includes the routers.
+# OR, keep them separate but fix the test_chat entry point.
+
+# The error 'issubclass() arg 1 must be a class' often happens when 'app' is NOT a valid ASGI app
+# or specifically when using the Vercel Python runtime with a file that doesn't expose 'app' or 'handler' correctly.
+# In `api/test_chat.py` we have `handler = app`.
+
+# Let's try to make `api/test_chat.py` standalone and simple first.
+# Also, Vercel looks for `index.py` in `api/` by default for the root, but `api/test_chat.py` should act as `api/test_chat`.
+
+# Wait, `api/test_chat.py` is accessed as `/api/test_chat`.
+# The traceback mentions `/var/task/vc__handler__python.py`.
+# This is Vercel's internal handler.
+
+# HYPOTHESIS: The recent change to `test_chat.py` might have circular imports or initialization issues 
+# that cause `app` to be None or invalid at import time.
+# Let's verify `test_chat.py` content again.
+
+pass
