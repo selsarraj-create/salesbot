@@ -86,18 +86,23 @@ export default function FlightSimulator() {
     };
 
     const runTurn = async (currentLeadId: string, history: Message[]) => {
+        console.log('[FlightSimulator] runTurn called, isRunning:', isRunning, 'history length:', history.length);
         if (!isRunning) return;
 
         const scenario = scenarios.find(s => s.id === selectedScenarioId);
-        if (!scenario) return;
+        if (!scenario) {
+            console.error('[FlightSimulator] Scenario not found:', selectedScenarioId);
+            return;
+        }
+
+        console.log('[FlightSimulator] Running scenario:', scenario.scenario_name);
 
         // --- STEP 1: ATTACKER (Lead AI) ---
-        // If history is empty, Attacker starts. 
-        // If last msg was from 'bot', Attacker responds.
         const lastMsg = history[history.length - 1];
 
         if (!lastMsg || lastMsg.sender === 'bot') {
             try {
+                console.log('[FlightSimulator] Calling Attacker API...');
                 const res = await fetch('/api/simulation/run', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -108,18 +113,25 @@ export default function FlightSimulator() {
                     })
                 });
 
+                if (!res.ok) {
+                    console.error('[FlightSimulator] Attacker API error:', res.status);
+                    throw new Error('Attacker API failed');
+                }
+
                 const data = await res.json();
                 const attackerMsg = data.attacker_message;
+                console.log('[FlightSimulator] Attacker response:', attackerMsg);
 
                 // Add to UI state
                 const newHistory = [...history, { id: 'lead-' + Date.now(), sender: 'lead', content: attackerMsg } as Message];
+                console.log('[FlightSimulator] Setting messages, new length:', newHistory.length);
                 setMessages(newHistory);
 
                 // Small delay strictly for visual pacing
                 await new Promise(r => setTimeout(r, 1500));
 
                 // --- STEP 2: DEFENDER (Alex/Sandbox) ---
-                // Now send this attacker msg to the REAL Sandbox API
+                console.log('[FlightSimulator] Calling Defender API...');
                 const sandboxRes = await fetch('/api/sandbox', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -130,17 +142,25 @@ export default function FlightSimulator() {
                     })
                 });
 
+                if (!sandboxRes.ok) {
+                    console.error('[FlightSimulator] Defender API error:', sandboxRes.status);
+                    throw new Error('Defender API failed');
+                }
+
                 const sandboxData = await sandboxRes.json();
                 const defenderMsg = sandboxData.response;
+                console.log('[FlightSimulator] Defender response:', defenderMsg);
 
                 // Add Defender response to state
                 const finalHistory = [...newHistory, { id: 'bot-' + Date.now(), sender: 'bot', content: defenderMsg } as Message];
+                console.log('[FlightSimulator] Final history length:', finalHistory.length);
                 setMessages(finalHistory);
 
                 setTurnCount(TC => TC + 1);
 
-            } catch (err) {
-                console.error("Simulation broken:", err);
+            } catch (err: any) {
+                console.error("[FlightSimulator] Simulation error:", err);
+                alert('Simulation error: ' + err.message);
                 setIsRunning(false);
             }
         }
