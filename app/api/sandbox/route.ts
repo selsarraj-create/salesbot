@@ -85,6 +85,7 @@ export async function POST(req: Request) {
         }
 
         // 1. Get Lead Details
+        console.log('Step 1: Fetching lead...');
         const { data: lead, error: leadError } = await supabase
             .from('leads')
             .select('*')
@@ -95,11 +96,13 @@ export async function POST(req: Request) {
             console.error('Lead fetch error:', leadError);
             return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
         }
+        console.log('Step 1: Lead fetched successfully');
 
         const leadName = lead.name || 'there';
         const currentStatus = lead.status || 'New';
 
         // 2. Save User Message
+        console.log('Step 2: Saving user message...');
         const { error: msgError } = await supabase
             .from('messages')
             .insert({
@@ -110,20 +113,25 @@ export async function POST(req: Request) {
             });
 
         if (msgError) console.error('Error saving user message:', msgError);
+        else console.log('Step 2: User message saved');
 
         // 3. Simulate Latency
         if (simulate_latency) {
-            const delay = Math.floor(Math.random() * (3000 - 1000 + 1) + 1000);
+            console.log('Step 3: Simulating latency...');
+            const delay = Math.floor(Math.random() * (3000 - 1000 + 1) + 1000); // 1-3 seconds
             await new Promise(resolve => setTimeout(resolve, delay));
+            console.log('Step 3: Latency done');
         }
 
         // 4. Get Chat History
+        console.log('Step 4: Fetching history...');
         const { data: history } = await supabase
             .from('messages')
             .select('sender_type, content')
             .eq('lead_id', lead_id)
             .order('timestamp', { ascending: true })
             .limit(20);
+        console.log(`Step 4: History fetched (${history?.length || 0} msgs)`);
 
         // Format history for Gemini
         let chatHistory = "Previous conversation:\n";
@@ -135,9 +143,11 @@ export async function POST(req: Request) {
         }
 
         // 5. Generate Response with Gemini
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" }); // Using user-requested model
+        console.log('Step 5: Calling Gemini (gemini-3-flash-preview)...');
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-        const prompt = `${SALES_PERSONA_PROMPT}
+            const prompt = `${SALES_PERSONA_PROMPT}
 
 CUSTOMER CONTEXT:
 Name: ${leadName}
@@ -149,27 +159,35 @@ Customer's Last Message: "${message}"
 
 Respond as Alex (keep it under 160 chars, end with question):`;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text().trim();
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text().trim();
+            console.log('Step 5: Gemini response received');
 
-        // 6. Save Bot Response
-        const { error: botMsgError } = await supabase
-            .from('messages')
-            .insert({
-                lead_id: lead_id,
-                content: responseText,
-                sender_type: 'bot'
-                // metadata removed
+            // 6. Save Bot Response
+            console.log('Step 6: Saving bot response...');
+            const { error: botMsgError } = await supabase
+                .from('messages')
+                .insert({
+                    lead_id: lead_id,
+                    content: responseText,
+                    sender_type: 'bot'
+                    // metadata removed
+                });
+
+            if (botMsgError) console.error('Error saving bot message:', botMsgError);
+            else console.log('Step 6: Bot response saved');
+
+            return NextResponse.json({
+                success: true,
+                response: responseText,
+                status: currentStatus,
+                analysis: {}
             });
-
-        if (botMsgError) console.error('Error saving bot message:', botMsgError);
-
-        return NextResponse.json({
-            success: true,
-            response: responseText,
-            status: currentStatus,
-            analysis: {} // Placeholder
-        });
+        } catch (geminiError: any) {
+            console.error('Gemini Generation Error:', geminiError);
+            // Return 500 so client sees error
+            return NextResponse.json({ detail: geminiError.message || 'Gemini Generation Error' }, { status: 500 });
+        }
 
     } catch (error: any) {
         console.error('Sandbox Error:', error);
