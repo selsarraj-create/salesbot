@@ -24,6 +24,8 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
 
         // Fetch messages for selected lead
         async function fetchMessages() {
+            if (!lead) return;
+
             setLoading(true);
             const { data, error } = await supabase
                 .from('messages')
@@ -131,8 +133,8 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                     <button
                         onClick={handleToggleTakeover}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${lead.is_manual_mode
-                                ? 'bg-purple-600 text-white hover:bg-purple-700'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-purple-600 text-white hover:bg-purple-700'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                     >
                         {lead.is_manual_mode ? '🔓 Release' : '🔒 Takeover'}
@@ -162,10 +164,10 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                             >
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isLead
-                                            ? 'bg-gray-100 text-gray-800'
-                                            : isHuman
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-blue-600 text-white'
+                                        ? 'bg-gray-100 text-gray-800'
+                                        : isHuman
+                                            ? 'bg-purple-600 text-white'
+                                            : 'bg-blue-600 text-white'
                                         }`}
                                 >
                                     <p className="text-sm">{message.content}</p>
