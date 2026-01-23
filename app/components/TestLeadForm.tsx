@@ -36,17 +36,19 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
             // Generate test phone if not provided
             const finalPhone = phone || `+44TEST${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
 
-            // Create test lead
+            // Create test lead with explicit typing
+            const newLead: Database['public']['Tables']['leads']['Insert'] = {
+                name: name || 'Test Lead',
+                phone: finalPhone,
+                lead_code: finalLeadCode,
+                status: 'New',
+                is_manual_mode: false,
+                is_test: true
+            };
+
             const { data, error } = await supabase
                 .from('leads')
-                .insert({
-                    name: name || 'Test Lead',
-                    phone: finalPhone,
-                    lead_code: finalLeadCode,
-                    status: 'New',
-                    is_manual_mode: false,
-                    is_test: true
-                })
+                .insert(newLead)
                 .select()
                 .single();
 
