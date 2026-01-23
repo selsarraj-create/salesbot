@@ -9,6 +9,14 @@ export interface Lead {
     is_manual_mode?: boolean;
 }
 
+export type LeadStatus =
+    | 'New'
+    | 'Qualifying'
+    | 'Booking_Offered'
+    | 'Booked'
+    | 'Objection_Distance'
+    | 'Human_Required';
+
 export interface Message {
     id: string;
     created_at?: string;
