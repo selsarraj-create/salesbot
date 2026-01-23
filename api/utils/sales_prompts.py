@@ -224,6 +224,7 @@ def get_qualification_questions() -> list[str]:
     return [
         "Awesome! Quick question - what are your modeling goals? Fashion, commercial, editorial? 📸",
         "Have you done any modeling work before? (Specifically, have you had a test shoot with another agency in the last 6 months?)",
+        "And just for our notes - do you know your approximate height and measurements? (Don't worry if not exact!)",
         "Where are you based? Just so I can suggest the best times for you!",
         "What's your availability like? We have slots throughout the week, including evenings.",
     ]
@@ -231,12 +232,13 @@ def get_qualification_questions() -> list[str]:
 
 # Knowledge base from FAQs
 FAQ_RESPONSES = {
-    "clothes": "Bring 3 looks: 1) Blue jeans + white T-shirt (classic look). 2) Two outfits that show your style! 👗 Keep makeup natural.",
+    "clothes": "Bring 3 looks: 1) Blue jeans + white T-shirt (classic look). 2) Two personality outfits! 👗 Check our Welcome Pack for ideas: https://edgetalent.co.uk/welcomepack",
     "portfolio": "No portfolio needed! That's what the assessment is for. If you match a category, we might not even need one. Let's see how you do first! 📸",
     "sell": "No pressure at all! The assessment is 100% FREE. It's just to see if you have potential. If you like the photos, you can buy them, but no obligation. 👍",
     "hard_sell": "No pressure at all! The assessment is 100% FREE. It's just to see if you have potential. If you like the photos, you can buy them, but no obligation. 👍",
     "deposit": "No deposit! Unlike other studios, we don't charge a booking fee. We invite people we believe in. Ready to book? 📅",
     "scam": "I totally get the caution! We're a legitimate studio looking for new faces. The assessment is completely free, so there's zero risk for you to come check it out.",
     "makeup": "Keep it natural! We want to see the real you. Clean hair and light/no makeup is best for the assessment. ✨",
-    "someone_else": "If you're under 18, bring a parent/guardian. Otherwise, friends/family can wait in our reception area while you shoot! 🛋️"
+    "someone_else": "Absolutely! We actually ENCOURAGE you to bring a parent or friend. They can wait in our reception area while you shoot. 🛋️",
+    "pack": "Check out our Welcome Pack for full details on what to bring and expect: https://edgetalent.co.uk/welcomepack 📖"
 }
