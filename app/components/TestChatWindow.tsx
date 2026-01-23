@@ -56,6 +56,18 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const handleSendMessage = async () => {
         if (!lead || !inputMessage.trim()) return;
 
+        // Optimistically add user message
+        const userMsg: Message = {
+            id: 'temp-' + Date.now(),
+            lead_id: lead.id,
+            content: inputMessage.trim(),
+            sender_type: 'lead',
+            timestamp: new Date().toISOString(),
+            is_read: true
+        };
+        setMessages(prev => [...prev, userMsg]);
+        setInputMessage('');
+
         setSending(true);
         setThinking(true);
 
@@ -65,7 +77,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     lead_id: lead.id,
-                    message: inputMessage.trim(),
+                    message: userMsg.content,
                     simulate_latency: simulateLatency
                 }),
             });
@@ -78,12 +90,26 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             const data = await response.json();
             console.log('Test chat response:', data);
 
-            setInputMessage('');
+            // Manually add bot response to state
+            if (data.response) {
+                const botMsg: Message = {
+                    id: 'bot-' + Date.now(),
+                    lead_id: lead.id,
+                    content: data.response,
+                    sender_type: 'bot',
+                    timestamp: new Date().toISOString(),
+                    is_read: true
+                };
+                setMessages(prev => [...prev, botMsg]);
+            }
+
         } catch (error: any) {
             console.error('Error sending test message:', error);
             alert(`Error: ${error.message}`);
-            setThinking(false);
+            // Remove optimistic message on failure (optional, but good UX)
+            setMessages(prev => prev.filter(m => m.id !== userMsg.id));
         } finally {
+            setThinking(false);
             setSending(false);
         }
     };
