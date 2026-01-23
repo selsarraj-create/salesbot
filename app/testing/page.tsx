@@ -81,8 +81,8 @@ export default function TestingPage() {
                     <TestLeadForm onLeadCreated={fetchTestLeads} />
 
                     {/* Test Leads List */}
-                    <div className="bg-white rounded-lg border p-4">
-                        <h3 className="font-semibold mb-4">Test Leads ({testLeads.length})</h3>
+                    <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <h3 className="font-semibold text-gray-900 mb-4">Test Leads ({testLeads.length})</h3>
                         {loading ? (
                             <p className="text-sm text-gray-500">Loading...</p>
                         ) : testLeads.length === 0 ? (
@@ -94,12 +94,12 @@ export default function TestingPage() {
                                         key={lead.id}
                                         onClick={() => setSelectedLead(lead)}
                                         className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLead?.id === lead.id
-                                                ? 'bg-blue-50 border-blue-300'
-                                                : 'bg-white border-gray-200 hover:border-gray-300'
+                                            ? 'bg-blue-50 border-blue-300'
+                                            : 'bg-white border-gray-200 hover:border-gray-300'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-1">
-                                            <p className="font-medium text-sm">{lead.name || lead.phone}</p>
+                                            <p className="font-medium text-sm text-gray-900">{lead.name || lead.phone}</p>
                                             <Badge variant="secondary" className="text-xs">TEST</Badge>
                                         </div>
                                         <p className="text-xs text-gray-500">{lead.lead_code}</p>
