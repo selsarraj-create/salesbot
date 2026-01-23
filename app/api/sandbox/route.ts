@@ -284,6 +284,31 @@ Return ONLY the updated JSON memory object.`;
             if (botMsgError) console.error('Error saving bot message:', botMsgError);
             else console.log('Step 8: Bot response saved');
 
+            // 9. Predictive Lead Scoring (Async)
+            try {
+                const scorePrompt = `Analyze the lead's "Intent to Book" based on this conversation.
+Lead: "${message}"
+Bot: "${responseText}"
+Current Status: ${currentStatus}
+
+Rate their intent from 0 to 100.
+0 = Hostile/Not interested
+50 = Neutral/Questioning
+100 = Ready to book instantly
+
+Return ONLY the number.`;
+
+                const scoreResult = await model.generateContent(scorePrompt);
+                const scoreText = scoreResult.response.text().trim();
+                const priorityScore = parseInt(scoreText.replace(/\D/g, '')) || 0;
+
+                console.log('Step 9: Priority Score:', priorityScore);
+
+                await supabase.from('leads').update({ priority_score: priorityScore }).eq('id', lead_id);
+            } catch (scoreError) {
+                console.error('Lead scoring failed:', scoreError);
+            }
+
             return NextResponse.json({
                 success: true,
                 response: responseText,

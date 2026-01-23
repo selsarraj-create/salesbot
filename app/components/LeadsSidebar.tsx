@@ -37,6 +37,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
             const { data, error } = await supabase
                 .from('leads')
                 .select('*')
+                .order('priority_score', { ascending: false, nullsFirst: false })
                 .order('updated_at', { ascending: false });
 
             if (error) {
@@ -139,7 +140,17 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                                 >
                                     {STATUS_LABELS[lead.status as LeadStatus]}
                                 </span>
-                                <span className="text-xs text-text-secondary">{lead.lead_code}</span>
+                                <div className="flex items-center gap-2">
+                                    {(lead.priority_score || 0) > 0 && (
+                                        <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${(lead.priority_score || 0) >= 80 ? 'text-green-400 bg-green-400/10' :
+                                                (lead.priority_score || 0) >= 50 ? 'text-yellow-400 bg-yellow-400/10' :
+                                                    'text-text-secondary'
+                                            }`}>
+                                            {lead.priority_score}
+                                        </span>
+                                    )}
+                                    <span className="text-xs text-text-secondary">{lead.lead_code}</span>
+                                </div>
                             </div>
                         </button>
                     ))

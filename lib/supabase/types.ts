@@ -7,6 +7,11 @@ export interface Lead {
     status: string;
     is_test?: boolean;
     is_manual_mode?: boolean;
+    context_memory?: any;
+    priority_score?: number;
+    shoot_date?: string;
+    last_contacted_at?: string;
+    follow_up_count?: number;
 }
 
 export type LeadStatus =
