@@ -43,6 +43,7 @@ export default function FlightSimulator() {
             lead_code: dummyCode,
             status: 'New',
             name: 'Simulated Lead',
+            phone: 'SIM-000', // Dummy phone for simulation
             is_test: true,
             is_manual_mode: false
         }).select().single();
@@ -187,8 +188,8 @@ export default function FlightSimulator() {
                 {messages.map((msg) => (
                     <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
-                                ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
-                                : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                            ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
+                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
                             }`}>
                             <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
                             {msg.content}
