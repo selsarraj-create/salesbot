@@ -5,7 +5,7 @@ import ReviewQueue from '@/app/components/training/ReviewQueue';
 import FlightSimulator from '@/app/components/training/FlightSimulator';
 import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Zap, BarChart3, MessageSquareSearch } from 'lucide-react';
+import { LayoutDashboard, Zap, BarChart3, MessageSquare } from 'lucide-react';
 
 export default function TrainingPage() {
     const [activeTab, setActiveTab] = useState<'review' | 'simulator' | 'analytics'>('review');
@@ -23,7 +23,7 @@ export default function TrainingPage() {
                     onClick={() => setActiveTab('review')}
                     className={activeTab === 'review' ? 'bg-electric-cyan text-charcoal' : 'text-text-secondary'}
                 >
-                    <MessageSquareSearch className="w-4 h-4 mr-2" />
+                    <MessageSquare className="w-4 h-4 mr-2" />
                     Review Queue
                 </Button>
                 <Button
