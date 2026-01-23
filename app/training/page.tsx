@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ReviewQueue from '@/app/components/training/ReviewQueue';
 import FlightSimulator from '@/app/components/training/FlightSimulator';
+import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, Zap, BarChart3, MessageSquareSearch } from 'lucide-react';
 
@@ -56,11 +57,13 @@ export default function TrainingPage() {
                     </div>
                 )}
 
+                import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
+
+                // ... (inside component)
+
                 {activeTab === 'analytics' && (
-                    <div className="flex flex-col items-center justify-center h-96 text-text-secondary animate-in zoom-in-95 duration-300">
-                        <BarChart3 className="w-16 h-16 mb-4 opacity-20" />
-                        <h3 className="text-xl font-medium">Performance Analytics</h3>
-                        <p>Coming Soon in Phase 4</p>
+                    <div className="animate-in zoom-in-95 duration-300">
+                        <AnalyticsDashboard />
                     </div>
                 )}
             </main>
