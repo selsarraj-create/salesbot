@@ -27,7 +27,14 @@ export default function FlightSimulator() {
     // Fetch Scenarios on mount
     useEffect(() => {
         const fetchScenarios = async () => {
-            const { data } = await supabase.from('simulated_scenarios').select('*');
+            console.log('[FlightSimulator] Fetching scenarios...');
+            const { data, error } = await supabase.from('simulated_scenarios').select('*');
+            if (error) {
+                console.error('[FlightSimulator] Error fetching scenarios:', error);
+                alert('Error loading scenarios. Make sure the database migration has been run.');
+                return;
+            }
+            console.log(`[FlightSimulator] Loaded ${data?.length || 0} scenarios`);
             if (data) setScenarios(data);
         };
         fetchScenarios();
@@ -35,28 +42,46 @@ export default function FlightSimulator() {
 
     // Create a temporary lead when starting simulation
     const startSimulation = async () => {
-        if (!selectedScenarioId) return;
+        if (!selectedScenarioId) {
+            alert('Please select a scenario first');
+            return;
+        }
 
-        // 1. Create realistic dummy lead
-        const dummyCode = `BS-${Math.floor(Math.random() * 1000)}`;
-        const { data: lead } = await supabase.from('leads').insert({
-            lead_code: dummyCode,
-            status: 'New',
-            name: 'Simulated Lead',
-            phone: 'SIM-000', // Dummy phone for simulation
-            is_test: true,
-            is_manual_mode: false
-        } as any).select().single() as any;
+        try {
+            console.log('[FlightSimulator] Starting simulation with scenario:', selectedScenarioId);
 
-        if (lead) {
-            setLeadId(lead.id);
-            setMessages([]); // Clear chat
-            setTurnCount(0);
-            setIsRunning(true);
+            // 1. Create realistic dummy lead
+            const dummyCode = `BS-${Math.floor(Math.random() * 1000)}`;
+            console.log('[FlightSimulator] Creating dummy lead:', dummyCode);
 
-            // Kickoff: Attacker speaks first usually, or maybe Bot sends compliance msg?
-            // Let's have Attacker start contextually.
-            runTurn(lead.id, []);
+            const { data: lead, error } = await supabase.from('leads').insert({
+                lead_code: dummyCode,
+                status: 'New',
+                name: 'Simulated Lead',
+                phone: 'SIM-000', // Dummy phone for simulation
+                is_test: true,
+                is_manual_mode: false
+            } as any).select().single() as any;
+
+            if (error) {
+                console.error('[FlightSimulator] Error creating lead:', error);
+                alert('Failed to create simulation lead: ' + error.message);
+                return;
+            }
+
+            if (lead) {
+                console.log('[FlightSimulator] Lead created:', lead.id);
+                setLeadId(lead.id);
+                setMessages([]); // Clear chat
+                setTurnCount(0);
+                setIsRunning(true);
+
+                // Kickoff: Attacker speaks first
+                runTurn(lead.id, []);
+            }
+        } catch (err: any) {
+            console.error('[FlightSimulator] Unexpected error:', err);
+            alert('Unexpected error starting simulation: ' + err.message);
         }
     };
 
