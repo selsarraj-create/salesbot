@@ -5,15 +5,15 @@ import time
 import os
 from dotenv import load_dotenv
 
-# Import shared logic (same as webhook.py)
-from .utils.gemini_client import get_gemini_agent
-from .utils.supabase_client import get_supabase_client
-from .utils.lead_manager import (
-    save_message,
-    get_messages_with_retry,
-    verify_message_saved,
-    update_lead_status
-)
+# Imports moved inside handler to prevent top-level initialization errors
+# from .utils.gemini_client import get_gemini_agent
+# from .utils.supabase_client import get_supabase_client
+# from .utils.lead_manager import (
+#     save_message,
+#     get_messages_with_retry,
+#     verify_message_saved,
+#     update_lead_status
+# )
 
 load_dotenv()
 
@@ -26,6 +26,16 @@ async def sandbox_handler(request: Request):
     Uses the REAL Gemini agent and Supabase logic.
     """
     try:
+        # Lazy imports to ensure module loads successfully even if dependencies fail initially
+        from .utils.gemini_client import get_gemini_agent
+        from .utils.supabase_client import get_supabase_client
+        from .utils.lead_manager import (
+            save_message,
+            get_messages_with_retry,
+            verify_message_saved,
+            update_lead_status
+        )
+
         data = await request.json()
         lead_id = data.get("lead_id")
         message = data.get("message")
