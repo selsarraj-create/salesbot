@@ -16,10 +16,12 @@ from .utils.lead_manager import (
 
 load_dotenv()
 
-app = FastAPI()
+# Remove app = FastAPI() line as we will use it in index_test_chat.py
+# app = FastAPI()
 
-@app.post("/api/test_chat")
+# Just define the handler function (remove @app.post decorator here, apply it in index)
 async def test_chat_handler(request: Request):
+
     """
     Test chat endpoint for the Sandbox.
     Uses the REAL Gemini agent and Supabase logic.
@@ -142,5 +144,5 @@ async def test_chat_handler(request: Request):
         # Return proper JSON error that frontend expects
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
-# Vercel entry point
-handler = app
+# Vercel entry point - removed, using index_test_chat.py
+# handler = app
