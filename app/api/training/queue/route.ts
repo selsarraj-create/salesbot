@@ -32,7 +32,7 @@ export async function GET(req: Request) {
         }
 
         // Fetch lead data separately
-        const leadIds = [...new Set(messages.map(m => m.lead_id))];
+        const leadIds = Array.from(new Set(messages.map(m => m.lead_id)));
         console.log(`[Training Queue API] Fetching ${leadIds.length} unique leads...`);
 
         const { data: leads, error: leadsError } = await supabase
