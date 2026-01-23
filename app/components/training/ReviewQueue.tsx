@@ -32,12 +32,16 @@ export default function ReviewQueue() {
 
     const fetchQueue = async () => {
         try {
+            console.log('[ReviewQueue] Fetching queue from /api/training/queue...');
             const res = await fetch('/api/training/queue');
+            console.log('[ReviewQueue] Response status:', res.status);
             if (!res.ok) throw new Error('Failed to fetch queue');
             const data = await res.json();
+            console.log('[ReviewQueue] Data received:', data);
+            console.log('[ReviewQueue] Queue length:', data.queue?.length || 0);
             setQueue(data.queue || []);
         } catch (error) {
-            console.error(error);
+            console.error('[ReviewQueue] Error:', error);
         } finally {
             setLoading(false);
         }
