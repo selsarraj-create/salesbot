@@ -136,6 +136,16 @@ Suggested_Status: [New/Qualifying/Booking_Offered/Booked/Objection_Distance/Huma
         name_context = f"The customer's name is {lead_name}." if lead_name else "You don't know the customer's name yet."
         status_context = f"Current lead status: {current_status}"
         
+        # Add context validation rules
+        context_validation = f"""
+CRITICAL CONTEXT RULES:
+1. ALWAYS check the last message in the conversation history above
+2. If the lead just answered a question, ACKNOWLEDGE their answer first
+3. DO NOT repeat the greeting if the conversation has already started
+4. If you see previous messages in the history, this is an ONGOING conversation - continue from where you left off
+5. The customer's LATEST message is: "{incoming_message}" - respond to THIS message specifically, not to an imagined first contact
+"""
+        
         # Add analysis context if available
         analysis_context = ""
         if analysis:
@@ -161,6 +171,7 @@ Suggested_Status: [New/Qualifying/Booking_Offered/Booked/Objection_Distance/Huma
 {status_context}
 
 {context}
+{context_validation}
 
 Customer's latest message: "{incoming_message}"
 {analysis_context}

@@ -169,9 +169,9 @@ def is_lead_in_manual_mode(phone: str) -> bool:
         return False
 
 
-def save_message(phone: str, sender_type: str, content: str) -> bool:
+def save_message(phone: str, sender_type: str, content: str) -> Optional[str]:
     """
-    Save message to messages table.
+    Save message to messages table and return message ID for verification.
     
     Args:
         phone: Lead's phone number
@@ -179,11 +179,11 @@ def save_message(phone: str, sender_type: str, content: str) -> bool:
         content: Message content
         
     Returns:
-        bool: True if save successful
+        str: Message ID if save successful, None otherwise
     """
     if sender_type not in ['lead', 'bot', 'human']:
         print(f"Invalid sender_type: {sender_type}. Must be 'lead', 'bot', or 'human'")
-        return False
+        return None
     
     try:
         client = get_supabase_client()
@@ -197,11 +197,91 @@ def save_message(phone: str, sender_type: str, content: str) -> bool:
             "sender_type": sender_type
         }
         
-        client.table("messages").insert(message_entry).execute()
-        return True
+        response = client.table("messages").insert(message_entry).execute()
+        
+        if response.data and len(response.data) > 0:
+            return response.data[0].get("id")
+        return None
     except Exception as e:
         print(f"Error saving message: {e}")
-        return False
+        return None
+
+
+def verify_message_saved(lead_id: str, message_id: str, max_attempts: int = 5) -> bool:
+    """
+    Poll database to confirm message was successfully inserted.
+    Uses exponential backoff to handle Supabase commit latency.
+    
+    Args:
+        lead_id: Lead's UUID
+        message_id: Message UUID to verify
+        max_attempts: Maximum number of verification attempts
+        
+    Returns:
+        bool: True if message found, False otherwise
+    """
+    import time
+    
+    client = get_supabase_client()
+    
+    for attempt in range(max_attempts):
+        try:
+            response = (
+                client.table("messages")
+                .select("id")
+                .eq("id", message_id)
+                .eq("lead_id", lead_id)
+                .execute()
+            )
+            
+            if response.data and len(response.data) > 0:
+                print(f"✓ Message {message_id} verified in database")
+                return True
+            
+            # Exponential backoff: 100ms, 200ms, 300ms, 400ms, 500ms
+            delay = (attempt + 1) * 0.1
+            print(f"Message not yet visible, retrying in {delay}s... (attempt {attempt + 1}/{max_attempts})")
+            time.sleep(delay)
+            
+        except Exception as e:
+            print(f"Error verifying message: {e}")
+            return False
+    
+    print(f"⚠️ Warning: Message {message_id} not confirmed after {max_attempts} attempts")
+    return False
+
+
+def get_messages_with_retry(phone: str, expected_count: Optional[int] = None, limit: int = 10, max_retries: int = 3) -> List[Dict[str, Any]]:
+    """
+    Retrieve recent messages with retry logic to ensure latest message is included.
+    Handles race conditions where Supabase hasn't committed recent inserts.
+    
+    Args:
+        phone: Lead's phone number
+        expected_count: Minimum expected message count (optional)
+        limit: Maximum number of messages to retrieve
+        max_retries: Maximum number of retry attempts
+        
+    Returns:
+        list: List of message dicts with sender_type, content, timestamp
+    """
+    import time
+    
+    for attempt in range(max_retries):
+        messages = get_messages(phone, limit)
+        
+        # If we have an expected count and haven't reached it, retry
+        if expected_count is not None and len(messages) < expected_count:
+            if attempt < max_retries - 1:
+                delay = 0.5  # 500ms delay
+                print(f"Expected {expected_count} messages but got {len(messages)}, retrying in {delay}s...")
+                time.sleep(delay)
+                continue
+        
+        return messages
+    
+    # Return whatever we got after max retries
+    return get_messages(phone, limit)
 
 
 def get_messages(phone: str, limit: int = 10) -> List[Dict[str, Any]]:

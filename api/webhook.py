@@ -15,6 +15,8 @@ from .utils.lead_manager import (
     get_or_create_lead,
     save_message,
     get_messages,
+    get_messages_with_retry,
+    verify_message_saved,
     update_lead_name,
     update_lead_status,
     is_lead_in_manual_mode
@@ -68,8 +70,10 @@ async def twilio_webhook(
             twiml = MessagingResponse()
             return Response(content=str(twiml), media_type="application/xml")
         
-        # Save incoming message to history
-        save_message(phone, "lead", incoming_message)
+        # Save incoming message to history and verify it was saved
+        message_id = save_message(phone, "lead", incoming_message)
+        if message_id:
+            verify_message_saved(lead["id"], message_id)
         
         # Check for STOP command
         if incoming_message.upper() in ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"]:
@@ -89,8 +93,11 @@ async def twilio_webhook(
             twiml = MessagingResponse()
             return Response(content=str(twiml), media_type="application/xml")
         
-        # Get conversation history for context
-        message_history = get_messages(phone, limit=10)
+        # Get conversation history for context with retry logic
+        # Add small delay to ensure Supabase has committed the insert
+        import time
+        time.sleep(0.5)
+        message_history = get_messages_with_retry(phone, limit=10)
         
         # Get AI agent
         agent = get_gemini_agent()
