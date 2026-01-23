@@ -62,8 +62,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             lead_id: lead.id,
             content: inputMessage.trim(),
             sender_type: 'lead',
-            timestamp: new Date().toISOString(),
-            is_read: true
+            timestamp: new Date().toISOString()
         };
         setMessages(prev => [...prev, userMsg]);
         setInputMessage('');
@@ -97,8 +96,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                     lead_id: lead.id,
                     content: data.response,
                     sender_type: 'bot',
-                    timestamp: new Date().toISOString(),
-                    is_read: true
+                    timestamp: new Date().toISOString()
                 };
                 setMessages(prev => [...prev, botMsg]);
             }
