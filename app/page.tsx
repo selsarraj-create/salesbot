@@ -3,14 +3,14 @@ import Dashboard from './components/Dashboard';
 
 export default function Home() {
     return (
-        <div>
+        <div className="min-h-screen bg-charcoal">
             {/* Navigation Bar */}
-            <div className="bg-white border-b border-gray-200 px-6 py-3">
+            <div className="bg-surface border-b border-surface-light px-6 py-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-gray-800">Sales Bot Dashboard</h1>
+                    <h1 className="text-xl font-bold text-text-primary">Sales Bot Dashboard</h1>
                     <Link
                         href="/testing"
-                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors"
+                        className="px-4 py-2 bg-electric-cyan text-charcoal rounded-lg font-medium hover:bg-electric-cyan/90 transition-colors"
                     >
                         🧪 Testing Sandbox
                     </Link>

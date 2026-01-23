@@ -52,7 +52,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex h-screen bg-charcoal">
             <LeadsSidebar
                 selectedLeadId={selectedLeadId}
                 onSelectLead={handleSelectLead}
