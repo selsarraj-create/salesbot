@@ -56,12 +56,18 @@ export async function GET(req: Request) {
         // Attach review status
         const feedbackMap = new Map(feedbackData?.map(f => [f.message_id, f]));
 
-        const reviewQueue = messages.map(msg => ({
-            ...msg,
-            has_feedback: feedbackMap.has(msg.id),
-            is_gold: feedbackMap.get(msg.id)?.is_gold_standard || false,
-            lead_context: msg.leads // Data from join
-        }));
+        const reviewQueue = messages.map(msg => {
+            const leadData = leadsMap.get(msg.lead_id);
+            return {
+                ...msg,
+                has_feedback: feedbackMap.has(msg.id),
+                is_gold: feedbackMap.get(msg.id)?.is_gold_standard || false,
+                lead_context: leadData ? {
+                    lead_code: leadData.lead_code,
+                    status: leadData.status
+                } : null
+            };
+        });
 
         // Sort: unreviewed first
         const sortedQueue = reviewQueue.sort((a, b) => {
