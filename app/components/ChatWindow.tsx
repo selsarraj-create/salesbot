@@ -129,8 +129,8 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                     <button
                         onClick={handleToggleTakeover}
                         className={`px-4 py-2 rounded-lg font-medium transition-all ${lead.is_manual_mode
-                                ? 'bg-electric-cyan text-charcoal hover:bg-electric-cyan/90 shadow-glow'
-                                : 'bg-surface-light text-text-primary hover:bg-surface border border-surface-light'
+                            ? 'bg-electric-cyan text-charcoal hover:bg-electric-cyan/90 shadow-glow'
+                            : 'bg-surface-light text-text-primary hover:bg-surface border border-surface-light'
                             }`}
                     >
                         {lead.is_manual_mode ? '🔓 Release' : '🔒 Takeover'}
@@ -151,7 +151,6 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                 ) : (
                     messages.map((message) => {
                         const isLead = message.sender_type === 'lead';
-                        const isHuman = message.sender_type === 'human';
 
                         return (
                             <div
@@ -160,10 +159,10 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                             >
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
-                                            ? 'bg-surface/50'
-                                            : isHuman
-                                                ? 'bg-purple-500/20 border-purple-500/30'
-                                                : 'bg-electric-cyan/10 border-electric-cyan/30'
+                                        ? 'bg-surface/50'
+                                        : isHuman
+                                            ? 'bg-purple-500/20 border-purple-500/30'
+                                            : 'bg-electric-cyan/10 border-electric-cyan/30'
                                         }`}
                                 >
                                     <p className="text-sm text-text-primary">{message.content}</p>
