@@ -46,7 +46,7 @@ export default function FlightSimulator() {
             phone: 'SIM-000', // Dummy phone for simulation
             is_test: true,
             is_manual_mode: false
-        }).select().single();
+        } as any).select().single();
 
         if (lead) {
             setLeadId(lead.id);
