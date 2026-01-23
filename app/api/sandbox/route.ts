@@ -106,7 +106,7 @@ export async function POST(req: Request) {
                 lead_id: lead_id,
                 content: message,
                 sender_type: 'lead'
-                // metadata removed to fix PGRST204
+                // metadata removed
             });
 
         if (msgError) console.error('Error saving user message:', msgError);
@@ -135,7 +135,7 @@ export async function POST(req: Request) {
         }
 
         // 5. Generate Response with Gemini
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Using gemini-pro for better compatibility
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" }); // Using user-requested model
 
         const prompt = `${SALES_PERSONA_PROMPT}
 
