@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             const base64Audio = Buffer.from(arrayBuffer).toString('base64');
 
             // Transcribe with Gemini
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
             const result = await model.generateContent([
                 {
                     inlineData: {
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
                 const arrayBuffer = await file.arrayBuffer();
                 const base64Doc = Buffer.from(arrayBuffer).toString('base64');
 
-                const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
                 const result = await model.generateContent([
                     {
                         inlineData: {
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
         // Generate AI Critique
         console.log('[Upload API] Generating AI critique...');
-        const critiqueModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const critiqueModel = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
         const critiqueResult = await critiqueModel.generateContent(`${CRITIQUE_PROMPT}\n\nContent to analyze:\n${content}`);
         const critiqueText = critiqueResult.response.text();
 
