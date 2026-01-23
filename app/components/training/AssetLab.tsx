@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,12 +21,7 @@ export default function AssetLab() {
     const [assets, setAssets] = useState<KnowledgeVector[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch existing assets on mount
-    useState(() => {
-        fetchAssets();
-    });
-
-    const fetchAssets = async () => {
+    const fetchAssets = useCallback(async () => {
         const { data } = await supabase
             .from('knowledge_vectors')
             .select('*')
@@ -34,7 +29,12 @@ export default function AssetLab() {
             .limit(10);
 
         if (data) setAssets(data);
-    };
+    }, []);
+
+    // Fetch existing assets on mount
+    useEffect(() => {
+        fetchAssets();
+    }, [fetchAssets]);
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         for (const file of acceptedFiles) {
@@ -79,7 +79,7 @@ export default function AssetLab() {
                 ));
             }
         }
-    }, []);
+    }, [fetchAssets]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
