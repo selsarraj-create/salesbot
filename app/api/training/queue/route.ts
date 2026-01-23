@@ -8,37 +8,50 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(req: Request) {
     try {
-        // Fetch recent bot messages that haven't been reviewed yet
-        // Joining with messages is tricky in Supabase basic client without explicit foreign key embedding sometimes,
-        // so we'll fetch messages and check if they have feedback.
-        // Ideally, we'd use a left join: messages LEFT JOIN training_feedback ON messages.id = training_feedback.message_id WHERE training_feedback.id IS NULL
+        console.log('[Training Queue API] Starting fetch...');
 
-        // For MVP, we'll fetch recent bot messages and then client-side or second-step filter if needed, 
-        // OR just fetch all and let the client explicitly showing "Reviewed" status.
-
+        // Fetch recent bot messages
+        console.log('[Training Queue API] Querying messages table...');
         const { data: messages, error } = await supabase
             .from('messages')
             .select(`
-        *,
-        leads (
-          lead_code,
-          status
-        )
-      `)
+                *,
+                leads (
+                    lead_code,
+                    status
+                )
+            `)
             .eq('sender_type', 'bot')
             .order('timestamp', { ascending: false })
             .limit(50);
 
-        if (error) throw error;
+        if (error) {
+            console.error('[Training Queue API] Supabase error:', error);
+            throw error;
+        }
+
+        console.log(`[Training Queue API] Found ${messages?.length || 0} bot messages`);
+
+        if (!messages || messages.length === 0) {
+            console.log('[Training Queue API] No messages found, returning empty queue');
+            return NextResponse.json({ queue: [] });
+        }
 
         // Fetch existing feedback to filter or annotate
         const messageIds = messages.map(m => m.id);
+        console.log(`[Training Queue API] Fetching feedback for ${messageIds.length} messages...`);
+
         const { data: feedbackData, error: feedbackError } = await supabase
             .from('training_feedback')
             .select('message_id, is_gold_standard')
             .in('message_id', messageIds);
 
-        if (feedbackError) throw feedbackError;
+        if (feedbackError) {
+            console.error('[Training Queue API] Feedback fetch error:', feedbackError);
+            throw feedbackError;
+        }
+
+        console.log(`[Training Queue API] Found ${feedbackData?.length || 0} feedback entries`);
 
         // Attach review status
         const feedbackMap = new Map(feedbackData?.map(f => [f.message_id, f]));
@@ -50,19 +63,22 @@ export async function GET(req: Request) {
             lead_context: msg.leads // Data from join
         }));
 
-        // Filter to only unreviewed for the "Queue" view? 
-        // Or return all sorted by "Needs Review" (unreviewed first).
-        // Let's return unreviewed first.
+        // Sort: unreviewed first
         const sortedQueue = reviewQueue.sort((a, b) => {
             if (a.has_feedback === b.has_feedback) return 0;
             return a.has_feedback ? 1 : -1;
         });
 
+        console.log(`[Training Queue API] Returning ${sortedQueue.length} items`);
         return NextResponse.json({ queue: sortedQueue });
 
     } catch (error: any) {
-        console.error('Error fetching review queue:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('[Training Queue API] Fatal error:', error);
+        console.error('[Training Queue API] Error stack:', error.stack);
+        return NextResponse.json({
+            error: error.message || 'Internal server error',
+            details: error.toString()
+        }, { status: 500 });
     }
 }
 
