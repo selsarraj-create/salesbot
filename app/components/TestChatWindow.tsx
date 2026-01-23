@@ -9,92 +9,51 @@ import { Badge } from '@/components/ui/badge';
 import { supabase, subscribeToMessages } from '@/lib/supabase/client';
 import type { Message, Lead } from '@/lib/supabase/types';
 
+import { Trash2 } from 'lucide-react';
+
 interface TestChatWindowProps {
     lead: Lead | null;
+    onDelete?: () => void;
 }
 
-export default function TestChatWindow({ lead }: TestChatWindowProps) {
+export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputMessage, setInputMessage] = useState('');
     const [sending, setSending] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [simulateLatency, setSimulateLatency] = useState(true);
     const [thinking, setThinking] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        if (!lead) {
-            setMessages([]);
+    // ... existing useEffects ...
+
+    const handleDeleteLead = async () => {
+        if (!lead || !onDelete) return;
+
+        if (!window.confirm('Are you sure you want to delete this test lead? This cannot be undone.')) {
             return;
         }
 
-        async function fetchMessages() {
-            if (!lead) return;
-
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('lead_id', lead.id)
-                .order('timestamp', { ascending: true });
-
-            if (error) {
-                console.error('Error fetching messages:', error);
-            } else {
-                setMessages(data || []);
-            }
-        }
-
-        fetchMessages();
-
-        const channel = subscribeToMessages(lead.id, (payload) => {
-            if (payload.eventType === 'INSERT') {
-                setMessages((prev) => [...prev, payload.new as Message]);
-                setThinking(false);
-            }
-        });
-
-        return () => {
-            channel.unsubscribe();
-        };
-    }, [lead?.id]);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, thinking]);
-
-    const handleSendMessage = async () => {
-        if (!lead || !inputMessage.trim()) return;
-
-        setSending(true);
-        setThinking(true);
-
+        setDeleting(true);
         try {
-            const response = await fetch('/api/test_chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    lead_id: lead.id,
-                    message: inputMessage.trim(),
-                    simulate_latency: simulateLatency
-                }),
-            });
+            // Delete messages first (safeguard against no cascade)
+            await supabase.from('messages').delete().eq('lead_id', lead.id);
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Failed to send message');
-            }
+            // Delete lead
+            const { error } = await supabase.from('leads').delete().eq('id', lead.id);
 
-            const data = await response.json();
-            console.log('Test chat response:', data);
+            if (error) throw error;
 
-            setInputMessage('');
+            onDelete();
         } catch (error: any) {
-            console.error('Error sending test message:', error);
-            alert(`Error: ${error.message}`);
-            setThinking(false);
+            console.error('Error deleting lead:', error);
+            alert('Failed to delete lead: ' + error.message);
         } finally {
-            setSending(false);
+            setDeleting(false);
         }
     };
+
+    // ... existing handleSendMessage ...
 
     if (!lead) {
         return (
@@ -122,6 +81,17 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
                             {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
                         </CardDescription>
                     </div>
+                    {onDelete && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleDeleteLead}
+                            disabled={deleting}
+                            className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
+                        >
+                            <Trash2 className="h-5 w-5" />
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
 
@@ -141,8 +111,8 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
                             >
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
-                                            ? 'bg-surface/50'
-                                            : 'bg-electric-cyan/10 border-electric-cyan/30'
+                                        ? 'bg-surface/50'
+                                        : 'bg-electric-cyan/10 border-electric-cyan/30'
                                         }`}
                                 >
                                     <p className="text-sm text-text-primary">{message.content}</p>

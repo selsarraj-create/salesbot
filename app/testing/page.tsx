@@ -93,8 +93,8 @@ export default function TestingPage() {
                                         key={lead.id}
                                         onClick={() => setSelectedLead(lead)}
                                         className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLead?.id === lead.id
-                                                ? 'glow-active border-electric-cyan/50'
-                                                : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
+                                            ? 'glow-active border-electric-cyan/50'
+                                            : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-1">
@@ -112,7 +112,10 @@ export default function TestingPage() {
 
                 {/* Right Column: Test Chat Window */}
                 <div className="lg:col-span-2 h-[calc(100vh-200px)]">
-                    <TestChatWindow lead={selectedLead} />
+                    <TestChatWindow
+                        lead={selectedLead}
+                        onDelete={() => setSelectedLead(null)}
+                    />
                 </div>
             </div>
         </div>
