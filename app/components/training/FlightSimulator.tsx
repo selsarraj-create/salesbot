@@ -88,8 +88,7 @@ export default function FlightSimulator() {
     };
 
     const runTurn = async (currentLeadId: string, history: Message[]) => {
-        console.log('[FlightSimulator] runTurn called, isRunning:', isRunning, 'history length:', history.length);
-        if (!isRunning) return;
+        console.log('[FlightSimulator] runTurn called, history length:', history.length);
 
         const scenario = scenarios.find(s => s.id === selectedScenarioId);
         if (!scenario) {
