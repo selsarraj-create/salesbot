@@ -22,10 +22,11 @@ export default function MetricsPanel() {
                 return;
             }
 
-            const total = leads?.length || 0;
-            const newLeads = leads?.filter((l) => l.status === 'New').length || 0;
-            const qualifying = leads?.filter((l) => l.status === 'Qualifying').length || 0;
-            const booked = leads?.filter((l) => l.status === 'Booked').length || 0;
+            const leadsData = (leads as any[]) || [];
+            const total = leadsData.length;
+            const newLeads = leadsData.filter((l) => l.status === 'New').length;
+            const qualifying = leadsData.filter((l) => l.status === 'Qualifying').length;
+            const booked = leadsData.filter((l) => l.status === 'Booked').length;
 
             setMetrics({ total, new: newLeads, qualifying, booked });
         }
