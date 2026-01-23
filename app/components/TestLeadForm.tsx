@@ -48,7 +48,7 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
 
             const { data, error } = await supabase
                 .from('leads')
-                .insert(newLead)
+                .insert(newLead as any)
                 .select()
                 .single();
 
