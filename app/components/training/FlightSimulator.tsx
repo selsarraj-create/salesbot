@@ -50,15 +50,17 @@ export default function FlightSimulator() {
         try {
             console.log('[FlightSimulator] Starting simulation with scenario:', selectedScenarioId);
 
-            // 1. Create realistic dummy lead
+            // 1. Create realistic dummy lead with unique phone
+            const timestamp = Date.now();
             const dummyCode = `#SIM${Math.floor(Math.random() * 10000)}`;
-            console.log('[FlightSimulator] Creating dummy lead:', dummyCode);
+            const dummyPhone = `SIM-${timestamp}`;
+            console.log('[FlightSimulator] Creating dummy lead:', dummyCode, dummyPhone);
 
             const { data: lead, error } = await supabase.from('leads').insert({
                 lead_code: dummyCode,
                 status: 'New',
                 name: 'Simulated Lead',
-                phone: 'SIM-000', // Dummy phone for simulation
+                phone: dummyPhone,
                 is_test: true,
                 is_manual_mode: false
             } as any).select().single() as any;
