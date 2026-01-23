@@ -121,6 +121,5 @@ async def sandbox_handler(request: Request):
         print(f"Sandbox Error: {str(e)}")
         return JSONResponse(status_code=500, content={"detail": str(e)})
 
-# Vercel entry point with Mangum adapter for AWS Lambda compatibility
-from mangum import Mangum
-handler = Mangum(app)
+# Vercel entry point (Native)
+handler = app
