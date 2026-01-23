@@ -143,13 +143,18 @@ export async function POST(req: Request) {
 
         // 2. Save User Message
         console.log('Step 2: Saving user message...');
+        let sentimentLabel = 'Neutral';
+        if (sentimentScore > 0.3) sentimentLabel = 'Positive';
+        else if (sentimentScore < -0.3) sentimentLabel = 'Negative';
+
         const { error: msgError } = await supabase
             .from('messages')
             .insert({
                 lead_id: lead_id,
                 content: message,
-                sender_type: 'lead'
-                // metadata removed
+                sender_type: 'lead',
+                sentiment_score: sentimentScore,
+                sentiment_label: sentimentLabel
             });
 
         if (msgError) console.error('Error saving user message:', msgError);
