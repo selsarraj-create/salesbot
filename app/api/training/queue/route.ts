@@ -112,6 +112,31 @@ export async function POST(req: Request) {
             confidence_score
         } = body;
 
+        console.log('[Training Queue API] Submitting feedback, is_gold:', is_gold_standard);
+
+        // Generate sentiment score for the AI response
+        let sentiment_score = null;
+        try {
+            const { analyzeSentiment } = await import('@/lib/utils/ai');
+            sentiment_score = await analyzeSentiment(ai_response);
+            console.log('[Training Queue API] Sentiment score:', sentiment_score);
+        } catch (error) {
+            console.error('[Training Queue API] Sentiment analysis failed:', error);
+        }
+
+        // Generate embedding if this is a Gold Standard
+        let embedding = null;
+        if (is_gold_standard) {
+            try {
+                const { generateEmbedding } = await import('@/lib/utils/ai');
+                const textToEmbed = manager_correction || ai_response;
+                embedding = await generateEmbedding(textToEmbed);
+                console.log('[Training Queue API] Embedding generated for Gold Standard');
+            } catch (error) {
+                console.error('[Training Queue API] Embedding generation failed:', error);
+            }
+        }
+
         const { data, error } = await supabase
             .from('training_feedback')
             .insert({
@@ -121,17 +146,20 @@ export async function POST(req: Request) {
                 manager_correction,
                 is_gold_standard,
                 objection_type,
-                confidence_score
+                confidence_score,
+                sentiment_score,
+                embedding
             })
             .select()
             .single();
 
         if (error) throw error;
 
+        console.log('[Training Queue API] Feedback saved:', data.id);
         return NextResponse.json({ success: true, feedback: data });
 
     } catch (error: any) {
-        console.error('Error submitting feedback:', error);
+        console.error('[Training Queue API] Error submitting feedback:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

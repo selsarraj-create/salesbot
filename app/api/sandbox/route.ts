@@ -142,8 +142,40 @@ export async function POST(req: Request) {
             });
         }
 
-        // 5. Generate Response with Gemini
-        console.log('Step 5: Calling Gemini (gemini-3-flash-preview)...');
+        // 5. Search Knowledge Base & Gold Standards
+        console.log('Step 5: Searching knowledge base...');
+        let knowledgeContext = '';
+        let goldStandardContext = '';
+
+        try {
+            const { searchKnowledge, searchGoldStandards } = await import('@/lib/utils/ai');
+
+            // Search uploaded knowledge (audio transcripts, documents)
+            const knowledgeResults = await searchKnowledge(message, 3);
+            if (knowledgeResults.length > 0) {
+                knowledgeContext = '\n\nRELEVANT KNOWLEDGE FROM TRAINING MATERIALS:\n';
+                knowledgeResults.forEach((result: any, idx: number) => {
+                    knowledgeContext += `\n${idx + 1}. ${result.content.substring(0, 300)}...\n`;
+                });
+                console.log(`Step 5: Found ${knowledgeResults.length} knowledge matches`);
+            }
+
+            // Search Gold Standard examples
+            const goldResults = await searchGoldStandards(message, 3);
+            if (goldResults.length > 0) {
+                goldStandardContext = '\n\nGOLD STANDARD EXAMPLES (proven successful responses):\n';
+                goldResults.forEach((result: any, idx: number) => {
+                    const response = result.manager_correction || result.ai_response;
+                    goldStandardContext += `\n${idx + 1}. ${response}\n`;
+                });
+                console.log(`Step 5: Found ${goldResults.length} Gold Standard matches`);
+            }
+        } catch (error) {
+            console.error('Step 5: Vector search failed:', error);
+        }
+
+        // 6. Generate Response with Gemini
+        console.log('Step 6: Calling Gemini (gemini-3-flash-preview)...');
         try {
             const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
@@ -154,6 +186,8 @@ Name: ${leadName}
 Current Status: ${currentStatus}
 
 ${chatHistory}
+${knowledgeContext}
+${goldStandardContext}
 
 Customer's Last Message: "${message}"
 
