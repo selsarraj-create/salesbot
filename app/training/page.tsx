@@ -1,68 +1,76 @@
 'use client';
 
 import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Target, Zap, FileText, TrendingUp } from 'lucide-react';
 import ReviewQueue from '@/app/components/training/ReviewQueue';
 import FlightSimulator from '@/app/components/training/FlightSimulator';
+import AssetLab from '@/app/components/training/AssetLab';
 import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
-import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Zap, BarChart3, MessageSquare } from 'lucide-react';
+
+type TabType = 'review' | 'assets' | 'simulator' | 'analytics';
 
 export default function TrainingPage() {
-    const [activeTab, setActiveTab] = useState<'review' | 'simulator' | 'analytics'>('review');
+    const [activeTab, setActiveTab] = useState<TabType>('review');
+
+    const tabs = [
+        { id: 'review' as TabType, label: 'Review Queue', icon: Target, color: 'text-electric-cyan' },
+        { id: 'assets' as TabType, label: 'Asset Lab', icon: FileText, color: 'text-green-400' },
+        { id: 'simulator' as TabType, label: 'Flight Simulator', icon: Zap, color: 'text-yellow-400' },
+        { id: 'analytics' as TabType, label: 'Analytics', icon: TrendingUp, color: 'text-purple-400' }
+    ];
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
-            <header className="mb-8">
-                <h1 className="text-3xl font-bold text-text-primary mb-2">AI Training Center 🥋</h1>
-                <p className="text-text-secondary">Coach your Sales Bot to perfection using RLHF and Stress Testing.</p>
-            </header>
-
-            <div className="flex gap-2 mb-6 border-b border-surface-light pb-4 overflow-x-auto">
-                <Button
-                    variant={activeTab === 'review' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('review')}
-                    className={activeTab === 'review' ? 'bg-electric-cyan text-charcoal' : 'text-text-secondary'}
-                >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Review Queue
-                </Button>
-                <Button
-                    variant={activeTab === 'simulator' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('simulator')}
-                    className={activeTab === 'simulator' ? 'bg-electric-cyan text-charcoal' : 'text-text-secondary'}
-                >
-                    <Zap className="w-4 h-4 mr-2" />
-                    Flight Simulator
-                </Button>
-                <Button
-                    variant={activeTab === 'analytics' ? 'default' : 'ghost'}
-                    onClick={() => setActiveTab('analytics')}
-                    className={activeTab === 'analytics' ? 'bg-electric-cyan text-charcoal' : 'text-text-secondary'}
-                >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Analytics
-                </Button>
+        <div className="min-h-screen bg-charcoal p-6">
+            {/* Header */}
+            <div className="max-w-7xl mx-auto mb-6">
+                <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
+                        <span className="text-4xl">🎯</span>
+                        AI Command Center
+                    </h1>
+                    <Badge variant="outline" className="border-electric-cyan text-electric-cyan">
+                        Apex Mode
+                    </Badge>
+                </div>
+                <p className="text-text-secondary">
+                    Train your AI using real conversations, synthetic simulations, and uploaded knowledge
+                </p>
             </div>
 
-            <main className="min-h-[600px]">
-                {activeTab === 'review' && (
-                    <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-                        <ReviewQueue />
-                    </div>
-                )}
+            {/* Tab Navigation */}
+            <div className="max-w-7xl mx-auto mb-6">
+                <div className="flex gap-2 p-1 bg-surface rounded-lg border border-surface-light">
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all ${activeTab === tab.id
+                                        ? 'bg-electric-cyan/10 border border-electric-cyan/30'
+                                        : 'hover:bg-charcoal'
+                                    }`}
+                            >
+                                <Icon className={`w-4 h-4 ${activeTab === tab.id ? tab.color : 'text-text-secondary'}`} />
+                                <span className={`font-medium ${activeTab === tab.id ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                    {tab.label}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
 
-                {activeTab === 'simulator' && (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                        <FlightSimulator />
-                    </div>
-                )}
-
-                {activeTab === 'analytics' && (
-                    <div className="animate-in zoom-in-95 duration-300">
-                        <AnalyticsDashboard />
-                    </div>
-                )}
-            </main>
+            {/* Tab Content */}
+            <div className="max-w-7xl mx-auto">
+                {activeTab === 'review' && <ReviewQueue />}
+                {activeTab === 'assets' && <AssetLab />}
+                {activeTab === 'simulator' && <FlightSimulator />}
+                {activeTab === 'analytics' && <AnalyticsDashboard />}
+            </div>
         </div>
     );
 }
