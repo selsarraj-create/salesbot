@@ -174,7 +174,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                                 >
                                     <p className="text-sm text-text-primary">{message.content}</p>
                                     <p className="text-xs mt-1 text-text-secondary">
-                                        {new Date(message.timestamp).toLocaleTimeString()} •{' '}
+                                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
                                         {isLead ? 'Lead' : 'Bot'}
                                     </p>
                                 </div>
