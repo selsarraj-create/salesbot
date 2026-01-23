@@ -51,7 +51,7 @@ export default function FlightSimulator() {
             console.log('[FlightSimulator] Starting simulation with scenario:', selectedScenarioId);
 
             // 1. Create realistic dummy lead
-            const dummyCode = `BS-${Math.floor(Math.random() * 1000)}`;
+            const dummyCode = `#SIM${Math.floor(Math.random() * 10000)}`;
             console.log('[FlightSimulator] Creating dummy lead:', dummyCode);
 
             const { data: lead, error } = await supabase.from('leads').insert({
