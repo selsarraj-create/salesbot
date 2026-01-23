@@ -118,11 +118,18 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                                         <p className="text-xs text-gray-500">{lead.phone}</p>
                                     )}
                                 </div>
-                                {lead.is_manual_mode && (
-                                    <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                                        Manual
-                                    </span>
-                                )}
+                                <div className="flex gap-1">
+                                    {lead.is_test && (
+                                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
+                                            TEST
+                                        </span>
+                                    )}
+                                    {lead.is_manual_mode && (
+                                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                                            Manual
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between">
