@@ -22,7 +22,6 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
             return;
         }
 
-        // Fetch messages for selected lead
         async function fetchMessages() {
             if (!lead) return;
 
@@ -43,9 +42,7 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
 
         fetchMessages();
 
-        // Subscribe to new messages for this lead
         const channel = subscribeToMessages(lead.id, (payload) => {
-            console.log('New message:', payload);
             if (payload.eventType === 'INSERT') {
                 setMessages((prev) => [...prev, payload.new as Message]);
             }
@@ -56,7 +53,6 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
         };
     }, [lead?.id]);
 
-    // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -96,10 +92,10 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
 
     if (!lead) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-                <div className="text-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center bg-charcoal">
+                <div className="text-center text-text-secondary">
                     <svg
-                        className="mx-auto h-12 w-12 text-gray-400 mb-4"
+                        className="mx-auto h-12 w-12 text-text-secondary mb-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -118,23 +114,23 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
     }
 
     return (
-        <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 flex flex-col bg-charcoal">
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="p-4 border-b border-surface-light bg-surface">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3 className="text-lg font-semibold text-text-primary">
                             {lead.name || lead.phone}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-text-secondary">
                             {lead.lead_code} • {lead.status}
                         </p>
                     </div>
                     <button
                         onClick={handleToggleTakeover}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${lead.is_manual_mode
-                            ? 'bg-purple-600 text-white hover:bg-purple-700'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${lead.is_manual_mode
+                                ? 'bg-electric-cyan text-charcoal hover:bg-electric-cyan/90 shadow-glow'
+                                : 'bg-surface-light text-text-primary hover:bg-surface border border-surface-light'
                             }`}
                     >
                         {lead.is_manual_mode ? '🔓 Release' : '🔒 Takeover'}
@@ -146,10 +142,10 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
                 {loading ? (
                     <div className="flex items-center justify-center h-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-electric-cyan"></div>
                     </div>
                 ) : messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex items-center justify-center h-full text-text-secondary">
                         <p>No messages yet</p>
                     </div>
                 ) : (
@@ -163,18 +159,15 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                                 className={`flex ${isLead ? 'justify-start' : 'justify-end'}`}
                             >
                                 <div
-                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isLead
-                                        ? 'bg-gray-100 text-gray-800'
-                                        : isHuman
-                                            ? 'bg-purple-600 text-white'
-                                            : 'bg-blue-600 text-white'
+                                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
+                                            ? 'bg-surface/50'
+                                            : isHuman
+                                                ? 'bg-purple-500/20 border-purple-500/30'
+                                                : 'bg-electric-cyan/10 border-electric-cyan/30'
                                         }`}
                                 >
-                                    <p className="text-sm">{message.content}</p>
-                                    <p
-                                        className={`text-xs mt-1 ${isLead ? 'text-gray-500' : 'text-white/70'
-                                            }`}
-                                    >
+                                    <p className="text-sm text-text-primary">{message.content}</p>
+                                    <p className="text-xs mt-1 text-text-secondary">
                                         {new Date(message.timestamp).toLocaleTimeString()} •{' '}
                                         {isHuman ? 'You' : isLead ? 'Lead' : 'Bot'}
                                     </p>
@@ -186,9 +179,9 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Manual message input (shown when in takeover mode) */}
+            {/* Manual message input */}
             {lead.is_manual_mode && (
-                <div className="p-4 border-t border-gray-200 bg-purple-50">
+                <div className="p-4 border-t border-surface-light bg-surface">
                     <div className="flex gap-2">
                         <input
                             type="text"
@@ -196,18 +189,18 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                             onChange={(e) => setManualMessage(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSendManualMessage()}
                             placeholder="Type your message..."
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="flex-1 px-4 py-2 bg-charcoal border border-surface-light rounded-lg text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-cyan"
                             disabled={sending}
                         />
                         <button
                             onClick={handleSendManualMessage}
                             disabled={sending || !manualMessage.trim()}
-                            className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-6 py-2 bg-electric-cyan text-charcoal rounded-lg font-medium hover:bg-electric-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {sending ? 'Sending...' : 'Send'}
                         </button>
                     </div>
-                    <p className="text-xs text-purple-700 mt-2">
+                    <p className="text-xs text-electric-cyan mt-2">
                         Manual mode active - AI responses paused
                     </p>
                 </div>

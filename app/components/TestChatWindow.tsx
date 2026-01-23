@@ -27,7 +27,6 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
             return;
         }
 
-        // Fetch messages for selected test lead
         async function fetchMessages() {
             if (!lead) return;
 
@@ -46,7 +45,6 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
 
         fetchMessages();
 
-        // Subscribe to new messages
         const channel = subscribeToMessages(lead.id, (payload) => {
             if (payload.eventType === 'INSERT') {
                 setMessages((prev) => [...prev, payload.new as Message]);
@@ -59,7 +57,6 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
         };
     }, [lead?.id]);
 
-    // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, thinking]);
@@ -101,9 +98,9 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
 
     if (!lead) {
         return (
-            <Card className="h-full">
+            <Card className="h-full bg-surface border-surface-light">
                 <CardContent className="flex items-center justify-center h-full">
-                    <div className="text-center text-gray-500">
+                    <div className="text-center text-text-secondary">
                         <p className="text-lg font-medium">Select a test lead to start chatting</p>
                         <p className="text-sm mt-2">Create a test lead using the form on the left</p>
                     </div>
@@ -113,15 +110,15 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
     }
 
     return (
-        <Card className="h-full flex flex-col">
-            <CardHeader className="border-b">
+        <Card className="h-full flex flex-col bg-surface border-surface-light">
+            <CardHeader className="border-b border-surface-light">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-text-primary">
                             {lead.name || lead.phone}
-                            <Badge variant="secondary">TEST</Badge>
+                            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-text-secondary">
                             {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
                         </CardDescription>
                     </div>
@@ -130,13 +127,12 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
 
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                 {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex items-center justify-center h-full text-text-secondary">
                         <p>No messages yet. Start the conversation!</p>
                     </div>
                 ) : (
                     messages.map((message) => {
                         const isLead = message.sender_type === 'lead';
-                        const isBot = message.sender_type === 'bot';
 
                         return (
                             <div
@@ -144,16 +140,13 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
                                 className={`flex ${isLead ? 'justify-start' : 'justify-end'}`}
                             >
                                 <div
-                                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isLead
-                                            ? 'bg-gray-100 text-gray-800'
-                                            : 'bg-blue-600 text-white'
+                                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
+                                            ? 'bg-surface/50'
+                                            : 'bg-electric-cyan/10 border-electric-cyan/30'
                                         }`}
                                 >
-                                    <p className="text-sm">{message.content}</p>
-                                    <p
-                                        className={`text-xs mt-1 ${isLead ? 'text-gray-500' : 'text-white/70'
-                                            }`}
-                                    >
+                                    <p className="text-sm text-text-primary">{message.content}</p>
+                                    <p className="text-xs mt-1 text-text-secondary">
                                         {new Date(message.timestamp).toLocaleTimeString()} •{' '}
                                         {isLead ? 'Lead' : 'Bot'}
                                     </p>
@@ -165,12 +158,12 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
 
                 {thinking && (
                     <div className="flex justify-end">
-                        <div className="max-w-xs lg:max-w-md px-4 py-2 rounded-lg bg-gray-200 text-gray-600">
-                            <p className="text-sm">Thinking...</p>
+                        <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect bg-surface/50">
+                            <p className="text-sm text-text-secondary">Thinking...</p>
                             <div className="flex gap-1 mt-1">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce"></div>
+                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                             </div>
                         </div>
                     </div>
@@ -179,14 +172,14 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
                 <div ref={messagesEndRef} />
             </CardContent>
 
-            <div className="border-t p-4 space-y-3">
+            <div className="border-t border-surface-light p-4 space-y-3">
                 <div className="flex items-center gap-2">
                     <Switch
                         checked={simulateLatency}
                         onCheckedChange={setSimulateLatency}
                         id="latency-toggle"
                     />
-                    <label htmlFor="latency-toggle" className="text-sm cursor-pointer">
+                    <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
                         Simulate SMS Latency (1-3s delay)
                     </label>
                 </div>
@@ -198,10 +191,12 @@ export default function TestChatWindow({ lead }: TestChatWindowProps) {
                         onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
                         placeholder="Type your message..."
                         disabled={sending}
+                        className="bg-charcoal border-surface-light text-text-primary"
                     />
                     <Button
                         onClick={handleSendMessage}
                         disabled={sending || !inputMessage.trim()}
+                        className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
                     >
                         {sending ? 'Sending...' : 'Send'}
                     </Button>

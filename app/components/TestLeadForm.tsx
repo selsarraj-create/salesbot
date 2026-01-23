@@ -13,9 +13,7 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
     const [leadCode, setLeadCode] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Auto-generate test lead code
     const generateTestCode = async () => {
-        // Get count of existing test leads
         const { count } = await supabase
             .from('leads')
             .select('*', { count: 'exact', head: true })
@@ -30,13 +28,9 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
         setLoading(true);
 
         try {
-            // Generate test code if not provided
             const finalLeadCode = leadCode || await generateTestCode();
-
-            // Generate test phone if not provided
             const finalPhone = phone || `+44TEST${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
 
-            // Create test lead with explicit typing
             const newLead: Database['public']['Tables']['leads']['Insert'] = {
                 name: name || 'Test Lead',
                 phone: finalPhone,
@@ -54,12 +48,10 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
 
             if (error) throw error;
 
-            // Reset form
             setName('');
             setPhone('');
             setLeadCode('');
 
-            // Notify parent
             if (onLeadCreated) onLeadCreated();
 
             alert(`Test lead created: ${finalLeadCode}`);
@@ -72,49 +64,52 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
     };
 
     return (
-        <Card>
+        <Card className="bg-surface border-surface-light">
             <CardHeader>
-                <CardTitle>Create Test Lead</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-text-primary">Create Test Lead</CardTitle>
+                <CardDescription className="text-text-secondary">
                     Generate a dummy lead for testing. No SMS costs.
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="text-sm font-medium">Name (optional)</label>
+                        <label className="text-sm font-medium text-text-primary">Name (optional)</label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="John Doe"
+                            className="bg-charcoal border-surface-light text-text-primary"
                         />
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium">Phone (optional)</label>
+                        <label className="text-sm font-medium text-text-primary">Phone (optional)</label>
                         <Input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="+44TEST0001"
+                            className="bg-charcoal border-surface-light text-text-primary"
                         />
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-text-secondary mt-1">
                             Auto-generated if left empty
                         </p>
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium">Lead Code (optional)</label>
+                        <label className="text-sm font-medium text-text-primary">Lead Code (optional)</label>
                         <Input
                             value={leadCode}
                             onChange={(e) => setLeadCode(e.target.value)}
                             placeholder="#TEST-01"
+                            className="bg-charcoal border-surface-light text-text-primary"
                         />
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-text-secondary mt-1">
                             Auto-increments if left empty
                         </p>
                     </div>
 
-                    <Button type="submit" disabled={loading} className="w-full">
+                    <Button type="submit" disabled={loading} className="w-full bg-electric-cyan text-charcoal hover:bg-electric-cyan/90">
                         {loading ? 'Creating...' : 'Generate Test Lead'}
                     </Button>
                 </form>
