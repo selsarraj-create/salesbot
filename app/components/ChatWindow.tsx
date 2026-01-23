@@ -160,15 +160,13 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
                                         ? 'bg-surface/50'
-                                        : isHuman
-                                            ? 'bg-purple-500/20 border-purple-500/30'
-                                            : 'bg-electric-cyan/10 border-electric-cyan/30'
+                                        : 'bg-electric-cyan/10 border-electric-cyan/30'
                                         }`}
                                 >
                                     <p className="text-sm text-text-primary">{message.content}</p>
                                     <p className="text-xs mt-1 text-text-secondary">
-                                        {new Date(message.timestamp).toLocaleTimeString()} •{' '}
-                                        {isHuman ? 'You' : isLead ? 'Lead' : 'Bot'}
+                                        {message.timestamp && new Date(message.timestamp).toLocaleTimeString()} •{' '}
+                                        {isLead ? 'Lead' : 'Bot'}
                                     </p>
                                 </div>
                             </div>
