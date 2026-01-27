@@ -4,13 +4,10 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Target, Zap, FileText, TrendingUp } from 'lucide-react';
-import ReviewQueue from '@/app/components/training/ReviewQueue';
-import FlightSimulator from '@/app/components/training/FlightSimulator';
-import AssetLab from '@/app/components/training/AssetLab';
-import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
+import RulesEngine from '@/app/components/training/RulesEngine';
+import { Target, Zap, FileText, TrendingUp, Shield } from 'lucide-react';
 
-type TabType = 'review' | 'assets' | 'simulator' | 'analytics';
+type TabType = 'review' | 'assets' | 'simulator' | 'analytics' | 'rules';
 
 export default function TrainingPage() {
     const [activeTab, setActiveTab] = useState<TabType>('review');
@@ -18,6 +15,7 @@ export default function TrainingPage() {
     const tabs = [
         { id: 'review' as TabType, label: 'Review Queue', icon: Target, color: 'text-electric-cyan' },
         { id: 'assets' as TabType, label: 'Asset Lab', icon: FileText, color: 'text-green-400' },
+        { id: 'rules' as TabType, label: 'System Rules', icon: Shield, color: 'text-red-400' },
         { id: 'simulator' as TabType, label: 'Flight Simulator', icon: Zap, color: 'text-yellow-400' },
         { id: 'analytics' as TabType, label: 'Analytics', icon: TrendingUp, color: 'text-purple-400' }
     ];
@@ -50,8 +48,8 @@ export default function TrainingPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all ${activeTab === tab.id
-                                        ? 'bg-electric-cyan/10 border border-electric-cyan/30'
-                                        : 'hover:bg-charcoal'
+                                    ? 'bg-electric-cyan/10 border border-electric-cyan/30'
+                                    : 'hover:bg-charcoal'
                                     }`}
                             >
                                 <Icon className={`w-4 h-4 ${activeTab === tab.id ? tab.color : 'text-text-secondary'}`} />
@@ -68,6 +66,7 @@ export default function TrainingPage() {
             <div className="max-w-7xl mx-auto">
                 {activeTab === 'review' && <ReviewQueue />}
                 {activeTab === 'assets' && <AssetLab />}
+                {activeTab === 'rules' && <RulesEngine />}
                 {activeTab === 'simulator' && <FlightSimulator />}
                 {activeTab === 'analytics' && <AnalyticsDashboard />}
             </div>

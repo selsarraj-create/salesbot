@@ -146,6 +146,23 @@ export async function POST(req: Request) {
             console.log('Step 3: Latency done');
         }
 
+        // 3.5 Fetch Dynamic System Rules
+        console.log('Step 3.5: Fetching system rules...');
+        const { data: rules } = await supabase
+            .from('system_rules')
+            .select('rule_text, category')
+            .eq('is_active', true);
+
+        let dynamicBehaviors = "";
+        let dynamicConstraints = "";
+
+        if (rules) {
+            rules.forEach(r => {
+                if (r.category === 'behavior') dynamicBehaviors += `- [DYNAMIC RULE]: ${r.rule_text}\n`;
+                if (r.category === 'constraint') dynamicConstraints += `- [RESTRICTION]: ${r.rule_text}\n`;
+            });
+        }
+
         // 4. Get Chat History
         console.log('Step 4: Fetching history...');
         const { data: history } = await supabase
@@ -294,6 +311,10 @@ You must be transparent. DO NOT promise success.`;
             const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
             const prompt = `${SALES_PERSONA_PROMPT}
+
+CUSTOM SYSTEM RULES (MANAGEMENT OVERRIDES):
+${dynamicBehaviors}
+${dynamicConstraints}
 
 CUSTOMER CONTEXT:
 Name: ${leadName}
