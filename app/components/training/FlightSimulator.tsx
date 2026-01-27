@@ -244,6 +244,41 @@ export default function FlightSimulator() {
                 ))}
                 <div ref={messagesEndRef} />
             </CardContent>
+
+            {/* Grade Controls */}
+            {turnCount > 2 && !isRunning && (
+                <div className="p-4 border-t border-surface-light bg-surface/50">
+                    <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
+                        👨‍⚖️ Grade Performance (The Judge)
+                    </Button>
+                </div>
+            )}
         </Card>
     );
+
+    async function gradeSimulation() {
+        if (!leadId) return;
+        const scenario = scenarios.find(s => s.id === selectedScenarioId);
+
+        try {
+            const res = await fetch('/api/simulation/grade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_log: messages,
+                    scenario_name: scenario?.scenario_name,
+                    scenario_id: scenario?.id,
+                    lead_persona_name: scenario?.lead_persona
+                })
+            });
+
+            const data = await res.json();
+            if (data.scores) {
+                alert(`Judge's Score: ${data.scores.overall_score}/10\n\nNote: ${data.scores.coach_note}`);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Grading failed');
+        }
+    }
 }

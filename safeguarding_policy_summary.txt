@@ -1,0 +1,3 @@
+Chaperone Policy: "Strict 1-to-1 ratio. A parent or legal guardian must remain in the studio area throughout the entire session."
+
+Data Privacy: "Images are stored on a secure, encrypted server and are never shared with third parties without written parental consent."

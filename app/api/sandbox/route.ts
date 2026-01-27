@@ -260,6 +260,30 @@ REFER TO ETHICS GUIDELINES:
 You must be transparent. DO NOT promise success.`;
         }
 
+        // --- NEW CONTEXT INJECTION (Wardrobe/Safeguarding) ---
+        let prepContext = "";
+        const wardrobeKeywords = ['wear', 'bring', 'clothes', 'outfit', 'jeans', 'shirt', 'dress'];
+        const safeKeywords = ['safe', 'child', 'security', 'dbs', 'guardian', 'parent', 'scam', 'background'];
+
+        if (wardrobeKeywords.some(w => lowerMsg.includes(w))) {
+            const fs = require('fs');
+            const path = require('path');
+            const wPath = path.join(process.cwd(), 'features', 'wardrobe_and_prep_standards.txt');
+            if (fs.existsSync(wPath)) {
+                prepContext += `\n\n[USER ASKED ABOUT WARDROBE. USE THIS KNOWLEDGE]:\n${fs.readFileSync(wPath, 'utf8')}\n`;
+            }
+        }
+
+        if (safeKeywords.some(w => lowerMsg.includes(w))) {
+            const fs = require('fs');
+            const path = require('path');
+            const sPath = path.join(process.cwd(), 'features', 'safeguarding_policy_summary.txt');
+            if (fs.existsSync(sPath)) {
+                prepContext += `\n\n[USER ASKED ABOUT SAFETY. USE THIS KNOWLEDGE]:\n${fs.readFileSync(sPath, 'utf8')}\n`;
+            }
+        }
+        // -----------------------------------------------------
+
         // Update memory with new counter (will be saved after generation)
         contextMemory.guarantee_asks = guaranteeCounter;
         // ------------------------------------------
@@ -283,6 +307,7 @@ ${goldStandardContext}
 ${localGuideInstruction}
 ${agencyCorrectionInstruction}
 ${ethicsContext}
+${prepContext}
 
 Customer's Last Message: "${message}"
 

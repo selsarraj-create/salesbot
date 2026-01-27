@@ -1,0 +1,10 @@
+1. The Reassurance SMS Templates
+Option A: For the Parent (The "Safety & Prep" Version)
+"Hi [Parent Name]! It’s [AI Name] from the Kentish Town studio. Great news—I’ve officially secured [Child Name]’s assessment for [Date] at [Time]. 📸
+
+We’ve sent a confirmation email with our 'Family Prep Guide' and safety protocols. Just a reminder: parking is easiest on Regis Road, just a 2-min walk away. We can't wait to see you both!"
+
+Option B: For the Mature Model (The "Professional" Version)
+"Hello [Name], this is [AI Name] at the studio. I’ve just added your Commercial Assessment to our production diary for [Date] at [Time].
+
+You’ll receive an email shortly with your Wardrobe Guide—we recommend bringing a few 'Smart Casual' options. If you have any questions before you arrive, just reply to this text. See you soon!"

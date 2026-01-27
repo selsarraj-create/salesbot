@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     description: "Real-time SMS sales bot monitoring and management",
 };
 
+import { Navigation } from "./components/ui/Navigation";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -19,7 +21,10 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning className="dark">
             <body className={inter.className}>
                 <Providers>
-                    {children}
+                    <Navigation />
+                    <main className="min-h-screen">
+                        {children}
+                    </main>
                 </Providers>
             </body>
         </html>
