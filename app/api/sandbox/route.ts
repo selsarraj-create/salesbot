@@ -277,30 +277,29 @@ Message:`;
             ethicsContext = `WARNING: User asked about jobs/money. STATE CLEARLY: "No guarantees. We provide the portfolio tools, not jobs."`;
         }
 
-        // Prep/Wardrobe (File reads - let's make these non-blocking or just skipped for speed if not essential, but for now we'll keep it simple or quick read)
-        // Since we are optimizing, reading from disk in Next.js serverless is fast enough, but we should cache it? 
-        // For now, I will include it if keywords match, but synchronous fs read is fast. 
-        // I will omit the detailed implementation of reading files here to keep the route clean, OR assume it's part of 'knowledge search' in the future. 
-        // Re-adding the existing logic for safety:
+        // --- ASSET LAB INJECTION (FULL CONTEXT MODE) ---
+        // User requested to disable "Context Caching" and force fresh input of all Asset Lab files.
         let prepContext = "";
-        const wardrobeKeywords = ['wear', 'bring', 'clothes', 'outfit'];
-        const safeKeywords = ['safe', 'child', 'security', 'dbs', 'guardian'];
+        const fs = require('fs');
+        const path = require('path');
 
-        if (wardrobeKeywords.some(w => lowerMsg.includes(w)) || safeKeywords.some(w => lowerMsg.includes(w))) {
-            // We can optimize this by loading these into constants/memory on cold start, 
-            // but for now, rely on FS cache.
-            const fs = require('fs');
-            const path = require('path');
-            try {
-                if (wardrobeKeywords.some(w => lowerMsg.includes(w))) {
-                    const wPath = path.join(process.cwd(), 'features', 'wardrobe_and_prep_standards.txt');
-                    if (fs.existsSync(wPath)) prepContext += `\n[WARDROBE]: ${fs.readFileSync(wPath, 'utf8')}\n`;
-                }
-                if (safeKeywords.some(w => lowerMsg.includes(w))) {
-                    const sPath = path.join(process.cwd(), 'features', 'safeguarding_policy_summary.txt');
-                    if (fs.existsSync(sPath)) prepContext += `\n[SAFETY]: ${fs.readFileSync(sPath, 'utf8')}\n`;
-                }
-            } catch (e) { console.error(e); }
+        try {
+            const featuresDir = path.join(process.cwd(), 'features');
+
+            // 1. Wardrobe & Prep
+            const wPath = path.join(featuresDir, 'wardrobe_and_prep_standards.txt');
+            if (fs.existsSync(wPath)) prepContext += `\n[WARDROBE & PREP]:\n${fs.readFileSync(wPath, 'utf8')}\n`;
+
+            // 2. Safeguarding
+            const sPath = path.join(featuresDir, 'safeguarding_policy_summary.txt');
+            if (fs.existsSync(sPath)) prepContext += `\n[SAFEGUARDING POLICY]:\n${fs.readFileSync(sPath, 'utf8')}\n`;
+
+            // 3. Ethics (New)
+            const ePath = path.join(featuresDir, 'ethics_and_compliance.txt');
+            if (fs.existsSync(ePath)) prepContext += `\n[ETHICS & COMPLIANCE]:\n${fs.readFileSync(ePath, 'utf8')}\n`;
+
+        } catch (e) {
+            console.error('Asset Lab Load Error:', e);
         }
 
         // --- GENERATE RESPONSE ---
