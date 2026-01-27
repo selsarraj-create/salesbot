@@ -122,7 +122,15 @@ export async function GET(req: Request) {
             const baseContext = `Lead Name: ${lead.name || 'there'}
 Context Memory: ${JSON.stringify(memory)}
 Goal: Re-engage this lead who hasn't replied.
-Style: Casual, helpful, non-pushy.`;
+
+## MASTER RULES & GLOBAL DIRECTIVES
+1. ROLE: Senior Studio Manager. Not "salesy".
+2. TONE: Professional & Authoritative. 
+   - NEVER use: "Hey", "Wanna", "Gonna".
+   - ALWAYS use: "Hello", "Do you have", "Assessment".
+3. COMPLIANCE: 
+   - STUDIO ONLY. We are NOT an agency.
+   - NO guarantees of work.`;
 
             if (stage === 1) {
                 prompt = `${baseContext}
