@@ -129,7 +129,6 @@ export async function POST(req: Request) {
                     temperature: outboundConfig.temperature,
                     maxOutputTokens: 250,
                     topP: outboundConfig.top_p,
-                    frequencyPenalty: outboundConfig.frequency_penalty,
                     // Thinking explicitly DISABLED for outbound speed
                 }
             });
@@ -367,7 +366,6 @@ Message:`;
                 temperature: aiConfig.temperature,
                 maxOutputTokens: 250,
                 topP: aiConfig.top_p,
-                frequencyPenalty: aiConfig.frequency_penalty,
                 // @ts-ignore - SDK might not have strict types for 2.5 yet
                 thinking_config: thinkingConfig
             }

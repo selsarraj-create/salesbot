@@ -46,8 +46,7 @@ Length: Keep responses under 2-3 sentences, like a real SMS/WhatsApp chat.
             generationConfig: {
                 temperature: 0.3,
                 maxOutputTokens: 250,
-                topP: 0.8,
-                frequencyPenalty: 0.5,
+                topP: 0.8
             }
         });
 

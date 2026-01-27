@@ -113,8 +113,7 @@ export async function GET(req: Request) {
                 generationConfig: {
                     temperature: 0.3,
                     maxOutputTokens: 250,
-                    topP: 0.8,
-                    frequencyPenalty: 0.5,
+                    topP: 0.8
                 }
             });
 
