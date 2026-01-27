@@ -29,6 +29,7 @@ export interface Message {
     lead_id: string;
     content: string;
     sender_type: 'lead' | 'bot';
+    review_status?: 'pending' | 'approved' | 'gold' | 'corrected' | 'skipped';
 }
 
 export interface TrainingFeedback {

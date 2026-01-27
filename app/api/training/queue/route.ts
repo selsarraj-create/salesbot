@@ -8,112 +8,99 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(req: Request) {
     try {
-        console.log('[Training Queue API] Starting fetch...');
+        const { searchParams } = new URL(req.url);
+        const filterHighValue = searchParams.get('high_value') === 'true';
+        const ignoreShort = searchParams.get('ignore_short') === 'true';
 
-        // Fetch recent bot messages (without join to avoid FK issues)
-        console.log('[Training Queue API] Querying messages table...');
-        const { data: messages, error } = await supabase
+        console.log(`[Training Queue API] Fetching queue. HighValue: ${filterHighValue}, IgnoreShort: ${ignoreShort}`);
+
+        // Base query: Bot messages that are pending review
+        let query = supabase
             .from('messages')
             .select('*')
             .eq('sender_type', 'bot')
+            .eq('review_status', 'pending')
             .order('timestamp', { ascending: false })
-            .limit(50);
+            .limit(100);
+
+        const { data: messages, error } = await query;
 
         if (error) {
             console.error('[Training Queue API] Supabase error:', error);
             throw error;
         }
 
-        console.log(`[Training Queue API] Found ${messages?.length || 0} bot messages`);
-
         if (!messages || messages.length === 0) {
-            console.log('[Training Queue API] No messages found, returning empty queue');
             return NextResponse.json({ queue: [] });
         }
 
-        // Fetch lead data separately
-        const leadIds = Array.from(new Set(messages.map(m => m.lead_id)));
-        console.log(`[Training Queue API] Fetching ${leadIds.length} unique leads...`);
+        // Apply filters in memory (Supabase text search is limited without full setup)
+        let filteredMessages = messages;
 
-        const { data: leads, error: leadsError } = await supabase
+        // 1. Ignore Short Messages (< 15 chars)
+        if (ignoreShort) {
+            filteredMessages = filteredMessages.filter(m => m.content.length >= 15);
+        }
+
+        // 2. High Value Filter (Keywords)
+        if (filterHighValue) {
+            const TRIGGERS = ['price', 'cost', 'how much', 'book', 'appointment', 'schedule', 'location', 'parking', 'drive', 'train'];
+            filteredMessages = filteredMessages.filter(m => {
+                const lower = m.content.toLowerCase();
+                // Check if message contains high intent triggers OR has negative sentiment (needs review)
+                const hasTrigger = TRIGGERS.some(t => lower.includes(t));
+                const lowScore = (m.sentiment_score !== undefined && m.sentiment_score !== null && Math.abs(m.sentiment_score) > 0.5); // High emotion is often high value/risk
+                return hasTrigger || lowScore;
+            });
+        }
+
+        if (filteredMessages.length === 0) {
+            return NextResponse.json({ queue: [] });
+        }
+
+        // Fetch lead data
+        const leadIds = Array.from(new Set(filteredMessages.map(m => m.lead_id)));
+        const { data: leads } = await supabase
             .from('leads')
-            .select('id, lead_code, status')
+            .select('id, lead_code, status, priority_score')
             .in('id', leadIds);
 
-        if (leadsError) {
-            console.error('[Training Queue API] Leads fetch error:', leadsError);
-            // Don't throw, just continue without lead data
-        }
-
         const leadsMap = new Map(leads?.map(l => [l.id, l]) || []);
-        console.log(`[Training Queue API] Fetched ${leads?.length || 0} leads`);
 
-        // Fetch existing feedback to filter or annotate
-        const messageIds = messages.map(m => m.id);
-        console.log(`[Training Queue API] Fetching feedback for ${messageIds.length} messages...`);
-
-        const { data: feedbackData, error: feedbackError } = await supabase
-            .from('training_feedback')
-            .select('message_id, is_gold_standard')
-            .in('message_id', messageIds);
-
-        if (feedbackError) {
-            console.error('[Training Queue API] Feedback fetch error:', feedbackError);
-            throw feedbackError;
-        }
-
-        console.log(`[Training Queue API] Found ${feedbackData?.length || 0} feedback entries`);
-
-        // Attach review status
-        const feedbackMap = new Map(feedbackData?.map(f => [f.message_id, f]));
-
-        const reviewQueue = messages.map(msg => {
+        // Fetch previous context
+        const richQueue = await Promise.all(filteredMessages.map(async (msg) => {
             const leadData = leadsMap.get(msg.lead_id);
-            return {
-                ...msg,
-                has_feedback: feedbackMap.has(msg.id),
-                is_gold: feedbackMap.get(msg.id)?.is_gold_standard || false,
-                lead_context: leadData ? {
-                    lead_code: leadData.lead_code,
-                    status: leadData.status
-                } : null
-            };
-        });
 
-        // Fetch previous context for each message (The "Prompt")
-        const richQueue = await Promise.all(reviewQueue.map(async (item) => {
+            // Get previous message
             const { data: prevMsg } = await supabase
                 .from('messages')
                 .select('content')
-                .eq('lead_id', item.lead_id)
+                .eq('lead_id', msg.lead_id)
                 .eq('sender_type', 'lead')
-                .lt('timestamp', item.timestamp)
+                .lt('timestamp', msg.timestamp)
                 .order('timestamp', { ascending: false })
                 .limit(1)
                 .single();
 
+            // Check if ignored due to length defaults (if we want to be aggressive, but user wants toggle)
             return {
-                ...item,
+                ...msg,
+                has_feedback: false, // filtered by review_status='pending', so always false
+                is_gold: false,
+                lead_context: leadData ? {
+                    lead_code: leadData.lead_code,
+                    status: leadData.status,
+                    priority_score: leadData.priority_score
+                } : null,
                 previous_message: prevMsg?.content || '(No context found)'
             };
         }));
 
-        // Sort: unreviewed first
-        const sortedQueue = richQueue.sort((a, b) => {
-            if (a.has_feedback === b.has_feedback) return 0;
-            return a.has_feedback ? 1 : -1;
-        });
-
-        console.log(`[Training Queue API] Returning ${sortedQueue.length} items`);
-        return NextResponse.json({ queue: sortedQueue });
+        return NextResponse.json({ queue: richQueue });
 
     } catch (error: any) {
-        console.error('[Training Queue API] Fatal error:', error);
-        console.error('[Training Queue API] Error stack:', error.stack);
-        return NextResponse.json({
-            error: error.message || 'Internal server error',
-            details: error.toString()
-        }, { status: 500 });
+        console.error('[Training Queue API] Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
@@ -121,7 +108,10 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const {
-            message_id,
+            action, // 'approve', 'intervene', 'gold', 'skip', 'bulk_skip'
+            message_ids, // for bulk
+            message_id, // for single
+            // Feedback fields
             original_prompt,
             ai_response,
             manager_correction,
@@ -130,51 +120,73 @@ export async function POST(req: Request) {
             confidence_score
         } = body;
 
-        console.log('[Training Queue API] Submitting feedback, is_gold:', is_gold_standard);
+        console.log(`[Training Queue API] Action: ${action}`);
 
-        // Generate sentiment score for the AI response
-        let sentiment_score = null;
-        try {
-            const { analyzeSentiment } = await import('@/lib/utils/ai');
-            sentiment_score = await analyzeSentiment(ai_response);
-            console.log('[Training Queue API] Sentiment score:', sentiment_score);
-        } catch (error) {
-            console.error('[Training Queue API] Sentiment analysis failed:', error);
-        }
-
-        // Generate embedding if this is a Gold Standard
-        let embedding = null;
-        if (is_gold_standard) {
-            try {
-                const { generateEmbedding } = await import('@/lib/utils/ai');
-                const textToEmbed = manager_correction || ai_response;
-                embedding = await generateEmbedding(textToEmbed);
-                console.log('[Training Queue API] Embedding generated for Gold Standard');
-            } catch (error) {
-                console.error('[Training Queue API] Embedding generation failed:', error);
+        // --- BULK ACTION ---
+        if (action === 'bulk_skip' || action === 'bulk_archive') {
+            if (!message_ids || !Array.isArray(message_ids)) {
+                return NextResponse.json({ error: 'message_ids array required for bulk action' }, { status: 400 });
             }
+
+            const { error } = await supabase
+                .from('messages')
+                .update({ review_status: 'skipped' })
+                .in('id', message_ids);
+
+            if (error) throw error;
+            return NextResponse.json({ success: true, count: message_ids.length });
         }
 
-        const { data, error } = await supabase
-            .from('training_feedback')
-            .insert({
-                message_id,
-                original_prompt,
-                ai_response,
-                manager_correction,
-                is_gold_standard,
-                objection_type,
-                confidence_score,
-                sentiment_score,
-                embedding
-            })
-            .select()
-            .single();
+        // --- SINGLE ACTIONS ---
+        const targetId = message_id;
+        if (!targetId) return NextResponse.json({ error: 'message_id required' }, { status: 400 });
 
-        if (error) throw error;
+        let newStatus = 'approved';
+        if (action === 'skip') newStatus = 'skipped';
+        if (action === 'intervene') newStatus = 'corrected';
+        if (action === 'gold') newStatus = 'gold';
 
-        console.log('[Training Queue API] Feedback saved:', data.id);
-        return NextResponse.json({ success: true, feedback: data });
+        // 1. Update Message Status
+        const { error: statusError } = await supabase
+            .from('messages')
+            .update({ review_status: newStatus })
+            .eq('id', targetId);
+
+        if (statusError) throw statusError;
+
+        // 2. Insert Feedback (Only if NOT skipped)
+        if (action !== 'skip') {
+            // Check sentiment/embedding logic here if needed (reused from prev implementation)
+            let sentiment_score = null;
+            let embedding = null;
+
+            if (is_gold_standard) {
+                try {
+                    const { generateEmbedding } = await import('@/lib/utils/ai');
+                    embedding = await generateEmbedding(manager_correction || ai_response);
+                } catch (e) {
+                    console.error('Embedding failed', e);
+                }
+            }
+
+            const { error: feedbackError } = await supabase
+                .from('training_feedback')
+                .insert({
+                    message_id: targetId,
+                    original_prompt: original_prompt || 'Unknown',
+                    ai_response,
+                    manager_correction,
+                    is_gold_standard: is_gold_standard || false,
+                    objection_type,
+                    confidence_score,
+                    sentiment_score,
+                    embedding
+                });
+
+            if (feedbackError) throw feedbackError;
+        }
+
+        return NextResponse.json({ success: true, status: newStatus });
 
     } catch (error: any) {
         console.error('[Training Queue API] Error submitting feedback:', error);
