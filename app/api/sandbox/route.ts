@@ -96,7 +96,14 @@ export async function POST(req: Request) {
                 pitchTemplate = "Hi [Name], it's Alex from the studio. Saw you were interested in modeling?";
             }
 
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.0-flash",
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 250,
+                    topP: 0.95,
+                }
+            });
             const prompt = `YOU ARE ALEX (SalesBot). 
 GOAL: Initiate a conversation via SMS.
 Lead Name: ${leadName}
@@ -284,7 +291,14 @@ Message:`;
             await new Promise(r => setTimeout(r, Math.random() * 500 + 500));
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash",
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 250,
+                topP: 0.95,
+            }
+        });
         const prompt = `${SALES_PERSONA_PROMPT}
 
 CUSTOM SYSTEM RULES:
