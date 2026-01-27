@@ -24,6 +24,9 @@ interface ReviewItem {
     };
     previous_message?: string;
     thought_content?: string;
+    quality_score?: number;
+    manual_score?: number;
+    judge_rationale?: string;
 }
 
 export default function ReviewQueue() {
@@ -35,6 +38,7 @@ export default function ReviewQueue() {
     // Filters
     const [highValueOnly, setHighValueOnly] = useState(false);
     const [ignoreShort, setIgnoreShort] = useState(true);
+    const [failuresOnly, setFailuresOnly] = useState(false);
 
     // Bulk Actions
     const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -48,7 +52,8 @@ export default function ReviewQueue() {
         try {
             const params = new URLSearchParams({
                 high_value: highValueOnly.toString(),
-                ignore_short: ignoreShort.toString()
+                ignore_short: ignoreShort.toString(),
+                failures_only: failuresOnly.toString()
             });
 
             const res = await fetch(`/api/training/queue?${params}`);
@@ -210,6 +215,17 @@ export default function ReviewQueue() {
                                         <Badge variant="outline" className="border-electric-cyan text-electric-cyan">
                                             {item.lead_context?.lead_code || 'Lead'}
                                         </Badge>
+                                        {(item.quality_score !== undefined || item.manual_score !== undefined) && (
+                                            <Badge
+                                                variant="outline"
+                                                className={`font-mono ${(item.manual_score ?? item.quality_score ?? 0) < 6 ? 'border-red-500 text-red-500 bg-red-500/10' :
+                                                        (item.manual_score ?? item.quality_score ?? 0) < 8 ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' :
+                                                            'border-green-500 text-green-500 bg-green-500/10'
+                                                    }`}
+                                            >
+                                                Score: {item.manual_score ?? item.quality_score}/10 {item.manual_score && '👑'}
+                                            </Badge>
+                                        )}
                                         <span className="text-xs text-text-tertiary">
                                             {new Date(item.timestamp).toLocaleString()}
                                         </span>
