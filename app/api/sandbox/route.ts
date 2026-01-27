@@ -372,7 +372,7 @@ Message:`;
             model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: aiConfig.temperature,
-                maxOutputTokens: 2048, // Increased to prevent cutoff
+                maxOutputTokens: 8192, // Increased to 8k for extensive thinking + response
                 topP: aiConfig.top_p,
                 // @ts-ignore - SDK might not have strict types for 2.5 yet
                 thinking_config: thinkingConfig

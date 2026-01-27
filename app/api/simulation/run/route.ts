@@ -45,7 +45,7 @@ Length: Keep responses under 2-3 sentences, like a real SMS/WhatsApp chat.
             model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: 0.3,
-                maxOutputTokens: 250,
+                maxOutputTokens: 8192,
                 topP: 0.8
             }
         });
