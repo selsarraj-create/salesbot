@@ -96,7 +96,7 @@ export async function POST(req: Request) {
                 pitchTemplate = "Hi [Name], it's Alex from the studio. Saw you were interested in modeling?";
             }
 
-            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
             const prompt = `YOU ARE ALEX (SalesBot). 
 GOAL: Initiate a conversation via SMS.
 Lead Name: ${leadName}

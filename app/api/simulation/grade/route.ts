@@ -42,7 +42,7 @@ OUTPUT FORMAT (JSON ONLY):
         });
 
         // 2. Generate Grade
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await model.generateContent(`${JUDGE_PROMPT}\n\nTRANSCRIPT:\n${conversationText}`);
         let jsonStr = result.response.text();
 

@@ -47,7 +47,7 @@ export async function GET(req: Request) {
         }
 
         const sentAlerts = [];
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         for (const lead of leads) {
             console.log(`[Concierge] Alerting ${lead.lead_code}`);

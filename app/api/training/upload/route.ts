@@ -58,7 +58,7 @@ export async function POST(req: Request) {
             const base64Audio = Buffer.from(arrayBuffer).toString('base64');
 
             // Transcribe with Gemini
-            const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
             const result = await model.generateContent([
                 {
                     inlineData: {
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
                 const arrayBuffer = await file.arrayBuffer();
                 const base64Doc = Buffer.from(arrayBuffer).toString('base64');
 
-                const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+                const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
                 const result = await model.generateContent([
                     {
                         inlineData: {

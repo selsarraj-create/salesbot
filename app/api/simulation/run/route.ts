@@ -41,7 +41,7 @@ Length: Keep responses under 2-3 sentences, like a real SMS/WhatsApp chat.
             chatHistory += `${speaker}: ${msg.content}\n`;
         });
 
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         // Using a simple generation call instead of startChat for statelessness simplicity here,
         // though startChat is better for long context, we pass full history anyway.

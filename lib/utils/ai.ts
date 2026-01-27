@@ -13,7 +13,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
  */
 export async function analyzeSentiment(text: string): Promise<number> {
     try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
         const result = await model.generateContent(`Analyze the sentiment of this message and return ONLY a number from -1 to 1, where -1 is very negative, 0 is neutral, and 1 is very positive. No explanation, just the number.
 
 Message: "${text}"`);

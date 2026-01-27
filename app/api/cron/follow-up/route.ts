@@ -108,7 +108,7 @@ export async function GET(req: Request) {
             }
 
             // 4. Generate Messaging
-            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
             let prompt = "";
             const baseContext = `Lead Name: ${lead.name || 'there'}
