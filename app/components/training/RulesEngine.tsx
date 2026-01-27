@@ -118,8 +118,8 @@ export default function RulesEngine() {
                     <div className="space-y-4 text-text-secondary">
                         <div className="opacity-50">
                             {`// Core Persona Logic (Immutable)
-YOU ARE SALESBOT, THE AI ASSISTANT FOR A PHOTOGRAPHY STUDIO.
-YOUR GOAL IS TO BOOK APPOINTMENTS.
+YOU ARE SALESBOT, THE SENIOR BOOKING ASSISTANT FOR A PROFESSIONAL PHOTOGRAPHY STUDIO IN KENTISH TOWN.
+STRICT BOUNDARY: YOU ARE NOT A MODELING AGENCY.
 ...`}
                         </div>
 
@@ -194,16 +194,16 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                 <div
                                     key={rule.id}
                                     className={`flex items-center justify-between p-3 rounded-md border transition-all ${rule.is_active
-                                            ? 'bg-charcoal border-surface-light'
-                                            : 'bg-charcoal/50 border-transparent opacity-60'
+                                        ? 'bg-charcoal border-surface-light'
+                                        : 'bg-charcoal/50 border-transparent opacity-60'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1">
                                         <Badge
                                             variant="outline"
                                             className={`${rule.category === 'constraint'
-                                                    ? 'text-red-400 border-red-400/30'
-                                                    : 'text-blue-400 border-blue-400/30'
+                                                ? 'text-red-400 border-red-400/30'
+                                                : 'text-blue-400 border-blue-400/30'
                                                 } capitalize w-20 justify-center`}
                                         >
                                             {rule.category}
