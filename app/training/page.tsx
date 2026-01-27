@@ -5,6 +5,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import RulesEngine from '@/app/components/training/RulesEngine';
+import ReviewQueue from '@/app/components/training/ReviewQueue';
+import FlightSimulator from '@/app/components/training/FlightSimulator';
+import AssetLab from '@/app/components/training/AssetLab';
+import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
 import { Target, Zap, FileText, TrendingUp, Shield } from 'lucide-react';
 
 type TabType = 'review' | 'assets' | 'simulator' | 'analytics' | 'rules';
