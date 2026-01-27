@@ -113,7 +113,7 @@ export async function POST(req: Request) {
                     temperature: 0.3,
                     maxOutputTokens: 250,
                     topP: 0.8,
-                    frequencyPenalty: 0.3,
+                    frequencyPenalty: 0.5,
                 }
             });
             const prompt = `YOU ARE ALEX (SalesBot). 
@@ -309,7 +309,7 @@ Message:`;
                 temperature: 0.3,
                 maxOutputTokens: 250,
                 topP: 0.8,
-                frequencyPenalty: 0.3,
+                frequencyPenalty: 0.5,
             }
         });
         const prompt = `${SALES_PERSONA_PROMPT}
