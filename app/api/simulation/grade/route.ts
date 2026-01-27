@@ -37,7 +37,7 @@ OUTPUT FORMAT (JSON ONLY):
 
         // Format history for Judge
         let conversationText = "";
-        let leadIdFromLog = null;
+        let leadIdFromLog: string | null = null;
         chat_log.forEach((msg: any) => {
             const speaker = msg.sender === 'bot' ? 'ALEX' : 'LEAD';
             conversationText += `${speaker}: ${msg.content}\n`;
