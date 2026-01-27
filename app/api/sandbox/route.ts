@@ -364,14 +364,14 @@ Message:`;
 
             thinkingConfig = {
                 include_thoughts: true,
-                budget_token_count: validBudget
+                thinking_budget: validBudget
             };
             console.log(`🧠 THINKING: FORCED ON (Budget: ${validBudget})`);
         } else if (isObjection) {
             // Priority 2: Adaptive Fallback
             thinkingConfig = {
                 include_thoughts: true,
-                budget_token_count: 2048
+                thinking_budget: 2048
             };
             console.log('🧠 ADAPTIVE THINKING: ENABLED (Objection Detected)');
         }
@@ -382,8 +382,9 @@ Message:`;
                 temperature: aiConfig.temperature,
                 maxOutputTokens: 8192, // Increased to 8k for extensive thinking + response
                 topP: aiConfig.top_p,
+                // @ts-ignore
                 thinking_config: thinkingConfig
-            }
+            } as any
         });
         const prompt = `${SALES_PERSONA_PROMPT}
 

@@ -62,7 +62,7 @@ OUTPUT FORMAT (JSON ONLY):
                     include_thoughts: true,
                     thinking_level: "high"
                 }
-            }
+            } as any
         });
         const result = await model.generateContent(`${JUDGE_PROMPT}\n\nTRANSCRIPT:\n${conversationText}`);
         let jsonStr = result.response.text();
