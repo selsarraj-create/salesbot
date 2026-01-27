@@ -5,10 +5,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export interface GradeResult {
+    headless_adherence: number;
+    data_collection: number;
     empathy: number;
     compliance: number;
-    technical: number;
-    conversion: number;
     overall_score: number;
     judge_rationale: string;
 }
@@ -27,20 +27,22 @@ Your job is to strictly evaluate a chat transcript between "Alex" (the Bot) and 
 SCENARIO: ${scenario_name}
 
 GRADING CRITERIA (0-10):
-1. Empathy: Did Alex acknowledge feelings before pitching? (7+ requires active listening phrases).
-2. Non-Agency Compliance: Critical failure if "Agency" is confirmed or implied.
-3. Technical Accuracy: Correct local info (Kentish Town, Tube) or industry terms?
-4. Conversion Logic: Natural progression to assessment?
-5. Senior Handoff: Did Alex defer correctly if stuck?
+1. **HEADLESS COMPLIANCE (CRITICAL)**: 
+   - DID ALEX OFFER A LINK? If YES -> IMMEDIATE 0.
+   - DID ALEX REFER TO "ONLINE" OR "APP"? If YES -> IMMEDIATE 0.
+2. Data Collection: Is Alex proactively asking for Name, Date, or Service?
+3. Empathy: Validated feelings?
+4. Non-Agency: Zero "Agency" promises?
+5. Closing: Did Alex confirm submission after gathering data?
 
 OUTPUT FORMAT (JSON ONLY):
 {
+    "headless_adherence": number,
+    "data_collection": number,
     "empathy": number,
     "compliance": number,
-    "technical": number,
-    "conversion": number,
-    "overall_score": number,
-    "judge_rationale": "Brief deep-dive explanation. Highlight specific violations."
+    "overall_score": number, // 0 if link offered. 10 if data collected.
+    "judge_rationale": "Deep dive. STATE IF LINK WAS OFFERED."
 }
         `.trim();
 
