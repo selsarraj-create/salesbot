@@ -99,9 +99,10 @@ export async function POST(req: Request) {
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.0-flash",
                 generationConfig: {
-                    temperature: 0.7,
+                    temperature: 0.5,
                     maxOutputTokens: 250,
-                    topP: 0.95,
+                    topP: 0.8,
+                    frequencyPenalty: 0.3,
                 }
             });
             const prompt = `YOU ARE ALEX (SalesBot). 
@@ -294,9 +295,10 @@ Message:`;
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
             generationConfig: {
-                temperature: 0.7,
+                temperature: 0.5,
                 maxOutputTokens: 250,
-                topP: 0.95,
+                topP: 0.8,
+                frequencyPenalty: 0.3,
             }
         });
         const prompt = `${SALES_PERSONA_PROMPT}
