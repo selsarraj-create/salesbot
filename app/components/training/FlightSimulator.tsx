@@ -108,35 +108,6 @@ export default function FlightSimulator() {
                         }
                     })
                 });
-                // ... 
-                return (
-                    // ... inside UI header ...
-                    <div className="flex gap-4 mb-6">
-                        <Select onValueChange={setSelectedScenarioId}>
-                            {/* ... existing select ... */}
-                        </Select>
-
-                        <div className="flex gap-2 items-center">
-                            <input
-                                className="bg-background border border-border rounded px-3 py-2 w-32"
-                                placeholder="Lead Name"
-                                value={simLeadName}
-                                onChange={(e) => setSimLeadName(e.target.value)}
-                            />
-                            <input
-                                className="bg-background border border-border rounded px-3 py-2 w-20"
-                                placeholder="Age"
-                                value={simLeadAge}
-                                onChange={(e) => setSimLeadAge(e.target.value)}
-                            />
-                        </div>
-
-                        <Button onClick={startSimulation} disabled={isRunning || !selectedScenarioId} className="gap-2">
-                            {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                            {isRunning ? 'Running...' : 'Start Simulation'}
-                        </Button>
-                    </div>
-                );
 
                 if (initRes.ok) {
                     const initData = await initRes.json();
