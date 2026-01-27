@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { KnowledgeVector } from '@/lib/supabase/types';
 
@@ -26,7 +26,7 @@ export default function AssetLab() {
             .from('knowledge_vectors')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(10);
+            .limit(50); // Increased limit from 10 to 50
 
         if (data) setAssets(data);
     }, []);
@@ -35,6 +35,21 @@ export default function AssetLab() {
     useEffect(() => {
         fetchAssets();
     }, [fetchAssets]);
+
+    const deleteAsset = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this asset? This will remove it from AI learning forever.')) return;
+
+        try {
+            const res = await fetch(`/api/training/assets?id=${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Delete failed');
+
+            // Remove from UI
+            setAssets(prev => prev.filter(a => a.id !== id));
+        } catch (error) {
+            console.error(error);
+            alert('Failed to delete asset');
+        }
+    };
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         for (const file of acceptedFiles) {
@@ -110,8 +125,8 @@ export default function AssetLab() {
                     <div
                         {...getRootProps()}
                         className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all ${isDragActive
-                                ? 'border-electric-cyan bg-electric-cyan/10'
-                                : 'border-surface-light hover:border-electric-cyan/50'
+                            ? 'border-electric-cyan bg-electric-cyan/10'
+                            : 'border-surface-light hover:border-electric-cyan/50'
                             }`}
                     >
                         <input {...getInputProps()} />
@@ -180,13 +195,23 @@ export default function AssetLab() {
                                                 <FileText className="w-5 h-5 text-electric-cyan mt-1" />
                                             )}
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <span className="text-text-primary font-medium">
-                                                        {asset.metadata?.filename || 'Untitled'}
-                                                    </span>
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {asset.content_type}
-                                                    </Badge>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-text-primary font-medium">
+                                                            {asset.metadata?.filename || 'Untitled'}
+                                                        </span>
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {asset.content_type}
+                                                        </Badge>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-text-tertiary hover:text-red-400 hover:bg-red-500/10 p-2 h-auto"
+                                                        onClick={() => deleteAsset(asset.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
                                                 </div>
                                                 <p className="text-text-secondary text-sm line-clamp-2">
                                                     {asset.content.substring(0, 150)}...
