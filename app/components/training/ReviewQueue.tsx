@@ -18,6 +18,7 @@ interface ReviewItem {
         lead_code: string;
         status: string;
     };
+    previous_message?: string;
 }
 
 export default function ReviewQueue() {
@@ -123,6 +124,13 @@ export default function ReviewQueue() {
                                 </div>
                             </CardHeader>
                             <CardContent>
+                                {item.previous_message && item.previous_message !== '(No context found)' && (
+                                    <div className="mb-3 pl-3 border-l-2 border-surface-light">
+                                        <p className="text-xs text-text-tertiary uppercase tracking-wider mb-1">Context (Lead)</p>
+                                        <p className="text-text-secondary italic text-sm">"{item.previous_message}"</p>
+                                    </div>
+                                )}
+
                                 <div className="bg-charcoal p-3 rounded-md border border-surface-light">
                                     <p className="text-text-primary">{item.content}</p>
                                 </div>

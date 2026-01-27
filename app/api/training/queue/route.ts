@@ -80,8 +80,26 @@ export async function GET(req: Request) {
             };
         });
 
+        // Fetch previous context for each message (The "Prompt")
+        const richQueue = await Promise.all(reviewQueue.map(async (item) => {
+            const { data: prevMsg } = await supabase
+                .from('messages')
+                .select('content')
+                .eq('lead_id', item.lead_id)
+                .eq('sender_type', 'lead')
+                .lt('timestamp', item.timestamp)
+                .order('timestamp', { ascending: false })
+                .limit(1)
+                .single();
+
+            return {
+                ...item,
+                previous_message: prevMsg?.content || '(No context found)'
+            };
+        }));
+
         // Sort: unreviewed first
-        const sortedQueue = reviewQueue.sort((a, b) => {
+        const sortedQueue = richQueue.sort((a, b) => {
             if (a.has_feedback === b.has_feedback) return 0;
             return a.has_feedback ? 1 : -1;
         });
