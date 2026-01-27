@@ -58,9 +58,9 @@ export default function FlightSimulator() {
         try {
             console.log('[FlightSimulator] Starting simulation with scenario:', selectedScenarioId);
 
-            // 1. Create realistic dummy lead with unique phone
+            // 1. Create realistic dummy lead with unique phone and code
             const timestamp = Date.now();
-            const dummyCode = `#SIM${Math.floor(Math.random() * 10000)}`;
+            const dummyCode = `#SIM-${timestamp}-${Math.floor(Math.random() * 1000)}`;
             const dummyPhone = `SIM-${timestamp}`;
             console.log('[FlightSimulator] Creating dummy lead:', dummyCode, dummyPhone);
 
