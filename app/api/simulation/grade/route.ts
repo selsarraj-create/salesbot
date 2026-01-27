@@ -42,7 +42,9 @@ OUTPUT FORMAT (JSON ONLY):
         });
 
         // 2. Generate Grade
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        // 2. Generate Grade
+        // Upgraded to Gemini 2.5 Flash for better reasoning
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(`${JUDGE_PROMPT}\n\nTRANSCRIPT:\n${conversationText}`);
         let jsonStr = result.response.text();
 
@@ -52,30 +54,41 @@ OUTPUT FORMAT (JSON ONLY):
 
         // 3. Save to File System (MVP fallback since migration failed)
         if (scenario_id) {
-            const fs = require('fs');
-            const path = require('path');
-            const crypto = require('crypto');
-            const dataDir = path.join(process.cwd(), 'data');
-            const filePath = path.join(dataDir, 'sim_results.json');
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const crypto = require('crypto');
+                const dataDir = path.join(process.cwd(), 'data');
 
-            let results = [];
-            if (fs.existsSync(filePath)) {
-                results = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                // Ensure directory exists
+                if (!fs.existsSync(dataDir)) {
+                    fs.mkdirSync(dataDir, { recursive: true });
+                }
+
+                const filePath = path.join(dataDir, 'sim_results.json');
+
+                let results = [];
+                if (fs.existsSync(filePath)) {
+                    results = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                }
+
+                const newResult = {
+                    id: crypto.randomUUID(),
+                    created_at: new Date().toISOString(),
+                    scenario_id,
+                    lead_persona_name,
+                    scores,
+                    coach_note: scores.coach_note,
+                    chat_log_preview: chat_log // Save full log if needed, or truncate
+                };
+
+                results.push(newResult);
+                fs.writeFileSync(filePath, JSON.stringify(results, null, 2));
+                console.log('[Judge] Saved result to', filePath);
+            } catch (saveError) {
+                console.error('[Judge] Save failed (non-fatal):', saveError);
+                // We don't block the response if save fails
             }
-
-            const newResult = {
-                id: crypto.randomUUID(),
-                created_at: new Date().toISOString(),
-                scenario_id,
-                lead_persona_name,
-                scores,
-                coach_note: scores.coach_note,
-                chat_log_preview: chat_log // Save full log if needed, or truncate
-            };
-
-            results.push(newResult);
-            fs.writeFileSync(filePath, JSON.stringify(results, null, 2));
-            console.log('[Judge] Saved result to', filePath);
         }
 
         return NextResponse.json({ success: true, scores });
