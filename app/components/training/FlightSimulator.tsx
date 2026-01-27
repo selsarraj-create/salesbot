@@ -35,7 +35,15 @@ export default function FlightSimulator() {
                 return;
             }
             console.log(`[FlightSimulator] Loaded ${data?.length || 0} scenarios`);
-            if (data) setScenarios(data);
+            if (data) {
+                // Deduplicate scenarios by name (prevent duplicates in dropdown)
+                const uniqueData = (data as SimulatedScenario[]).filter((scenario, index, self) =>
+                    index === self.findIndex((t) => (
+                        t.scenario_name === scenario.scenario_name
+                    ))
+                );
+                setScenarios(uniqueData);
+            }
         };
         fetchScenarios();
     }, []);
