@@ -25,7 +25,77 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const [thinking, setThinking] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // ... existing useEffects ...
+    // Fetch messages & Subscribe
+    useEffect(() => {
+        if (!lead) return;
+
+        const fetchMessages = async () => {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('lead_id', lead.id)
+                .order('timestamp', { ascending: true });
+
+            if (error) {
+                console.error('Error fetching messages:', error);
+            } else {
+                setMessages(data || []);
+
+                // --- OUTBOUND INITIATION (If empty) ---
+                if (data && data.length === 0) {
+                    initiateOutbound(lead.id);
+                }
+            }
+        };
+
+        fetchMessages();
+
+        const channel = subscribeToMessages(lead.id, (payload) => {
+            const newMsg = payload.new as Message;
+            setMessages((prev) => {
+                // Deduplicate
+                if (prev.find(m => m.id === newMsg.id)) return prev;
+                return [...prev, newMsg];
+            });
+        });
+
+        return () => {
+            channel.unsubscribe();
+        };
+    }, [lead]);
+
+    // Scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const initiateOutbound = async (leadId: string) => {
+        console.log('Initiating outbound conversation for lead:', leadId);
+        setThinking(true);
+        try {
+            const res = await fetch('/api/sandbox', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lead_id: leadId,
+                    action: 'initiate'
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.response) {
+                    // We rely on subscription to add the message, 
+                    // but we can optimistic update if subscription is slow?
+                    // Safe to wait for subscription usually, but let's be robust.
+                }
+            }
+        } catch (e) {
+            console.error('Failed to initiate:', e);
+        } finally {
+            setThinking(false);
+        }
+    };
 
     const handleDeleteLead = async () => {
         if (!lead || !onDelete) return;
