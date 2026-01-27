@@ -113,13 +113,23 @@ export async function POST(req: Request) {
                 pitchTemplate = "Hi [Name], it's Alex from the studio. Saw you were interested in modeling?";
             }
 
+            // Fetch Config for Outbound too? Ideally yes, but let's keep it simple or default for now.
+            // Or better, do a quick fetch
+            let outboundConfig = { temperature: 0.3, top_p: 0.8, frequency_penalty: 0.5 };
+            const { data: dbConfig } = await supabase.from('ai_config').select('*').single();
+            if (dbConfig) outboundConfig = {
+                temperature: dbConfig.temperature,
+                top_p: dbConfig.top_p,
+                frequency_penalty: dbConfig.frequency_penalty
+            };
+
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.0-flash",
                 generationConfig: {
-                    temperature: 0.3,
+                    temperature: outboundConfig.temperature,
                     maxOutputTokens: 250,
-                    topP: 0.8,
-                    frequencyPenalty: 0.5,
+                    topP: outboundConfig.top_p,
+                    frequencyPenalty: outboundConfig.frequency_penalty,
                 }
             });
             const prompt = `YOU ARE ALEX (SalesBot). 
@@ -168,7 +178,8 @@ Message:`;
             rulesResult,
             historyResult,
             knowledgeResult,
-            goldResult
+            goldResult,
+            configResult // Step 6: AI Config
         ] = await Promise.all([
             // Step 0: Sentiment Analysis (Async Parallel)
             analyzeSentiment(message).catch(e => { console.error(e); return 0; }),
@@ -186,10 +197,21 @@ Message:`;
             searchKnowledge(message, 3).catch(e => []),
 
             // Step 5: Gold Standards
-            searchGoldStandards(message, 3).catch(e => [])
+            searchGoldStandards(message, 3).catch(e => []),
+
+            // Step 6: AI Config
+            supabase.from('ai_config').select('*').single()
         ]);
 
-        console.log('[API] Parallel Fetch Complete');
+        // Default Config (fallback)
+        const aiConfig = configResult.data || {
+            temperature: 0.3,
+            top_p: 0.95,
+            frequency_penalty: 0.5,
+            full_context_mode: true
+        };
+
+        console.log('[API] Parallel Fetch Complete. AI Config:', aiConfig);
 
         // --- SENTIMENT GUARDRAIL (Blocking) ---
         if (sentimentScore < -0.5) {
@@ -277,29 +299,44 @@ Message:`;
             ethicsContext = `WARNING: User asked about jobs/money. STATE CLEARLY: "No guarantees. We provide the portfolio tools, not jobs."`;
         }
 
-        // --- ASSET LAB INJECTION (FULL CONTEXT MODE) ---
-        // User requested to disable "Context Caching" and force fresh input of all Asset Lab files.
+        // --- ASSET LAB INJECTION (DYNAMIC MODE) ---
         let prepContext = "";
         const fs = require('fs');
         const path = require('path');
+        const featuresDir = path.join(process.cwd(), 'features');
 
-        try {
-            const featuresDir = path.join(process.cwd(), 'features');
+        if (aiConfig.full_context_mode) {
+            try {
+                // 1. Wardrobe & Prep
+                const wPath = path.join(featuresDir, 'wardrobe_and_prep_standards.txt');
+                if (fs.existsSync(wPath)) prepContext += `\n[WARDROBE & PREP]:\n${fs.readFileSync(wPath, 'utf8')}\n`;
 
-            // 1. Wardrobe & Prep
-            const wPath = path.join(featuresDir, 'wardrobe_and_prep_standards.txt');
-            if (fs.existsSync(wPath)) prepContext += `\n[WARDROBE & PREP]:\n${fs.readFileSync(wPath, 'utf8')}\n`;
+                // 2. Safeguarding
+                const sPath = path.join(featuresDir, 'safeguarding_policy_summary.txt');
+                if (fs.existsSync(sPath)) prepContext += `\n[SAFEGUARDING POLICY]:\n${fs.readFileSync(sPath, 'utf8')}\n`;
 
-            // 2. Safeguarding
-            const sPath = path.join(featuresDir, 'safeguarding_policy_summary.txt');
-            if (fs.existsSync(sPath)) prepContext += `\n[SAFEGUARDING POLICY]:\n${fs.readFileSync(sPath, 'utf8')}\n`;
+                // 3. Ethics (New)
+                const ePath = path.join(featuresDir, 'ethics_and_compliance.txt');
+                if (fs.existsSync(ePath)) prepContext += `\n[ETHICS & COMPLIANCE]:\n${fs.readFileSync(ePath, 'utf8')}\n`;
+            } catch (e) {
+                console.error('Asset Lab Load Error:', e);
+            }
+        } else {
+            // OPTIMIZED MODE (Keyword Based) - "Cached"
+            // Only load if keywords match
+            try {
+                const wardrobeKeywords = ['wear', 'bring', 'clothes', 'outfit'];
+                const safeKeywords = ['safe', 'child', 'security', 'dbs', 'guardian'];
 
-            // 3. Ethics (New)
-            const ePath = path.join(featuresDir, 'ethics_and_compliance.txt');
-            if (fs.existsSync(ePath)) prepContext += `\n[ETHICS & COMPLIANCE]:\n${fs.readFileSync(ePath, 'utf8')}\n`;
-
-        } catch (e) {
-            console.error('Asset Lab Load Error:', e);
+                if (wardrobeKeywords.some(w => lowerMsg.includes(w))) {
+                    const wPath = path.join(featuresDir, 'wardrobe_and_prep_standards.txt');
+                    if (fs.existsSync(wPath)) prepContext += `\n[WARDROBE]: ${fs.readFileSync(wPath, 'utf8')}\n`;
+                }
+                if (safeKeywords.some(w => lowerMsg.includes(w))) {
+                    const sPath = path.join(featuresDir, 'safeguarding_policy_summary.txt');
+                    if (fs.existsSync(sPath)) prepContext += `\n[SAFETY]: ${fs.readFileSync(sPath, 'utf8')}\n`;
+                }
+            } catch (e) { console.error('Optimized Load Error', e); }
         }
 
         // --- GENERATE RESPONSE ---
@@ -311,10 +348,10 @@ Message:`;
         const model = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
             generationConfig: {
-                temperature: 0.3,
+                temperature: aiConfig.temperature,
                 maxOutputTokens: 250,
-                topP: 0.8,
-                frequencyPenalty: 0.5,
+                topP: aiConfig.top_p,
+                frequencyPenalty: aiConfig.frequency_penalty,
             }
         });
         const prompt = `${SALES_PERSONA_PROMPT}

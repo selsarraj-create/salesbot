@@ -8,10 +8,11 @@ import RulesEngine from '@/app/components/training/RulesEngine';
 import ReviewQueue from '@/app/components/training/ReviewQueue';
 import FlightSimulator from '@/app/components/training/FlightSimulator';
 import AssetLab from '@/app/components/training/AssetLab';
+import AICalibrationPanel from '@/app/components/training/AICalibrationPanel';
 import AnalyticsDashboard from '@/app/components/training/AnalyticsDashboard';
-import { Target, Zap, FileText, TrendingUp, Shield } from 'lucide-react';
+import { Target, Zap, FileText, TrendingUp, Shield, Settings2 } from 'lucide-react';
 
-type TabType = 'review' | 'assets' | 'simulator' | 'analytics' | 'rules';
+type TabType = 'review' | 'assets' | 'simulator' | 'analytics' | 'rules' | 'calibration';
 
 export default function TrainingPage() {
     const [activeTab, setActiveTab] = useState<TabType>('review');
@@ -20,6 +21,7 @@ export default function TrainingPage() {
         { id: 'review' as TabType, label: 'Review Queue', icon: Target, color: 'text-electric-cyan' },
         { id: 'assets' as TabType, label: 'Asset Lab', icon: FileText, color: 'text-green-400' },
         { id: 'rules' as TabType, label: 'System Rules', icon: Shield, color: 'text-red-400' },
+        { id: 'calibration' as TabType, label: 'Calibration', icon: Settings2, color: 'text-orange-400' },
         { id: 'simulator' as TabType, label: 'Flight Simulator', icon: Zap, color: 'text-yellow-400' },
         { id: 'analytics' as TabType, label: 'Analytics', icon: TrendingUp, color: 'text-purple-400' }
     ];
@@ -71,6 +73,7 @@ export default function TrainingPage() {
                 {activeTab === 'review' && <ReviewQueue />}
                 {activeTab === 'assets' && <AssetLab />}
                 {activeTab === 'rules' && <RulesEngine />}
+                {activeTab === 'calibration' && <AICalibrationPanel />}
                 {activeTab === 'simulator' && <FlightSimulator />}
                 {activeTab === 'analytics' && <AnalyticsDashboard />}
             </div>
