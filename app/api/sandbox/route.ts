@@ -410,6 +410,16 @@ Respond as Alex:`;
         const result = await model.generateContent(prompt);
         const responseText = result.response.text().trim();
 
+        // --- POST-GENERATION CHECKS ---
+        // 1. Check for Graceful Exit Phrase
+        const EXIT_PHRASE_SNIPPET = "email you the details so you have them in writing";
+        if (responseText.includes(EXIT_PHRASE_SNIPPET)) {
+            console.log('🛑 GRACEFUL EXIT TRIGGERED. Stopping Lead.');
+            waitUntil((async () => {
+                await supabase.from('leads').update({ status: 'Stopped' }).eq('id', lead_id);
+            })());
+        }
+
         // --- ASYNC BACKGROUND TASKS (Fire & Forget via waitUntil) ---
         waitUntil((async () => {
             console.log('[Background] Starting post-processing...');

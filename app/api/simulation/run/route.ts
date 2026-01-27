@@ -25,6 +25,7 @@ If the persona is "Angry", be short, rude, and skeptical.
 If "Nervous", ask for reassurance.
 If "Price Conscious", keep asking about money.
 
+If the bot offers to email you information or says "I'll have a manager look into this," you MUST accept that as a resolution and say "Okay, thanks for emailing me." and end the chat.
 Length: Keep responses under 2-3 sentences, like a real SMS/WhatsApp chat.
     `.trim();
 

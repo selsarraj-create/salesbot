@@ -206,6 +206,11 @@ export default function FlightSimulator() {
             const lastMsg = messages[messages.length - 1];
             // If Bot just spoke, it's Lead's turn again
             if (lastMsg.sender === 'bot') {
+                if (turnCount >= 10) {
+                    console.log('[FlightSimulator] Turn limit reached (10). Stopping.');
+                    setIsRunning(false);
+                    return;
+                }
                 const timer = setTimeout(() => {
                     runTurn(leadId, messages);
                 }, 2000); // 2s pause before Attacker replies
