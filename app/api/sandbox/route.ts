@@ -127,7 +127,7 @@ export async function POST(req: Request) {
                 model: "gemini-2.5-flash",
                 generationConfig: {
                     temperature: outboundConfig.temperature,
-                    maxOutputTokens: 250,
+                    maxOutputTokens: 8192,
                     topP: outboundConfig.top_p,
                     // Thinking explicitly DISABLED for outbound speed
                 }
