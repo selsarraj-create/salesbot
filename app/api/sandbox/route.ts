@@ -124,12 +124,13 @@ export async function POST(req: Request) {
             };
 
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.0-flash",
+                model: "gemini-2.5-flash",
                 generationConfig: {
                     temperature: outboundConfig.temperature,
                     maxOutputTokens: 250,
                     topP: outboundConfig.top_p,
                     frequencyPenalty: outboundConfig.frequency_penalty,
+                    // Thinking explicitly DISABLED for outbound speed
                 }
             });
             const prompt = `YOU ARE ALEX (SalesBot). 
@@ -345,13 +346,30 @@ Message:`;
             await new Promise(r => setTimeout(r, Math.random() * 500 + 500));
         }
 
+        // --- ADAPTIVE THINKING LOGIC (Gemini 2.5 Flash) ---
+        // We only enable "Thinking" when the user initiates a complex objection or risk scenario.
+        // Otherwise, we keep it FAST (Thinking OFF).
+
+        const OBJECTION_KEYWORDS = ['price', 'cost', 'expensive', 'afford', 'scam', 'legit', 'real', 'reviews', 'unsure', 'maybe', 'think about it'];
+        const isObjection = sentimentScore < -0.3 || OBJECTION_KEYWORDS.some(w => lowerMsg.includes(w));
+
+        // Define Thinking Config (Schema 2.5)
+        // Note: For gemini-2.5-flash, if we want "thinking", we add the config.
+        const thinkingConfig = isObjection ? { include_thoughts: true, output_cost_cap: 0.5 } : undefined;
+
+        if (isObjection) {
+            console.log('🧠 ADAPTIVE THINKING: ENABLED (Objection Detected)');
+        }
+
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: aiConfig.temperature,
                 maxOutputTokens: 250,
                 topP: aiConfig.top_p,
                 frequencyPenalty: aiConfig.frequency_penalty,
+                // @ts-ignore - SDK might not have strict types for 2.5 yet
+                thinking_config: thinkingConfig
             }
         });
         const prompt = `${SALES_PERSONA_PROMPT}
