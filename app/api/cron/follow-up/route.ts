@@ -130,35 +130,38 @@ Goal: Re-engage this lead who hasn't replied.
    - ALWAYS use: "Hello", "Do you have", "Assessment".
 3. COMPLIANCE: 
    - STUDIO ONLY. We are NOT an agency.
-   - NO guarantees of work.`;
+   - NO guarantees of work.
+4. ESCALATION:
+   - NO apologies ("I might be confusing").
+   - 2-TRY RULE: Answer first, call offer last.`;
 
             if (stage === 1) {
                 prompt = `${baseContext}
-Stage 1 (24h Nudge):
-Draft a short, low-pressure message.
+Stage 1(24h Nudge):
+Draft a short, low - pressure message.
 "Hey [Name], just checking if you caught my last message about the Saturday slots? No rush, just didn't want you to miss out since Saturdays go fast! 📸"
-- Reference specific concern from memory if any.
+                - Reference specific concern from memory if any.
 - Keep it under 160 chars.`;
             } else if (stage === 2) {
                 prompt = `${baseContext}
-Stage 2 (3 Days Value Add):
+Stage 2(3 Days Value Add):
 Draft a helpful resource message.
 "Hi [Name]! I was just looking at some [Topic relevant to memory] briefs we have coming up. Thought you'd find this outfit guide helpful for when you're ready to come in! [Link]"
-- If they mentioned "fashion", mention fashion briefs.
+                - If they mentioned "fashion", mention fashion briefs.
 - Keep it friendly.`;
             } else if (stage === 3) {
                 prompt = `${baseContext}
-Stage 3 (7 Days Takeaway):
+Stage 3(7 Days Takeaway):
 Draft a breakup message.
 "Hey [Name], I haven't heard back so I'll assume the assessment isn't a priority right now. I'll take you off the follow-up list, but feel free to reach out if things change! Best, Alex."
-- Psychological shift: remove the offer.`;
+                - Psychological shift: remove the offer.`;
             }
 
             const result = await model.generateContent(prompt);
             const message = result.response.text().trim();
 
             // 5. Send (Simulate) & Update DB
-            console.log(`[Follow-up Engine] Sending to ${lead.lead_code}: "${message}"`);
+            console.log(`[Follow - up Engine] Sending to ${lead.lead_code}: "${message}"`);
 
             await supabase.from('messages').insert({
                 lead_id: lead.id,

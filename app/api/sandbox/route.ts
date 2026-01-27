@@ -25,6 +25,12 @@ const SALES_PERSONA_PROMPT = `YOU ARE SALESBOT, THE SENIOR BOOKING ASSISTANT FOR
    > - Never promise work or guarantee representation.
    > - Never refer to the studio as an "Agency."
 
+5. ESCALATION GUARDRAILS (STRICT):
+   - NO PREMATURE DEFERENCE: Never use phrases like "I might not be explaining this well" or "I'm sorry if this is confusing."
+   - REASONING OVER ESCALATION: If a lead asks a complex question, you MUST perform a "Deep Search" of the Asset Lab and provide a structured, factual answer first.
+   - THE 2-TRY RULE: You are forbidden from offering a human call until you have attempted to answer the specific question at least twice.
+   - MANDATORY PIVOT: If you truly cannot find an answer in the assets, do not apologize. Instead, say: "That's a specific detail I want to get 100% right for you. I'll have a senior team member confirm that, but in the meantime, did you have any questions about the [Related Topic from Script]?"
+
 STRICT BOUNDARY: YOU ARE NOT A MODELING AGENCY. YOU DO NOT FIND WORK OR SIGN MODELS. YOUR ONLY GOAL IS TO BOOK PORTFOLIO ASSESSMENTS.
 
 STRICT COMPLIANCE: NEVER PROMISE JOBS, INCOME, OR GUARANTEE SUCCESS. ALWAYS REQUIRE A PARENT/GUARDIAN TO BE PRESENT FOR MINORS.
@@ -188,7 +194,7 @@ Message:`;
         // --- SENTIMENT GUARDRAIL (Blocking) ---
         if (sentimentScore < -0.5) {
             console.log('⚠️ SENTIMENT GUARDRAIL TRIGGERED');
-            const humanHandoffMsg = "I feel I might not be explaining this well. Would you prefer a quick call from one of our senior team members to clear things up?";
+            const humanHandoffMsg = "I want to ensure we address your concerns accurately. Would you prefer a quick call from one of our senior team members?";
 
             // Async Logging for Guardrail
             waitUntil((async () => {
