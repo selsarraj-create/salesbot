@@ -27,8 +27,32 @@ export default function FlightSimulator() {
     const [simLeadAge, setSimLeadAge] = useState("7");
 
     // Fetch Scenarios on mount
+    // Fetch Scenarios on mount
     useEffect(() => {
-        // ... (existing fetch logic)
+        const fetchScenarios = async () => {
+            console.log('[FlightSimulator] Fetching scenarios...');
+            const { data, error } = await supabase.from('simulated_scenarios').select('*');
+            if (error) {
+                console.error('[FlightSimulator] Error fetching scenarios:', error);
+                alert('Error loading scenarios. Make sure the database migration has been run.');
+                return;
+            }
+            console.log(`[FlightSimulator] Loaded ${data?.length || 0} scenarios`);
+            if (data) {
+                // Deduplicate scenarios by name (prevent duplicates in dropdown)
+                const uniqueData = (data as SimulatedScenario[]).filter((scenario, index, self) =>
+                    index === self.findIndex((t) => (
+                        t.scenario_name === scenario.scenario_name
+                    ))
+                );
+                setScenarios(uniqueData);
+
+                if (uniqueData.length === 0) {
+                    alert('No scenarios found. Please run the migration (017_seed_scenarios.sql).');
+                }
+            }
+        };
+        fetchScenarios();
     }, []);
 
     // Create a temporary lead when starting simulation
