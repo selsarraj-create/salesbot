@@ -352,11 +352,19 @@ Message:`;
         const OBJECTION_KEYWORDS = ['price', 'cost', 'expensive', 'afford', 'scam', 'legit', 'real', 'reviews', 'unsure', 'maybe', 'think about it'];
         const isObjection = sentimentScore < -0.3 || OBJECTION_KEYWORDS.some(w => lowerMsg.includes(w));
 
-        // Define Thinking Config (Schema 2.5)
-        // Note: For gemini-2.5-flash, if we want "thinking", we add the config.
-        const thinkingConfig = isObjection ? { include_thoughts: true, output_cost_cap: 0.5 } : undefined;
+        // Define Thinking Config
+        let thinkingConfig = undefined;
 
-        if (isObjection) {
+        if (aiConfig.show_thoughts) {
+            // Priority 1: Manual Override (Admin Panel)
+            thinkingConfig = {
+                include_thoughts: true,
+                thinking_budget: aiConfig.thinking_budget || 2048
+            };
+            console.log(`🧠 THINKING: FORCED ON (Budget: ${thinkingConfig.thinking_budget})`);
+        } else if (isObjection) {
+            // Priority 2: Adaptive Fallback
+            thinkingConfig = { include_thoughts: true, thinking_budget: 2048 };
             console.log('🧠 ADAPTIVE THINKING: ENABLED (Objection Detected)');
         }
 
@@ -364,7 +372,7 @@ Message:`;
             model: "gemini-2.5-flash",
             generationConfig: {
                 temperature: aiConfig.temperature,
-                maxOutputTokens: 250,
+                maxOutputTokens: 2048, // Increased to prevent cutoff
                 topP: aiConfig.top_p,
                 // @ts-ignore - SDK might not have strict types for 2.5 yet
                 thinking_config: thinkingConfig
