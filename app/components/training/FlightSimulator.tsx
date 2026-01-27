@@ -23,29 +23,12 @@ export default function FlightSimulator() {
     const [turnCount, setTurnCount] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [leadId, setLeadId] = useState<string | null>(null);
+    const [simLeadName, setSimLeadName] = useState("Sarah");
+    const [simLeadAge, setSimLeadAge] = useState("7");
 
     // Fetch Scenarios on mount
     useEffect(() => {
-        const fetchScenarios = async () => {
-            console.log('[FlightSimulator] Fetching scenarios...');
-            const { data, error } = await supabase.from('simulated_scenarios').select('*');
-            if (error) {
-                console.error('[FlightSimulator] Error fetching scenarios:', error);
-                alert('Error loading scenarios. Make sure the database migration has been run.');
-                return;
-            }
-            console.log(`[FlightSimulator] Loaded ${data?.length || 0} scenarios`);
-            if (data) {
-                // Deduplicate scenarios by name (prevent duplicates in dropdown)
-                const uniqueData = (data as SimulatedScenario[]).filter((scenario, index, self) =>
-                    index === self.findIndex((t) => (
-                        t.scenario_name === scenario.scenario_name
-                    ))
-                );
-                setScenarios(uniqueData);
-            }
-        };
-        fetchScenarios();
+        // ... (existing fetch logic)
     }, []);
 
     // Create a temporary lead when starting simulation
@@ -67,10 +50,11 @@ export default function FlightSimulator() {
             const { data: lead, error } = await supabase.from('leads').insert({
                 lead_code: dummyCode,
                 status: 'New',
-                name: 'Simulated Lead',
+                name: simLeadName,
                 phone: dummyPhone,
                 is_test: true,
-                is_manual_mode: false
+                is_manual_mode: false,
+                lead_metadata: { age: simLeadAge } // Store age in metadata
             } as any).select().single() as any;
 
             if (error) {
@@ -93,9 +77,42 @@ export default function FlightSimulator() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         lead_id: lead.id,
-                        action: 'initiate'
+                        action: 'initiate',
+                        lead_context: {
+                            name: simLeadName,
+                            age: simLeadAge
+                        }
                     })
                 });
+                // ... 
+                return (
+                    // ... inside UI header ...
+                    <div className="flex gap-4 mb-6">
+                        <Select onValueChange={setSelectedScenarioId}>
+                            {/* ... existing select ... */}
+                        </Select>
+
+                        <div className="flex gap-2 items-center">
+                            <input
+                                className="bg-background border border-border rounded px-3 py-2 w-32"
+                                placeholder="Lead Name"
+                                value={simLeadName}
+                                onChange={(e) => setSimLeadName(e.target.value)}
+                            />
+                            <input
+                                className="bg-background border border-border rounded px-3 py-2 w-20"
+                                placeholder="Age"
+                                value={simLeadAge}
+                                onChange={(e) => setSimLeadAge(e.target.value)}
+                            />
+                        </div>
+
+                        <Button onClick={startSimulation} disabled={isRunning || !selectedScenarioId} className="gap-2">
+                            {isRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            {isRunning ? 'Running...' : 'Start Simulation'}
+                        </Button>
+                    </div>
+                );
 
                 if (initRes.ok) {
                     const initData = await initRes.json();

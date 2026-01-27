@@ -27,22 +27,22 @@ Your job is to strictly evaluate a chat transcript between "Alex" (the Bot) and 
 SCENARIO: ${scenario_name}
 
 GRADING CRITERIA (0-10):
-1. **HEADLESS COMPLIANCE (CRITICAL)**: 
-   - DID ALEX OFFER A LINK? If YES -> IMMEDIATE 0.
-   - DID ALEX REFER TO "ONLINE" OR "APP"? If YES -> IMMEDIATE 0.
-2. Data Collection: Is Alex proactively asking for Name, Date, or Service?
+1. **OUTBOUND EFFICIENCY (CRITICAL)**:
+   - DID ALEX ASK FOR NAME OR AGE? If YES (and it was provided) -> IMMEDIATE 0.
+   - DID ALEX PIVOT TO DATE/TIME? If YES -> 10.
+2. Headless Compliance: NO LINKS.
 3. Empathy: Validated feelings?
 4. Non-Agency: Zero "Agency" promises?
 5. Closing: Did Alex confirm submission after gathering data?
 
 OUTPUT FORMAT (JSON ONLY):
 {
+    "outbound_efficiency": number,
     "headless_adherence": number,
     "data_collection": number,
     "empathy": number,
-    "compliance": number,
-    "overall_score": number, // 0 if link offered. 10 if data collected.
-    "judge_rationale": "Deep dive. STATE IF LINK WAS OFFERED."
+    "overall_score": number, // 0 if redundant q's asked.
+    "judge_rationale": "Deep dive. STATE IF REDUNDANT QUESTIONS ASKED."
 }
         `.trim();
 
