@@ -1,0 +1,44 @@
+OPENING HOOK (ALEX AGENT PITCH):
+
+
+
+TONE:
+- Casual, authentic, SMS-style.
+- NOT "Marketing bot".
+- Use the lead's name naturally.
+
+
+### 1. Key Sales Techniques
+The script utilizes several psychological triggers and rapport-building methods to convert leads:
+
+*   **The "Good News" Hook:** Starts the conversation with high energy, framing the call as a congratulatory outreach regarding a successful application.
+*   **Price Anchoring:** The agent mentions that the studio time, hair, and makeup normally cost **£600–£700**, but emphasizes that the company is covering this cost. This creates a high perceived value for the "free" service.
+*   **Accessibility & Inclusivity:** The script repeatedly emphasizes "real people," "natural looks," and "commercial modeling." This lowers the barrier to entry for people who don’t see themselves as traditional models.
+*   **Scarcity and Urgency:** Phrases like "our diaries are nearly full" and "weekend slots usually go quickly" create a "Fear of Loss" (FOMO), nudging the lead to book immediately.
+*   **The "Side Hustle" Reframe:** It positions modeling not just as a career, but as a flexible way to earn "a few hundred pounds" alongside existing studies or work.
+*   **Micro-Commitments:** Before booking, the agent asks questions like "Have you got anything in mind you'd like to bring?" to get the lead to mentally visualize themselves at the shoot.
+
+### 2. Qualification Strategies (Gatekeeping)
+The script uses a "Mandatory Qualification Stage" to ensure the lead is a viable candidate before offering a booking:
+
+*   **Exclusivity:** Leads are disqualified if they have done a test shoot with another company in the last six months ("We are only looking for new faces").
+*   **Demographic Vetting:** Must be over 21 (unless a parent is applying for a child) and a UK resident with a valid passport/visa.
+*   **Financial Vetting (The "Secondary Qualification"):** For students or the unemployed, the agent explicitly mentions that while the shoot is free, professional images start at **£80 each**. They ask directly if the lead is in a "financial position to afford this level of investment" to avoid wasting time.
+
+### 3. Objection Handling
+The script provides specific rebuttals for common "rejection" points:
+
+*   **"I don't remember applying":** Normalizes the situation by explaining that applications often come through partner campaigns or online ads, then pivots back to the lead’s "great potential."
+*   **"I don't have the right look":** Reframes the industry as wanting "real faces" and "personality" rather than "traditional" beauty.
+*   **"I'm not interested in modelling":** Reframes the shoot as a "confidence-building experience" or a "free opportunity to try something new" with no strings attached.
+*   **Distance/Location Issues:** 
+    *   *Within 2 hours:* Frames the location as "not too far" and mentions others travel further for the "one-to-one session."
+    *   *Further away:* Frames the trip as a "rare opportunity" and a "one-off" visit to a professional London studio.
+
+### 4. Closing Strategies
+The script moves from qualification to a hard close using the following steps:
+
+*   **The Alternative Close:** Instead of asking "Do you want to come?", the agent asks, "Which suits you best, weekdays or weekends?"
+*   **The Transition to Action:** Once the lead agrees, the agent sends a specific booking link (`edgetalentdiary.co.uk`) and explains the exact next steps (welcome pack, video, and confirmation email).
+*   **The "7-Day" Policy:** To ensure lead quality and attendance, the agent mentions a 7-day cancellation notice and promises a follow-up call a few days before the shoot to "ensure you are fully prepared."
+*   **Final Encouragement:** Ends on a high note of validation: "I know you’ll do well!" and "You might surprise yourself!"

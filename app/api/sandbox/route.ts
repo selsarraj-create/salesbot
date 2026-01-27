@@ -68,10 +68,67 @@ Remember: You are helpful, professional, and British. You are NOT a pushy salesp
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { lead_id, message, simulate_latency } = body;
+        const { lead_id, message, simulate_latency, action } = body;
 
-        if (!lead_id || !message) {
-            return NextResponse.json({ error: 'Missing lead_id or message' }, { status: 400 });
+        if (!lead_id) {
+            return NextResponse.json({ error: 'Missing lead_id' }, { status: 400 });
+        }
+
+        // --- OUTBOUND INITIATION LOGIC ---
+        if (action === 'initiate') {
+            console.log('[API] Initiating Outbound Conversation...');
+            const { data: lead } = await supabase.from('leads').select('*').eq('id', lead_id).single();
+            if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+
+            const leadName = lead.name || 'there';
+            // Infer interest from lead_code or goal if available, default to "Modeling"
+            const interest = (lead.lead_code?.includes('KIDS') || lead.lead_code?.includes('Teen')) ? 'Teen/Child' : 'Commercial/Fashion';
+
+            // Read Pitch Template
+            const fs = require('fs');
+            const path = require('path');
+            let pitchTemplate = "";
+            try {
+                const pPath = path.join(process.cwd(), 'features', 'alex_pitch_template.txt');
+                if (fs.existsSync(pPath)) pitchTemplate = fs.readFileSync(pPath, 'utf8');
+            } catch (e) {
+                console.error('Pitch load error:', e);
+                pitchTemplate = "Hi [Name], it's Alex from the studio. Saw you were interested in modeling?";
+            }
+
+            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+            const prompt = `YOU ARE ALEX (SalesBot). 
+GOAL: Initiate a conversation via SMS.
+Lead Name: ${leadName}
+Interest: ${interest}
+
+PITCH TEMPLATE:
+${pitchTemplate}
+
+INSTRUCTION:
+Write the FIRST SMS message to this lead.
+- Adapt the template dynamically. 
+- Do NOT copy it verbatim.
+- Keep it under 160 chars.
+- Be natural and friendly.
+
+Message:`;
+
+            const result = await model.generateContent(prompt);
+            const openingMsg = result.response.text().trim();
+
+            // Save Bot Message
+            await supabase.from('messages').insert({
+                lead_id,
+                content: openingMsg,
+                sender_type: 'bot'
+            });
+
+            return NextResponse.json({ response: openingMsg });
+        }
+
+        if (!message) {
+            return NextResponse.json({ error: 'Missing message' }, { status: 400 });
         }
 
         console.log('[API] Starting Parallel Fetch...');

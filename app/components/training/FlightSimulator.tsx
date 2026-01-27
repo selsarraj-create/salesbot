@@ -86,8 +86,32 @@ export default function FlightSimulator() {
                 setTurnCount(0);
                 setIsRunning(true);
 
-                // Kickoff: Attacker speaks first
-                runTurn(lead.id, []);
+                // Kickoff: Bot Initiates Conversation (Outbound)
+                console.log('[FlightSimulator] Triggering Bot Initiation...');
+                const initRes = await fetch('/api/sandbox', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lead_id: lead.id,
+                        action: 'initiate'
+                    })
+                });
+
+                if (initRes.ok) {
+                    const initData = await initRes.json();
+                    const botMsg = initData.response;
+                    console.log('[FlightSimulator] Bot Initiated:', botMsg);
+
+                    const initialHistory = [{ id: 'bot-' + Date.now(), sender: 'bot', content: botMsg } as Message];
+                    setMessages(initialHistory);
+
+                    // Now Lead Responds
+                    setTimeout(() => runTurn(lead.id, initialHistory), 1500);
+                } else {
+                    console.error('Failed to initiate');
+                    // Fallback to old way if fails
+                    runTurn(lead.id, []);
+                }
             }
         } catch (err: any) {
             console.error('[FlightSimulator] Unexpected error:', err);
