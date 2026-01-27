@@ -23,6 +23,7 @@ interface ReviewItem {
         priority_score?: number;
     };
     previous_message?: string;
+    thought_content?: string;
 }
 
 export default function ReviewQueue() {
@@ -236,7 +237,20 @@ export default function ReviewQueue() {
                                 )}
 
                                 <div className="bg-charcoal p-4 rounded-md border border-surface-light ml-6">
-                                    <p className="text-text-primary">{item.content}</p>
+                                    {item.thought_content && (
+                                        <div className="mb-4 border-l-2 border-yellow-400/50 pl-3">
+                                            <details className="group">
+                                                <summary className="text-xs font-mono text-yellow-400/80 cursor-pointer hover:text-yellow-400 flex items-center gap-2 select-none">
+                                                    <span className="group-open:rotate-90 transition-transform">▶</span>
+                                                    <span>Reasoning Chain (Thinking Process)</span>
+                                                </summary>
+                                                <div className="mt-2 text-xs text-text-secondary font-mono bg-black/20 p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                                                    {item.thought_content}
+                                                </div>
+                                            </details>
+                                        </div>
+                                    )}
+                                    <p className="text-text-primary whitespace-pre-wrap">{item.content}</p>
                                 </div>
 
                                 {selectedId === item.id && (
