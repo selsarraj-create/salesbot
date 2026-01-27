@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
+import { gradeConversation } from '@/lib/intelligence/judge';
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -363,14 +364,14 @@ Message:`;
 
             thinkingConfig = {
                 include_thoughts: true,
-                thinking_budget: validBudget
+                budget_token_count: validBudget
             };
             console.log(`🧠 THINKING: FORCED ON (Budget: ${validBudget})`);
         } else if (isObjection) {
             // Priority 2: Adaptive Fallback
             thinkingConfig = {
                 include_thoughts: true,
-                thinking_budget: 2048
+                budget_token_count: 2048
             };
             console.log('🧠 ADAPTIVE THINKING: ENABLED (Objection Detected)');
         }
@@ -381,7 +382,6 @@ Message:`;
                 temperature: aiConfig.temperature,
                 maxOutputTokens: 8192, // Increased to 8k for extensive thinking + response
                 topP: aiConfig.top_p,
-                // @ts-ignore - SDK might not have strict types for 2.5 yet
                 thinking_config: thinkingConfig
             }
         });
@@ -448,6 +448,19 @@ Respond as Alex:`;
             });
 
             // 3. Ethics Scan of Bot Response (Validation)
+            // (Existing logic...)
+
+            // 4. AUTO-JUDGING (Quality Control)
+            // Fetch updated chat history for grading
+            const { data: updatedHistory } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('lead_id', lead_id)
+                .order('timestamp', { ascending: true });
+
+            if (updatedHistory && updatedHistory.length >= 2) {
+                await gradeConversation(updatedHistory, 'Live Sandbox', lead_id);
+            }
             const p3 = (async () => {
                 const lowerResp = responseText.toLowerCase();
                 const FORBIDDEN = ['guarantee', 'guaranteed', 'job', 'income', 'salary', 'promise', 'our agency'];
