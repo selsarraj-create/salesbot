@@ -356,15 +356,22 @@ Message:`;
         let thinkingConfig = undefined;
 
         if (aiConfig.show_thoughts) {
-            // Priority 1: Manual Override (Admin Panel)
+            // Priority 1: Manual Override
+            // CLAMP BUDGET: 0 - 24576
+            const rawBudget = aiConfig.thinking_budget || 2048;
+            const validBudget = Math.max(0, Math.min(24576, rawBudget));
+
             thinkingConfig = {
                 include_thoughts: true,
-                thinking_budget: aiConfig.thinking_budget || 2048
+                thinking_budget: validBudget
             };
-            console.log(`🧠 THINKING: FORCED ON (Budget: ${thinkingConfig.thinking_budget})`);
+            console.log(`🧠 THINKING: FORCED ON (Budget: ${validBudget})`);
         } else if (isObjection) {
             // Priority 2: Adaptive Fallback
-            thinkingConfig = { include_thoughts: true, thinking_budget: 2048 };
+            thinkingConfig = {
+                include_thoughts: true,
+                thinking_budget: 2048
+            };
             console.log('🧠 ADAPTIVE THINKING: ENABLED (Objection Detected)');
         }
 
