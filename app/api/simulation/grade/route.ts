@@ -45,8 +45,8 @@ OUTPUT FORMAT (JSON ONLY):
         });
 
         // 2. Generate Grade (Gemini 3 Pro)
-        // User requested gemini-3-pro for "Deep Think" capability
-        const model = genAI.getGenerativeModel({ model: "gemini-3-pro" });
+        // User requested gemini-3-pro-preview (v1beta) for "Deep Think" capability
+        const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
         const result = await model.generateContent(`${JUDGE_PROMPT}\n\nTRANSCRIPT:\n${conversationText}`);
         let jsonStr = result.response.text();
 
