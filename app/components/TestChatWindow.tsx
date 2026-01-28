@@ -140,8 +140,8 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             lead_id: lead.id,
             content: inputMessage.trim(),
             sender_type: 'lead',
-            timestamp: new Date().toISOString(),
-            sentiment_score: 0
+            timestamp: new Date().toISOString()
+            // sentiment_score removed to fix build
         };
         setMessages(prev => [...prev, optimisticMsg]);
         setInputMessage('');
