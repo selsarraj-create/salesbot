@@ -248,7 +248,7 @@ export default function FlightSimulator() {
                             Flight Simulator
                         </CardTitle>
                         <Select onValueChange={setSelectedScenarioId} disabled={isRunning}>
-                            <SelectTrigger className="w-[200px] bg-background border-surface-light text-text-primary">
+                            <SelectTrigger className="w-[300px] bg-background border-surface-light text-text-primary">
                                 <SelectValue placeholder="Select Scenario" />
                             </SelectTrigger>
                             <SelectContent>
@@ -259,23 +259,6 @@ export default function FlightSimulator() {
                                 ))}
                             </SelectContent>
                         </Select>
-
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Lead Name"
-                                value={simLeadName}
-                                onChange={(e) => setSimLeadName(e.target.value)}
-                                className="w-[120px] bg-background border-surface-light h-10"
-                                disabled={isRunning}
-                            />
-                            <Input
-                                placeholder="Age"
-                                value={simLeadAge}
-                                onChange={(e) => setSimLeadAge(e.target.value)}
-                                className="w-[70px] bg-background border-surface-light h-10"
-                                disabled={isRunning}
-                            />
-                        </div>
                     </div>
                     <div className="flex gap-2">
                         {!isRunning ? (
@@ -292,36 +275,90 @@ export default function FlightSimulator() {
                         </Button>
                     </div>
                 </div>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 && (
-                    <div className="text-center text-text-secondary mt-20">
-                        <p>Select a scenario and press Start to launch the AI vs AI battle.</p>
+
+                {/* Scenario Info Card */}
+                {selectedScenarioId && (
+                    <div className="mt-4 p-4 rounded-lg bg-surface/30 border border-surface-light text-text-secondary text-sm">
+                        {(() => {
+                            const s = scenarios.find(sc => sc.id === selectedScenarioId);
+                            if (!s) return null;
+                            return (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="md:col-span-2">
+                                        <h4 className="text-electric-cyan font-medium mb-1">🎯 Persona Objective</h4>
+                                        <p className="opacity-90">{s.lead_persona}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div>
+                                            <span className="text-electric-cyan font-medium">Identity: </span>
+                                            <span className="text-white">{s.lead_name || 'Unknown'} ({s.lead_age || '?'})</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-electric-cyan font-medium">Difficulty: </span>
+                                            <Badge variant="outline" className={
+                                                s.difficulty_level === 'Hard' ? 'text-red-400 border-red-400' :
+                                                    s.difficulty_level === 'Medium' ? 'text-yellow-400 border-yellow-400' :
+                                                        'text-green-400 border-green-400'
+                                            }>{s.difficulty_level}</Badge>
+                                        </div>
+                                        <div>
+                                            <span className="text-electric-cyan font-medium">Goal: </span>
+                                            <span className="text-white text-xs">{s.target_outcome}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 )}
-                {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
-                            ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
-                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                            }`}>
-                            <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
-                            {msg.content}
-                        </div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </CardContent>
-
-            {/* Grade Controls */}
-            {turnCount > 2 && !isRunning && (
-                <div className="p-4 border-t border-surface-light bg-surface/50">
-                    <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
-                        👨‍⚖️ Grade Performance (The Judge)
+            </div>
+            <div className="flex gap-2">
+                {!isRunning ? (
+                    <Button onClick={startSimulation} disabled={!selectedScenarioId} className="bg-green-600 hover:bg-green-700 text-white">
+                        <Play className="w-4 h-4 mr-2" /> Start Test
                     </Button>
+                ) : (
+                    <Button onClick={() => setIsRunning(false)} variant="destructive">
+                        <Pause className="w-4 h-4 mr-2" /> Pause
+                    </Button>
+                )}
+                <Button variant="outline" onClick={() => { setIsRunning(false); setMessages([]); }} className="border-surface-light">
+                    <RefreshCw className="w-4 h-4" />
+                </Button>
+            </div>
+        </div>
+            </CardHeader >
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.length === 0 && (
+                <div className="text-center text-text-secondary mt-20">
+                    <p>Select a scenario and press Start to launch the AI vs AI battle.</p>
                 </div>
             )}
-        </Card>
+            {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
+                        ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
+                        : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                        }`}>
+                        <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
+                        {msg.content}
+                    </div>
+                </div>
+            ))}
+            <div ref={messagesEndRef} />
+        </CardContent>
+
+    {/* Grade Controls */ }
+    {
+        turnCount > 2 && !isRunning && (
+            <div className="p-4 border-t border-surface-light bg-surface/50">
+                <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
+                    👨‍⚖️ Grade Performance (The Judge)
+                </Button>
+            </div>
+        )
+    }
+        </Card >
     );
 
     async function gradeSimulation() {
