@@ -64,7 +64,9 @@ Value Pitch: Explain the studio day, the 7-outfit requirement, and the value of 
 
 Qualification: Execute the 4-step gate while building excitement.
 
-The Close: Secure a specific Date/Time for the photoshoot.`;
+The Close: Secure a specific Date/Time for the photoshoot.
+
+INTERRUPTION PROTOCOL: If the user speaks before you can send your opening pitch, DO NOT ignore them. You must ANSWER their question first, and then seamlessly bridge back to the 'Good News' and '7-Outfit' pitch.`;
 
 
 export async function POST(req: Request) {
@@ -81,32 +83,27 @@ export async function POST(req: Request) {
             const { name, age } = lead_context || {};
             console.log('[API] Initiating Outbound Conversation...', { name, age });
 
-            // Script Selection Logic (Headless)
-            let initialMessage = "";
-            if (name && age) {
-                if (parseInt(age) < 18) {
-                    // Child Model Script
-                    initialMessage = `Hi! I was just looking over the application for ${name}. She's at a great age for the portfolios we're doing right now. I'd love to get that organized for you—what day of the week usually works best for your schedule?`;
-                } else {
-                    // Adult Model Script
-                    initialMessage = `Hi ${name}! I've got your application here for the photoshoot. I'd love to get you in the studio—what does your schedule look like for a booking?`;
-                }
-            } else {
-                // Fallback (Should typically happen if context missing)
-                initialMessage = "Hi! I was looking over your inquiry for the photoshoot. I'd love to get that booked in for you—did you have a specific day in mind?";
-            }
+            // Dynamic AI Opener Generation
+            const openerPrompt = `
+${SALES_PERSONA_PROMPT}
 
-            console.log('[API] Script selected:', initialMessage.substring(0, 20) + '...');
+CONTEXT: This is the very first outbound message to a new applicant.
+Name: ${name || 'Lead'}
+Age: ${age || 'Unknown'}
 
-            console.log('[API] Fetching lead...', lead_id);
-            const { data: lead, error: leadError } = await supabase.from('leads').select('*').eq('id', lead_id).single();
+GOAL: Write a short, warm, professional SMS opening message (max 2 sentences).
+- Acknowledge their application.
+- Validate their look ("Great age for portfolios").
+- Ask for a booking day.
+- NO LINKS.
 
-            if (leadError) {
-                console.error('[API] Lead Fetch Error:', leadError);
-                return NextResponse.json({ error: leadError.message }, { status: 500 });
-            }
-            if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
-            console.log('[API] Lead found:', lead.id);
+Generate Opener:`;
+
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const result = await model.generateContent(openerPrompt);
+            const initialMessage = result.response.text().trim();
+
+            console.log('[API] AI Generated Opener:', initialMessage);
 
             // Save Initial Bot Message
             console.log('[API] Saving initial message...');
@@ -159,7 +156,7 @@ export async function POST(req: Request) {
             supabase.from('system_rules').select('rule_text, category').eq('is_active', true),
 
             // Step 4: Chat History
-            supabase.from('messages').select('sender_type, content').eq('lead_id', lead_id).order('timestamp', { ascending: true }).limit(20),
+            supabase.from('messages').select('id, sender_type, content').eq('lead_id', lead_id).order('timestamp', { ascending: true }).limit(50),
 
             // Step 5: Vector Search (Knowledge)
             searchKnowledge(message, 3).catch(e => []),
@@ -398,7 +395,32 @@ Generate the next response.
 
 Respond as Alex:`;
 
+        // Race Condition Check (1) - Pre-Generation
+        const initialMsgCount = historyResult.data ? historyResult.data.length : 0;
+
         const result = await model.generateContent(finalPrompt);
+
+        // Race Condition Check (2) - Post-Generation
+        // If the user sent a message while we were thinking, our context is stale.
+        // We should ABORT and let the *new* request (triggered by the user's new message) handle it.
+        const { count: currentMsgCount } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('lead_id', lead_id);
+
+        // Check if we received a new USER message (Total count increased)
+        // Note: We use >= because we might have just inserted the user's message in this request, 
+        // but if *another* one came in, count would be even higher.
+        // Actually, safest is: Fetch the LATEST message. If it's from 'lead' and NOT the one we just processed...
+        // Simplified: If count changed significantly, bail.
+        // Better: client provided `message` (User's input). We inserted it (or client did).
+        // If DB has MORE messages than (initialMsgCount + 1), then user double-texted.
+
+        if (currentMsgCount !== null && currentMsgCount > (initialMsgCount + 1)) {
+            console.log(`🛑 INTERRUPT DETECTED: Msg Count moved from ${initialMsgCount} to ${currentMsgCount}. Aborting old response.`);
+            return NextResponse.json({ status: 'Interrupted', response: null });
+        }
+
         let responseText = result.response.text();
 
         // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
