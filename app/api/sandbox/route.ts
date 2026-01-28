@@ -70,7 +70,7 @@ The Close: Secure a specific Date/Time for the photoshoot.`;
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { lead_id, message, simulate_latency, action, lead_context } = body;
+        const { lead_id, message, simulate_latency, action, lead_context, skip_user_insert } = body;
 
         if (!lead_id) {
             return NextResponse.json({ error: 'Missing lead_id' }, { status: 400 });
@@ -458,14 +458,14 @@ Respond as Alex:`;
         waitUntil((async () => {
             console.log('[Background] Starting post-processing...');
 
-            // 1. Save User Message
-            const p1 = supabase.from('messages').insert({
+            // 1. Save User Message (Unless handled by client)
+            const p1 = !skip_user_insert ? supabase.from('messages').insert({
                 lead_id,
                 content: message,
                 sender_type: 'lead',
                 sentiment_score: sentimentScore,
                 sentiment_label: sentimentScore > 0.3 ? 'Positive' : (sentimentScore < -0.3 ? 'Negative' : 'Neutral')
-            });
+            }) : Promise.resolve();
 
             // 2. Save Bot Message (Include thought_content if enabled)
             const p2 = supabase.from('messages').insert({

@@ -23,8 +23,8 @@ export default function FlightSimulator() {
     const [turnCount, setTurnCount] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [leadId, setLeadId] = useState<string | null>(null);
-    const [simLeadName, setSimLeadName] = useState("Sarah");
-    const [simLeadAge, setSimLeadAge] = useState("7");
+    const [simLeadName, setSimLeadName] = useState("James");
+    const [simLeadAge, setSimLeadAge] = useState("25");
 
     // Fetch Scenarios on mount
     // Fetch Scenarios on mount
@@ -246,7 +246,7 @@ export default function FlightSimulator() {
                             Flight Simulator
                         </CardTitle>
                         <Select onValueChange={setSelectedScenarioId} disabled={isRunning}>
-                            <SelectTrigger className="w-[250px] bg-background border-surface-light text-text-primary">
+                            <SelectTrigger className="w-[200px] bg-background border-surface-light text-text-primary">
                                 <SelectValue placeholder="Select Scenario" />
                             </SelectTrigger>
                             <SelectContent>
@@ -257,6 +257,23 @@ export default function FlightSimulator() {
                                 ))}
                             </SelectContent>
                         </Select>
+
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Lead Name"
+                                value={simLeadName}
+                                onChange={(e) => setSimLeadName(e.target.value)}
+                                className="w-[120px] bg-background border-surface-light h-10"
+                                disabled={isRunning}
+                            />
+                            <Input
+                                placeholder="Age"
+                                value={simLeadAge}
+                                onChange={(e) => setSimLeadAge(e.target.value)}
+                                className="w-[70px] bg-background border-surface-light h-10"
+                                disabled={isRunning}
+                            />
+                        </div>
                     </div>
                     <div className="flex gap-2">
                         {!isRunning ? (
