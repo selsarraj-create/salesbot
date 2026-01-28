@@ -242,7 +242,16 @@ return (
                                     : 'bg-electric-cyan/10 border-electric-cyan/30'
                                     }`}
                             >
-                                <p className="text-sm text-text-primary">{message.content}</p>
+                                {/* Render Thought Process (Bot Only) */}
+                                {message.thought_content && (
+                                    <div className="mb-2 p-2 rounded bg-black/20 border-l-2 border-blue-400/50">
+                                        <p className="text-xs font-mono text-blue-300 whitespace-pre-wrap">
+                                            {message.thought_content}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <p className="text-sm text-text-primary whitespace-pre-wrap">{message.content}</p>
                                 <p className="text-xs mt-1 text-text-secondary">
                                     {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
                                     {isLead ? 'Lead' : 'Bot'}
