@@ -57,7 +57,7 @@ OUTPUT FORMAT (JSON ONLY):
 
         // 3. Generate with Gemini 3 Pro Preview
         const model = genAI.getGenerativeModel({
-            model: "gemini-3-pro-preview",
+            model: "gemini-3.0-pro",
             generationConfig: {
                 // @ts-ignore
                 thinking_config: {
