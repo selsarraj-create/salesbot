@@ -133,9 +133,18 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const handleSendMessage = async () => {
         if (!lead || !inputMessage.trim()) return;
 
-        // Optimistically add user message? NO - Rely on Subscription to avoid duplication.
-        // const userMsg: Message = { ... }; 
-        // setMessages(prev => [...prev, userMsg]);
+        // Optimistic UI Update
+        const optimisticId = 'opt-' + Date.now();
+        const optimisticMsg: Message = {
+            id: optimisticId,
+            lead_id: lead.id,
+            content: inputMessage.trim(),
+            sender_type: 'lead',
+            timestamp: new Date().toISOString(),
+            is_otp_verified: false,
+            sentiment_score: 0
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
         setInputMessage('');
 
         setSending(true);

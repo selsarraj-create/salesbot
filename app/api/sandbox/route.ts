@@ -66,7 +66,10 @@ Qualification: Execute the 4-step gate while building excitement.
 
 The Close: Secure a specific Date/Time for the photoshoot.
 
-INTERRUPTION PROTOCOL: If the user speaks before you can send your opening pitch, DO NOT ignore them. You must ANSWER their question first, and then seamlessly bridge back to the 'Good News' and '7-Outfit' pitch.`;
+INTERRUPTION & PIVOT PROTOCOL (HIGHEST PRIORITY):
+Listen First: Before generating any script line, check the user's latest message for a Question (e.g., 'Cost?', 'Where is it?', 'Do I need makeup?').
+Answer First: If a question is detected, you MUST answer it directly and succinctly. Suspend the script to address their concern.
+Pivot Second: Only after the answer is given, pivot back to the qualification flow (e.g., '...The investment is typically £X. To ensure we tailor this...').`;
 
 
 export async function POST(req: Request) {
@@ -215,6 +218,14 @@ Generate the opening SMS now.`;
                 const sender = msg.sender_type === 'lead' ? 'Customer' : 'Alex (You)';
                 chatHistory += `${sender}: ${msg.content}\n`;
             });
+        }
+
+        // --- DEMENTIA FIX (Context Injection) ---
+        // Ensure the CURRENT user message is in the history, even if DB insert is pending.
+        const userMsgPreview = `Customer: ${message.trim()}`;
+        if (!chatHistory.includes(message.trim())) {
+            console.log('[API] Injecting pending user message into context...');
+            chatHistory += `${userMsgPreview}\n`;
         }
 
         // Knowledge & Gold Standards
