@@ -57,10 +57,14 @@ export default function FlightSimulator() {
 
     // Create a temporary lead when starting simulation
     const startSimulation = async () => {
-        if (!selectedScenarioId) {
+        const scenario = scenarios.find(s => s.id === selectedScenarioId);
+        if (!selectedScenarioId || !scenario) {
             alert('Please select a scenario first');
             return;
         }
+
+        const targetName = scenario.lead_name || 'Sim User';
+        const targetAge = String(scenario.lead_age || '25');
 
         try {
             console.log('[FlightSimulator] Starting simulation with scenario:', selectedScenarioId);
@@ -74,11 +78,11 @@ export default function FlightSimulator() {
             const { data: lead, error } = await supabase.from('leads').insert({
                 lead_code: dummyCode,
                 status: 'New',
-                name: simLeadName,
+                name: targetName,
                 phone: dummyPhone,
                 is_test: true,
                 is_manual_mode: false,
-                lead_metadata: { age: simLeadAge } // Store age in metadata
+                lead_metadata: { age: targetAge } // Store age in metadata
             } as any).select().single() as any;
 
             if (error) {
@@ -103,8 +107,8 @@ export default function FlightSimulator() {
                         lead_id: lead.id,
                         action: 'initiate',
                         lead_context: {
-                            name: simLeadName,
-                            age: simLeadAge
+                            name: targetName,
+                            age: targetAge
                         }
                     })
                 });
