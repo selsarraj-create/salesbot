@@ -355,8 +355,8 @@ Generate the next response.
    - STRATEGY: Verify intent -> Collect missing data -> Close.
 2. THEN, write the response string.
 3. Strict 2-sentence limit for SMS.
-`;
-        Respond as Alex: `;
+
+Respond as Alex:`;
 
         const result = await model.generateContent(finalPrompt);
         const responseText = result.response.text().trim();
@@ -416,7 +416,7 @@ Generate the next response.
 
             // 4. Update Memory
             const p4 = (async () => {
-                const memPrompt = `Update memory JSON based on: \nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${ JSON.stringify(contextMemory) } \nReturn ONE JSON object.`;
+                const memPrompt = `Update memory JSON based on: \nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${JSON.stringify(contextMemory)} \nReturn ONE JSON object.`;
                 const memRes = await model.generateContent(memPrompt);
                 const jsonMatch = memRes.response.text().match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
@@ -428,7 +428,7 @@ Generate the next response.
 
             // 5. Lead Scoring
             const p5 = (async () => {
-                const scorePrompt = `Rate Intent(0 - 100) based on: \n"${message}" -> "${responseText}"\nStatus: ${ currentStatus } \nReturn NUMBER only.`;
+                const scorePrompt = `Rate Intent(0 - 100) based on: \n"${message}" -> "${responseText}"\nStatus: ${currentStatus} \nReturn NUMBER only.`;
                 const scoreRes = await model.generateContent(scorePrompt);
                 const score = parseInt(scoreRes.response.text().replace(/\D/g, '')) || 0;
                 await supabase.from('leads').update({ priority_score: score }).eq('id', lead_id);
