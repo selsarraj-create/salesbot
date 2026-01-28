@@ -141,7 +141,6 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             content: inputMessage.trim(),
             sender_type: 'lead',
             timestamp: new Date().toISOString(),
-            is_otp_verified: false,
             sentiment_score: 0
         };
         setMessages(prev => [...prev, optimisticMsg]);
