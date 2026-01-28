@@ -23,8 +23,6 @@ export default function FlightSimulator() {
     const [turnCount, setTurnCount] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [leadId, setLeadId] = useState<string | null>(null);
-    const [simLeadName, setSimLeadName] = useState("James");
-    const [simLeadAge, setSimLeadAge] = useState("25");
 
     // Fetch Scenarios on mount
     // Fetch Scenarios on mount
