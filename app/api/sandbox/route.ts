@@ -460,6 +460,16 @@ Respond as Alex:`;
             // 3. Ethics Scan of Bot Response (Validation)
             // (Existing logic...)
 
+            // --- INSTANTIATE FAST MODEL (NO THINKING) FOR UTILITY TASKS ---
+            const fastModel = genAI.getGenerativeModel({
+                model: "gemini-2.5-flash",
+                generationConfig: {
+                    temperature: 0.1, // Low temp for deterministic JSON/Scoring
+                    topP: 0.95,
+                    maxOutputTokens: 1024
+                }
+            });
+
             // 4. AUTO-JUDGING (Quality Control)
             // Fetch updated chat history for grading
             const { data: updatedHistory } = await supabase
@@ -483,7 +493,7 @@ Respond as Alex:`;
             // 4. Update Memory
             const p4 = (async () => {
                 const memPrompt = `Update memory JSON based on: \nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${JSON.stringify(contextMemory)} \nReturn ONE JSON object.`;
-                const memRes = await model.generateContent(memPrompt);
+                const memRes = await fastModel.generateContent(memPrompt); // Use fastModel
 
                 // ROBUST JSON PARSING
                 const jsonMatch = memRes.response.text().match(/\{[\s\S]*\}/);
@@ -501,7 +511,7 @@ Respond as Alex:`;
             // 5. Lead Scoring
             const p5 = (async () => {
                 const scorePrompt = `Rate Intent(0 - 100) based on: \n"${message}" -> "${responseText}"\nStatus: ${currentStatus} \nReturn NUMBER only.`;
-                const scoreRes = await model.generateContent(scorePrompt);
+                const scoreRes = await fastModel.generateContent(scorePrompt); // Use fastModel
                 const scoreText = scoreRes.response.text().replace(/\D/g, ''); // Strip non-digits
                 const score = parseInt(scoreText) || 0;
                 await supabase.from('leads').update({ priority_score: score }).eq('id', lead_id);
