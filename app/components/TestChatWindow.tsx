@@ -133,15 +133,9 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const handleSendMessage = async () => {
         if (!lead || !inputMessage.trim()) return;
 
-        // Optimistically add user message
-        const userMsg: Message = {
-            id: 'temp-' + Date.now(),
-            lead_id: lead.id,
-            content: inputMessage.trim(),
-            sender_type: 'lead',
-            timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, userMsg]);
+        // Optimistically add user message? NO - Rely on Subscription to avoid duplication.
+        // const userMsg: Message = { ... }; 
+        // setMessages(prev => [...prev, userMsg]);
         setInputMessage('');
 
         setSending(true);
@@ -153,7 +147,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     lead_id: lead.id,
-                    message: userMsg.content,
+                    message: inputMessage.trim(), // Use inputMessage directly
                     simulate_latency: simulateLatency
                 }),
             });
@@ -166,146 +160,145 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             const data = await response.json();
             console.log('Test chat response:', data);
 
-            // Manually add bot response to state
-            if (data.response) {
-                const botMsg: Message = {
-                    id: 'bot-' + Date.now(),
-                    lead_id: lead.id,
-                    content: data.response,
-                    sender_type: 'bot',
-                    timestamp: new Date().toISOString()
-                };
-                setMessages(prev => [...prev, botMsg]);
-            }
+            // Do NOT manually add bot response. 
+            // The API inserts it into DB -> Subscription adds it.
 
         } catch (error: any) {
             console.error('Error sending test message:', error);
             alert(`Error: ${error.message}`);
-            // Remove optimistic message on failure (optional, but good UX)
-            setMessages(prev => prev.filter(m => m.id !== userMsg.id));
         } finally {
             setThinking(false);
             setSending(false);
         }
-    };
 
-    if (!lead) {
-        return (
-            <Card className="h-full bg-surface border-surface-light">
-                <CardContent className="flex items-center justify-center h-full">
-                    <div className="text-center text-text-secondary">
-                        <p className="text-lg font-medium">Select a test lead to start chatting</p>
-                        <p className="text-sm mt-2">Create a test lead using the form on the left</p>
-                    </div>
-                </CardContent>
-            </Card>
-        );
+    } catch (error: any) {
+        console.error('Error sending test message:', error);
+        alert(`Error: ${error.message}`);
+        // Remove optimistic message on failure (optional, but good UX)
+        setMessages(prev => prev.filter(m => m.id !== userMsg.id));
+    } finally {
+        setThinking(false);
+        setSending(false);
     }
+};
 
+if (!lead) {
     return (
-        <Card className="h-full flex flex-col bg-surface border-surface-light">
-            <CardHeader className="border-b border-surface-light">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="flex items-center gap-2 text-text-primary">
-                            {lead.name || lead.phone}
-                            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
-                        </CardTitle>
-                        <CardDescription className="text-text-secondary">
-                            {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
-                        </CardDescription>
-                    </div>
-                    {onDelete && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleDeleteLead}
-                            disabled={deleting}
-                            className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
-                        >
-                            <Trash2 className="h-5 w-5" />
-                        </Button>
-                    )}
+        <Card className="h-full bg-surface border-surface-light">
+            <CardContent className="flex items-center justify-center h-full">
+                <div className="text-center text-text-secondary">
+                    <p className="text-lg font-medium">Select a test lead to start chatting</p>
+                    <p className="text-sm mt-2">Create a test lead using the form on the left</p>
                 </div>
-            </CardHeader>
-
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-text-secondary">
-                        <p>No messages yet. Start the conversation!</p>
-                    </div>
-                ) : (
-                    messages.map((message) => {
-                        const isLead = message.sender_type === 'lead';
-
-                        return (
-                            <div
-                                key={message.id}
-                                className={`flex ${isLead ? 'justify-start' : 'justify-end'}`}
-                            >
-                                <div
-                                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
-                                        ? 'bg-surface/50'
-                                        : 'bg-electric-cyan/10 border-electric-cyan/30'
-                                        }`}
-                                >
-                                    <p className="text-sm text-text-primary">{message.content}</p>
-                                    <p className="text-xs mt-1 text-text-secondary">
-                                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
-                                        {isLead ? 'Lead' : 'Bot'}
-                                    </p>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-
-                {thinking && (
-                    <div className="flex justify-end">
-                        <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect bg-surface/50">
-                            <p className="text-sm text-text-secondary">Thinking...</p>
-                            <div className="flex gap-1 mt-1">
-                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} />
             </CardContent>
-
-            <div className="border-t border-surface-light p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                    <Switch
-                        checked={simulateLatency}
-                        onCheckedChange={setSimulateLatency}
-                        id="latency-toggle"
-                    />
-                    <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
-                        Simulate SMS Latency (1-3s delay)
-                    </label>
-                </div>
-
-                <div className="flex gap-2">
-                    <Input
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
-                        placeholder="Type your message..."
-                        disabled={sending}
-                        className="bg-charcoal border-surface-light text-text-primary"
-                    />
-                    <Button
-                        onClick={handleSendMessage}
-                        disabled={sending || !inputMessage.trim()}
-                        className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
-                    >
-                        {sending ? 'Sending...' : 'Send'}
-                    </Button>
-                </div>
-            </div>
         </Card>
     );
+}
+
+return (
+    <Card className="h-full flex flex-col bg-surface border-surface-light">
+        <CardHeader className="border-b border-surface-light">
+            <div className="flex items-center justify-between">
+                <div>
+                    <CardTitle className="flex items-center gap-2 text-text-primary">
+                        {lead.name || lead.phone}
+                        <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
+                    </CardTitle>
+                    <CardDescription className="text-text-secondary">
+                        {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
+                    </CardDescription>
+                </div>
+                {onDelete && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleDeleteLead}
+                        disabled={deleting}
+                        className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
+                    >
+                        <Trash2 className="h-5 w-5" />
+                    </Button>
+                )}
+            </div>
+        </CardHeader>
+
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-text-secondary">
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+            ) : (
+                messages.map((message) => {
+                    const isLead = message.sender_type === 'lead';
+
+                    return (
+                        <div
+                            key={message.id}
+                            className={`flex ${isLead ? 'justify-start' : 'justify-end'}`}
+                        >
+                            <div
+                                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
+                                    ? 'bg-surface/50'
+                                    : 'bg-electric-cyan/10 border-electric-cyan/30'
+                                    }`}
+                            >
+                                <p className="text-sm text-text-primary">{message.content}</p>
+                                <p className="text-xs mt-1 text-text-secondary">
+                                    {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
+                                    {isLead ? 'Lead' : 'Bot'}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })
+            )}
+
+            {thinking && (
+                <div className="flex justify-end">
+                    <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect bg-surface/50">
+                        <p className="text-sm text-text-secondary">Thinking...</p>
+                        <div className="flex gap-1 mt-1">
+                            <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div ref={messagesEndRef} />
+        </CardContent>
+
+        <div className="border-t border-surface-light p-4 space-y-3">
+            <div className="flex items-center gap-2">
+                <Switch
+                    checked={simulateLatency}
+                    onCheckedChange={setSimulateLatency}
+                    id="latency-toggle"
+                />
+                <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
+                    Simulate SMS Latency (1-3s delay)
+                </label>
+            </div>
+
+            <div className="flex gap-2">
+                <Input
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
+                    placeholder="Type your message..."
+                    disabled={sending}
+                    className="bg-charcoal border-surface-light text-text-primary"
+                />
+                <Button
+                    onClick={handleSendMessage}
+                    disabled={sending || !inputMessage.trim()}
+                    className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
+                >
+                    {sending ? 'Sending...' : 'Send'}
+                </Button>
+            </div>
+        </div>
+    </Card>
+);
 }
