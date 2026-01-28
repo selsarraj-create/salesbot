@@ -381,7 +381,22 @@ Generate the next response.
 Respond as Alex:`;
 
         const result = await model.generateContent(finalPrompt);
-        const responseText = result.response.text().trim();
+        let responseText = result.response.text();
+
+        // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
+        // Often Gemini Thinking is in text, sometimes in metadata. 
+        // If the model manually outputted a thinking block like:
+        // "Thoughts: ... \n\n Response: ..."
+        // We attempt to clean it.
+        const thoughtMatch = responseText.match(/Thoughts?:[\s\S]*?\n\n/i); // Naive removal if visible
+        let thoughtContent = "";
+
+        // BETTER: Retrieve thought from candidate metadata if available (Official Gemini 2.0 way)
+        // @ts-ignore 
+        if (result.response.candidates?.[0]?.content?.parts?.[0]?.thought) {
+            // @ts-ignore
+            thoughtContent = result.response.candidates[0].content.parts[0].thought;
+        }
 
         // --- POST-GENERATION CHECKS ---
         // 1. Check for Graceful Exit Phrase
@@ -406,11 +421,12 @@ Respond as Alex:`;
                 sentiment_label: sentimentScore > 0.3 ? 'Positive' : (sentimentScore < -0.3 ? 'Negative' : 'Neutral')
             });
 
-            // 2. Save Bot Message
+            // 2. Save Bot Message (Include thought_content if enabled)
             const p2 = supabase.from('messages').insert({
                 lead_id,
-                content: responseText,
-                sender_type: 'bot'
+                content: responseText.trim(),
+                sender_type: 'bot',
+                thought_content: thoughtContent || null // Save if present
             });
 
             // 3. Ethics Scan of Bot Response (Validation)
@@ -440,11 +456,17 @@ Respond as Alex:`;
             const p4 = (async () => {
                 const memPrompt = `Update memory JSON based on: \nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${JSON.stringify(contextMemory)} \nReturn ONE JSON object.`;
                 const memRes = await model.generateContent(memPrompt);
+
+                // ROBUST JSON PARSING
                 const jsonMatch = memRes.response.text().match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
-                    const newMem = JSON.parse(jsonMatch[0]);
-                    newMem.guarantee_asks = guaranteeCounter;
-                    await supabase.from('leads').update({ context_memory: newMem }).eq('id', lead_id);
+                    try {
+                        const newMem = JSON.parse(jsonMatch[0]);
+                        newMem.guarantee_asks = guaranteeCounter;
+                        await supabase.from('leads').update({ context_memory: newMem }).eq('id', lead_id);
+                    } catch (e) {
+                        console.error('[Memory Update] JSON Parse Error:', e);
+                    }
                 }
             })();
 
@@ -452,7 +474,8 @@ Respond as Alex:`;
             const p5 = (async () => {
                 const scorePrompt = `Rate Intent(0 - 100) based on: \n"${message}" -> "${responseText}"\nStatus: ${currentStatus} \nReturn NUMBER only.`;
                 const scoreRes = await model.generateContent(scorePrompt);
-                const score = parseInt(scoreRes.response.text().replace(/\D/g, '')) || 0;
+                const scoreText = scoreRes.response.text().replace(/\D/g, ''); // Strip non-digits
+                const score = parseInt(scoreText) || 0;
                 await supabase.from('leads').update({ priority_score: score }).eq('id', lead_id);
             })();
 
@@ -462,11 +485,12 @@ Respond as Alex:`;
 
         return NextResponse.json({
             success: true,
-            response: responseText,
+            response: responseText.trim(),
             status: currentStatus,
             analysis: {
                 sentiment: sentimentScore
-            }
+            },
+            thought: thoughtContent
         });
 
     } catch (error: any) {

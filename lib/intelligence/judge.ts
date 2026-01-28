@@ -67,10 +67,10 @@ OUTPUT FORMAT (JSON ONLY):
             } as any
         });
         const result = await model.generateContent(`${JUDGE_PROMPT}\n\nTRANSCRIPT:\n${conversationText}`);
-        let jsonStr = result.response.text();
-
-        jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        const scores = JSON.parse(jsonStr);
+        // Helper to extract JSON
+        const jsonMatch = result.response.text().match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("No JSON found in response");
+        const scores = JSON.parse(jsonMatch[0]);
 
         // 4. Save to DB if lead_id provided
         if (lead_id) {
