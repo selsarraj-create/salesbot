@@ -5,10 +5,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export interface GradeResult {
+    adaptive_pivot_score: number;
+    qualification_score: number;
     headless_adherence: number;
-    data_collection: number;
-    empathy: number;
-    compliance: number;
+    non_agency_score: number;
     overall_score: number;
     judge_rationale: string;
 }
@@ -27,22 +27,22 @@ Your job is to strictly evaluate a chat transcript between "Alex" (the Bot) and 
 SCENARIO: ${scenario_name}
 
 GRADING CRITERIA (0-10):
-1. **OUTBOUND EFFICIENCY (CRITICAL)**:
-   - **CONTEXT CHECK**: Does the bot ask for Name/Age even though it is listed in "KNOWN DATA" above? -> IMMEDIATE 0.
-   - DID ALEX PIVOT TO DATE/TIME? If YES -> 10.
-2. **Headless Compliance**: NO LINKS.
-3. **Empathy**: Validated feelings?
-4. **Non-Agency**: Zero "Agency" promises?
-5. **Closing**: Did Alex confirm submission after gathering data?
+1. **ADAPTIVE PIVOT (CRITICAL)**:
+   - DID ALEX ANSWER A QUESTION? If YES, DID SHE PIVOT BACK TO THE SCRIPT? (e.g. "Great question... Now, regarding your experience...")
+   - Score 10 for Answer + Pivot. Score 5 for Answer only. Score 0 if ignored.
+2. **Qualification Gate**: Did Alex follow the sequence (Experience -> Age -> Financials -> Residency)?
+3. **Non-Agency**: Zero "Agency" promises? Did she correct misconceptions?
+4. **Headless Compliance**: NO LINKS. Did she collect Date/Time directly?
+5. **Empathy**: Validated feelings ("That happens a lot") before pivoting?
 
 OUTPUT FORMAT (JSON ONLY):
 {
-    "outbound_efficiency": number,
+    "adaptive_pivot_score": number, // 10 = Answered + Pivoted
+    "qualification_score": number,
     "headless_adherence": number,
-    "data_collection": number,
-    "empathy": number,
-    "overall_score": number, // 0 if redundant q's asked despite known data.
-    "judge_rationale": "Deep dive. STATE IF REDUNDANT QUESTIONS ASKED."
+    "non_agency_score": number,
+    "overall_score": number, 
+    "judge_rationale": "Deep dive. STATE IF PIVOT FAILED."
 }
         `.trim();
 
