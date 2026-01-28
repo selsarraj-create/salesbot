@@ -295,7 +295,7 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                                 <Input
                                                     value={editText}
                                                     onChange={(e) => setEditText(e.target.value)}
-                                                    className="bg-black/20 border-surface-light h-8"
+                                                    className="bg-black/20 border-surface-light h-8 text-text-primary"
                                                     autoFocus
                                                 />
                                                 <Button size="sm" variant="ghost" onClick={() => saveRule(rule.id)} className="h-8 w-8 p-0 text-green-400">
