@@ -83,21 +83,16 @@ export async function POST(req: Request) {
             const { name, age } = lead_context || {};
             console.log('[API] Initiating Outbound Conversation...', { name, age });
 
-            // Dynamic AI Opener Generation
+            // Dynamic AI Opener Generation (System Wake-Up Event)
             const openerPrompt = `
 ${SALES_PERSONA_PROMPT}
 
-CONTEXT: This is the very first outbound message to a new applicant.
-Name: ${name || 'Lead'}
-Age: ${age || 'Unknown'}
+SYSTEM EVENT:
+Role: System
+Content: "New Lead Connected: ${name || 'Lead'}, Age ${age || 'Unknown'}. The user has not spoken yet. You must initiate the conversation now using the 'Good News' opening from ALEXSCRIPT.PDF."
 
-GOAL: Write a short, warm, professional SMS opening message (max 2 sentences).
-- Acknowledge their application.
-- Validate their look ("Great age for portfolios").
-- Ask for a booking day.
-- NO LINKS.
-
-Generate Opener:`;
+INSTRUCTION:
+Generate the opening SMS now.`;
 
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(openerPrompt);
