@@ -73,12 +73,19 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         console.log('Initiating outbound conversation for lead:', leadId);
         setThinking(true);
         try {
+            // Extract metadata safely
+            const meta = (lead?.lead_metadata as any) || {};
+
             const res = await fetch('/api/sandbox', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     lead_id: leadId,
-                    action: 'initiate'
+                    action: 'initiate',
+                    lead_context: {
+                        name: lead?.name,
+                        age: meta.age || '22'
+                    }
                 })
             });
 

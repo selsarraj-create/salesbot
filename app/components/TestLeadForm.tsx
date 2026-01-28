@@ -10,6 +10,7 @@ import type { Database } from '@/lib/supabase/types';
 export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => void }) {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
+    const [age, setAge] = useState(''); // New State
     const [leadCode, setLeadCode] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -37,7 +38,8 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
                 lead_code: finalLeadCode,
                 status: 'New',
                 is_manual_mode: false,
-                is_test: true
+                is_test: true,
+                lead_metadata: { age: age || '22' } // Store Age in metadata
             };
 
             const { data, error } = await supabase
@@ -51,6 +53,7 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
             setName('');
             setPhone('');
             setLeadCode('');
+            setAge('');
 
             if (onLeadCreated) onLeadCreated();
 
@@ -107,6 +110,19 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
                         <p className="text-xs text-text-secondary mt-1">
                             Auto-increments if left empty
                         </p>
+                        <p className="text-xs text-text-secondary mt-1">
+                            Auto-increments if left empty
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-medium text-text-primary">Age (optional)</label>
+                        <Input
+                            value={age}
+                            onChange={(e) => setAge(e.target.value)}
+                            placeholder="21"
+                            className="bg-charcoal border-surface-light text-text-primary"
+                        />
                     </div>
 
                     <Button type="submit" disabled={loading} className="w-full bg-electric-cyan text-charcoal hover:bg-electric-cyan/90">

@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Play, Pause, RefreshCw, Zap } from 'lucide-react';
@@ -246,20 +245,6 @@ export default function FlightSimulator() {
                             <Zap className="text-yellow-400" />
                             Flight Simulator
                         </CardTitle>
-                        <div className="flex items-center gap-2">
-                            <Input
-                                placeholder="Lead Name"
-                                value={simLeadName}
-                                onChange={(e) => setSimLeadName(e.target.value)}
-                                className="w-[120px] bg-background border-surface-light text-text-primary"
-                            />
-                            <Input
-                                placeholder="Age"
-                                value={simLeadAge}
-                                onChange={(e) => setSimLeadAge(e.target.value)}
-                                className="w-[60px] bg-background border-surface-light text-text-primary"
-                            />
-                        </div>
                         <Select onValueChange={setSelectedScenarioId} disabled={isRunning}>
                             <SelectTrigger className="w-[250px] bg-background border-surface-light text-text-primary">
                                 <SelectValue placeholder="Select Scenario" />
