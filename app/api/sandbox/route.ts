@@ -96,15 +96,31 @@ export async function POST(req: Request) {
                 initialMessage = "Hi! I was looking over your inquiry for the photoshoot. I'd love to get that booked in for you—did you have a specific day in mind?";
             }
 
-            const { data: lead } = await supabase.from('leads').select('*').eq('id', lead_id).single();
+            console.log('[API] Script selected:', initialMessage.substring(0, 20) + '...');
+
+            console.log('[API] Fetching lead...', lead_id);
+            const { data: lead, error: leadError } = await supabase.from('leads').select('*').eq('id', lead_id).single();
+
+            if (leadError) {
+                console.error('[API] Lead Fetch Error:', leadError);
+                return NextResponse.json({ error: leadError.message }, { status: 500 });
+            }
             if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+            console.log('[API] Lead found:', lead.id);
 
             // Save Initial Bot Message
-            await supabase.from('messages').insert({
+            console.log('[API] Saving initial message...');
+            const { error: msgError } = await supabase.from('messages').insert({
                 lead_id,
                 content: initialMessage,
                 sender_type: 'bot'
             });
+
+            if (msgError) {
+                console.error('[API] Message Insert Error:', msgError);
+                return NextResponse.json({ error: msgError.message }, { status: 500 });
+            }
+            console.log('[API] Message saved. Returning response.');
 
             return NextResponse.json({
                 response: initialMessage,
