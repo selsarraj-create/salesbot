@@ -55,6 +55,8 @@ export interface SimulatedScenario {
     lead_persona: string;
     target_outcome?: string;
     difficulty_level: string;
+    lead_name?: string;
+    lead_age?: number;
 }
 
 export interface KnowledgeVector {
