@@ -414,6 +414,12 @@ Respond as Alex:`;
             thoughtContent = result.response.candidates[0].content.parts[0].thought;
         }
 
+        // Clean responseText if thought was matched in text (Naive fallback)
+        if (thoughtMatch) {
+            thoughtContent = thoughtContent || thoughtMatch[0].replace('Thoughts:', '').replace('Thoughts', '').trim();
+            responseText = responseText.replace(thoughtMatch[0], "").trim();
+        }
+
         // --- POST-GENERATION CHECKS ---
         // 1. Check for Graceful Exit Phrase
         const EXIT_PHRASE_SNIPPET = "email you the details so you have them in writing";
