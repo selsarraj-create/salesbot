@@ -31,6 +31,7 @@ export interface Message {
     content: string;
     sender_type: 'lead' | 'bot';
     review_status?: 'pending' | 'approved' | 'gold' | 'corrected' | 'skipped';
+    thought_content?: string;
 }
 
 export interface TrainingFeedback {
