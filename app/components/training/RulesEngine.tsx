@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { ShieldAlert, Plus, Trash2, Lock, Save, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Plus, Trash2, Lock, Save, RefreshCw, Edit, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SystemRule {
@@ -22,6 +22,8 @@ export default function RulesEngine() {
     const [loading, setLoading] = useState(true);
     const [newRule, setNewRule] = useState('');
     const [newCategory, setNewCategory] = useState<'behavior' | 'constraint'>('behavior');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editText, setEditText] = useState('');
 
     useEffect(() => {
         fetchRules();
@@ -96,6 +98,37 @@ export default function RulesEngine() {
             toast.success('Rule deleted');
         } catch (error: any) {
             toast.error(error.message);
+        }
+    };
+
+    const startEditing = (rule: SystemRule) => {
+        if (rule.is_locked) {
+            toast.error("Cannot edit locked rules.");
+            return;
+        }
+        setEditingId(rule.id);
+        setEditText(rule.rule_text);
+    };
+
+    const cancelEditing = () => {
+        setEditingId(null);
+        setEditText('');
+    };
+
+    const saveRule = async (id: string) => {
+        try {
+            const res = await fetch('/api/training/rules', {
+                method: 'PATCH',
+                body: JSON.stringify({ id, rule_text: editText })
+            });
+            const data = await res.json();
+            if (data.rule) {
+                setRules(prev => prev.map(r => r.id === id ? data.rule : r));
+                toast.success('Rule updated');
+                cancelEditing();
+            }
+        } catch (error) {
+            toast.error('Failed to update rule');
         }
     };
 
@@ -256,9 +289,27 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                         >
                                             {rule.category}
                                         </Badge>
-                                        <p className="text-text-primary text-sm font-medium line-clamp-2 leading-snug">
-                                            {rule.rule_text}
-                                        </p>
+
+                                        {editingId === rule.id ? (
+                                            <div className="flex items-center gap-2 flex-1">
+                                                <Input
+                                                    value={editText}
+                                                    onChange={(e) => setEditText(e.target.value)}
+                                                    className="bg-black/20 border-surface-light h-8"
+                                                    autoFocus
+                                                />
+                                                <Button size="sm" variant="ghost" onClick={() => saveRule(rule.id)} className="h-8 w-8 p-0 text-green-400">
+                                                    <Check className="w-4 h-4" />
+                                                </Button>
+                                                <Button size="sm" variant="ghost" onClick={cancelEditing} className="h-8 w-8 p-0 text-gray-400">
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <p className="text-text-primary text-sm font-medium line-clamp-2 leading-snug">
+                                                {rule.rule_text}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="flex items-center gap-2 pl-2">
@@ -276,8 +327,18 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
+                                                    className="text-text-tertiary hover:text-electric-cyan p-2 h-auto"
+                                                    onClick={() => startEditing(rule)}
+                                                    disabled={!!editingId} // Disable other edits while one is active
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
                                                     className="text-text-tertiary hover:text-red-400 p-2 h-auto"
                                                     onClick={() => deleteRule(rule.id)}
+                                                    disabled={!!editingId}
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </Button>

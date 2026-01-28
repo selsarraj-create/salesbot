@@ -92,13 +92,24 @@ export async function DELETE(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
-        const { id, is_active } = await req.json();
+        const { id, is_active, rule_text } = await req.json();
 
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
+        const updates: any = {};
+        if (typeof is_active === 'boolean') updates.is_active = is_active;
+
+        if (rule_text) {
+            updates.rule_text = rule_text;
+            // Re-check safety status if text changes
+            updates.is_locked = SAFETY_KEYWORDS.some(keyword =>
+                rule_text.toLowerCase().includes(keyword)
+            );
+        }
+
         const { data, error } = await supabase
             .from('system_rules')
-            .update({ is_active })
+            .update(updates)
             .eq('id', id)
             .select()
             .single();
