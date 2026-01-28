@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { generateEmbedding } from '@/lib/utils/ai';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -129,9 +130,7 @@ export async function POST(req: Request) {
 
         // Generate embedding
         console.log('[Upload API] Generating embedding...');
-        const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
-        const embeddingResult = await embeddingModel.embedContent(content);
-        const embedding = embeddingResult.embedding.values;
+        const embedding = await generateEmbedding(content);
 
         console.log('[Upload API] Embedding generated, dimensions:', embedding.length);
 
