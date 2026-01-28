@@ -31,7 +31,7 @@ Message: "${text}"`);
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
     try {
-        const model = genAI.getGenerativeModel({ model: 'text-embedding-004' }, { apiVersion: 'v1' });
+        const model = genAI.getGenerativeModel({ model: 'embedding-001' }, { apiVersion: 'v1' });
         const result = await model.embedContent(text);
         return result.embedding.values;
     } catch (error) {
