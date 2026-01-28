@@ -31,6 +31,10 @@ BEGIN
 END $$;
 
 -- 3. Update Matching Functions (Safe Replace)
+-- DROP first to allow return type change
+DROP FUNCTION IF EXISTS match_knowledge_vectors(vector, float, int, text);
+DROP FUNCTION IF EXISTS match_gold_standards(vector, float, int);
+
 CREATE OR REPLACE FUNCTION match_knowledge_vectors(
   query_embedding vector(3072),
   match_threshold float,
