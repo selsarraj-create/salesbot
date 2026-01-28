@@ -219,8 +219,8 @@ export default function ReviewQueue() {
                                             <Badge
                                                 variant="outline"
                                                 className={`font-mono ${(item.manual_score ?? item.quality_score ?? 0) < 6 ? 'border-red-500 text-red-500 bg-red-500/10' :
-                                                        (item.manual_score ?? item.quality_score ?? 0) < 8 ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' :
-                                                            'border-green-500 text-green-500 bg-green-500/10'
+                                                    (item.manual_score ?? item.quality_score ?? 0) < 8 ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' :
+                                                        'border-green-500 text-green-500 bg-green-500/10'
                                                     }`}
                                             >
                                                 Score: {item.manual_score ?? item.quality_score}/10 {item.manual_score && '👑'}
@@ -260,7 +260,7 @@ export default function ReviewQueue() {
                                                     <span className="group-open:rotate-90 transition-transform">▶</span>
                                                     <span>Reasoning Chain (Thinking Process)</span>
                                                 </summary>
-                                                <div className="mt-2 text-xs text-text-secondary font-mono bg-black/20 p-3 rounded overflow-x-auto whitespace-pre-wrap">
+                                                <div className="mt-2 text-xs text-blue-300 font-mono bg-black/20 p-3 rounded overflow-x-auto whitespace-pre-wrap">
                                                     {item.thought_content}
                                                 </div>
                                             </details>
