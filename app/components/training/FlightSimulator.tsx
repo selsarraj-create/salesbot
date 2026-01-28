@@ -311,53 +311,37 @@ export default function FlightSimulator() {
                         })()}
                     </div>
                 )}
-            </div>
-            <div className="flex gap-2">
-                {!isRunning ? (
-                    <Button onClick={startSimulation} disabled={!selectedScenarioId} className="bg-green-600 hover:bg-green-700 text-white">
-                        <Play className="w-4 h-4 mr-2" /> Start Test
-                    </Button>
-                ) : (
-                    <Button onClick={() => setIsRunning(false)} variant="destructive">
-                        <Pause className="w-4 h-4 mr-2" /> Pause
-                    </Button>
-                )}
-                <Button variant="outline" onClick={() => { setIsRunning(false); setMessages([]); }} className="border-surface-light">
-                    <RefreshCw className="w-4 h-4" />
-                </Button>
-            </div>
-        </div>
-            </CardHeader >
-        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.length === 0 && (
-                <div className="text-center text-text-secondary mt-20">
-                    <p>Select a scenario and press Start to launch the AI vs AI battle.</p>
-                </div>
-            )}
-            {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
-                        ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
-                        : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                        }`}>
-                        <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
-                        {msg.content}
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.length === 0 && (
+                    <div className="text-center text-text-secondary mt-20">
+                        <p>Select a scenario and press Start to launch the AI vs AI battle.</p>
                     </div>
-                </div>
-            ))}
-            <div ref={messagesEndRef} />
-        </CardContent>
+                )}
+                {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
+                            ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
+                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                            }`}>
+                            <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
+                            {msg.content}
+                        </div>
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </CardContent>
 
-    {/* Grade Controls */ }
-    {
-        turnCount > 2 && !isRunning && (
-            <div className="p-4 border-t border-surface-light bg-surface/50">
-                <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
-                    👨‍⚖️ Grade Performance (The Judge)
-                </Button>
-            </div>
-        )
-    }
+            {/* Grade Controls */}
+            {
+                turnCount > 2 && !isRunning && (
+                    <div className="p-4 border-t border-surface-light bg-surface/50">
+                        <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
+                            👨‍⚖️ Grade Performance (The Judge)
+                        </Button>
+                    </div>
+                )
+            }
         </Card >
     );
 
