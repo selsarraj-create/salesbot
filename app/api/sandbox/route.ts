@@ -388,10 +388,11 @@ ${chatHistory}
 
 INSTRUCTION:
 Generate the next response.
-1. FIRST, formulate a "Thought Process" (internal monologue) in 2-3 sentences.
+1. FIRST, formulate a "Thought Process" (internal monologue).
+   - WRAP THIS IN DELIMITERS: [[[THOUGHT]]] ... [[[END_THOUGHT]]]
    - CHECK: Do I already have the Name/Age? If YES, skip to Date/Time.
-   - STRATEGY: Verify intent -> Collect missing data -> Close.
-2. THEN, write the response string.
+   - CRITICAL: If the user asked a question (e.g. location, price), ANSWER IT FIRST before pivoting.
+2. THEN, write the response string (the SMS sent to the user).
 3. Strict 2-sentence limit for SMS.
 
 Respond as Alex:`;
@@ -400,11 +401,8 @@ Respond as Alex:`;
         let responseText = result.response.text();
 
         // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
-        // Often Gemini Thinking is in text, sometimes in metadata. 
-        // If the model manually outputted a thinking block like:
-        // "Thoughts: ... \n\n Response: ..."
-        // We attempt to clean it.
-        const thoughtMatch = responseText.match(/Thoughts?:[\s\S]*?\n\n/i); // Naive removal if visible
+        const thoughtBlockRegex = /\[\[\[THOUGHT\]\]\]([\s\S]*?)\[\[\[END_THOUGHT\]\]\]/;
+        const thoughtMatch = responseText.match(thoughtBlockRegex);
         let thoughtContent = "";
 
         // BETTER: Retrieve thought from candidate metadata if available (Official Gemini 2.0 way)
@@ -414,10 +412,18 @@ Respond as Alex:`;
             thoughtContent = result.response.candidates[0].content.parts[0].thought;
         }
 
-        // Clean responseText if thought was matched in text (Naive fallback)
+        // Clean responseText if thought was matched in text (Delimiter Fallback)
         if (thoughtMatch) {
-            thoughtContent = thoughtContent || thoughtMatch[0].replace('Thoughts:', '').replace('Thoughts', '').trim();
+            // Capture group 1 is the inner content
+            thoughtContent = thoughtContent || thoughtMatch[1].trim();
             responseText = responseText.replace(thoughtMatch[0], "").trim();
+        } else {
+            // Fallback for legacy/loose "Thoughts:" format if delimiters missed (safety net)
+            const looseMatch = responseText.match(/Thoughts?:[\s\S]*?\n\n/i);
+            if (looseMatch && !thoughtContent) {
+                responseText = responseText.replace(looseMatch[0], "").trim();
+                thoughtContent = looseMatch[0].trim();
+            }
         }
 
         // --- POST-GENERATION CHECKS ---
