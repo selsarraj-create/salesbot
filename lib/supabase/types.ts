@@ -12,6 +12,7 @@ export interface Lead {
     shoot_date?: string;
     last_contacted_at?: string;
     follow_up_count?: number;
+    lead_metadata?: any; // e.g. { age: '25', name: 'Sarah' }
 }
 
 export type LeadStatus =
