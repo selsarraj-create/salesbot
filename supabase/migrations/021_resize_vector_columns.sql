@@ -2,15 +2,29 @@
 -- Upgrade vector dimensions to 3072 to match gemini-embedding-001 output
 -- Note: We must TRUNCATE existing data as dimensions cannot be cast automatically
 
--- 1. Handle knowledge_vectors (Critical)
-TRUNCATE TABLE knowledge_vectors;
-ALTER TABLE knowledge_vectors 
-ALTER COLUMN embedding TYPE vector(3072);
+-- 1. Critical Update: Drop ALL potential indexes
+DROP INDEX IF EXISTS knowledge_vectors_embedding_idx;      -- IVFFlat
+DROP INDEX IF EXISTS knowledge_vectors_embedding_hnsw_idx; -- HNSW (The likely culprit)
+DROP INDEX IF EXISTS training_feedback_embedding_idx;      -- IVFFlat
+DROP INDEX IF EXISTS training_feedback_embedding_hnsw_idx; -- HNSW
 
--- 2. Handle gold_standards (Optional / If Exists)
+TRUNCATE TABLE knowledge_vectors;
+ALTER TABLE knowledge_vectors ALTER COLUMN embedding TYPE vector(3072);
+
+-- Also resize training_feedback if it exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'training_feedback' AND column_name = 'embedding') THEN
+        TRUNCATE TABLE training_feedback;
+        ALTER TABLE training_feedback ALTER COLUMN embedding TYPE vector(3072);
+    END IF;
+END $$;
+
+-- 2. Optional Update (Safe Check)
 DO $$
 BEGIN
     IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'gold_standards') THEN
+        DROP INDEX IF EXISTS gold_standards_embedding_idx;
         TRUNCATE TABLE gold_standards;
         ALTER TABLE gold_standards ALTER COLUMN embedding TYPE vector(3072);
     END IF;
