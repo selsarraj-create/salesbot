@@ -392,8 +392,9 @@ Generate the next response.
    - WRAP THIS IN DELIMITERS: [[[THOUGHT]]] ... [[[END_THOUGHT]]]
    - CHECK: Do I already have the Name/Age? If YES, skip to Date/Time.
    - CRITICAL: If the user asked a question (e.g. location, price), ANSWER IT FIRST before pivoting.
-2. THEN, write the response string (the SMS sent to the user).
-3. Strict 2-sentence limit for SMS.
+2. THEN, write the Final SMS Response.
+   - WRAP THIS IN DELIMITERS: [[[RESPONSE]]] ... [[[END_RESPONSE]]]
+   - Strict 2-sentence limit for SMS.
 
 Respond as Alex:`;
 
@@ -401,28 +402,45 @@ Respond as Alex:`;
         let responseText = result.response.text();
 
         // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
-        const thoughtBlockRegex = /\[\[\[THOUGHT\]\]\]([\s\S]*?)\[\[\[END_THOUGHT\]\]\]/;
-        const thoughtMatch = responseText.match(thoughtBlockRegex);
+        const thoughtRegex = /\[\[\[THOUGHT\]\]\]([\s\S]*?)\[\[\[END_THOUGHT\]\]\]/i;
+        const responseRegex = /\[\[\[RESPONSE\]\]\]([\s\S]*?)\[\[\[END_RESPONSE\]\]\]/i;
+
+        const thoughtMatch = responseText.match(thoughtRegex);
+        const responseMatch = responseText.match(responseRegex);
+
         let thoughtContent = "";
 
-        // BETTER: Retrieve thought from candidate metadata if available (Official Gemini 2.0 way)
-        // @ts-ignore 
+        // 1. Extract Thought
+        // @ts-ignore hiding official property check for brevity
         if (result.response.candidates?.[0]?.content?.parts?.[0]?.thought) {
             // @ts-ignore
             thoughtContent = result.response.candidates[0].content.parts[0].thought;
+        } else if (thoughtMatch) {
+            thoughtContent = thoughtMatch[1].trim();
         }
 
-        // Clean responseText if thought was matched in text (Delimiter Fallback)
-        if (thoughtMatch) {
-            // Capture group 1 is the inner content
-            thoughtContent = thoughtContent || thoughtMatch[1].trim();
-            responseText = responseText.replace(thoughtMatch[0], "").trim();
-        } else {
-            // Fallback for legacy/loose "Thoughts:" format if delimiters missed (safety net)
+        // 2. Extract Response (Prioritize Explicit Tags)
+        if (responseMatch) {
+            responseText = responseMatch[1].trim();
+        } else if (thoughtMatch) {
+            // Fallback: If no response tags, take everything AFTER the thought block
+            // This handles cases where model forgets [[[RESPONSE]]] tags but faithfully used [[[THOUGHT]]]
+            const textAfterThought = responseText.split(thoughtMatch[0])[1];
+            if (textAfterThought && textAfterThought.trim().length > 0) {
+                responseText = textAfterThought.trim();
+            } else {
+                // Fatal: Model outputted thoughts but NO response text
+                console.warn('Model outputted thoughts but no response text.');
+                // responseText = "..."; // Let it fall through, might be legacy format
+            }
+        }
+
+        // 3. Last Result Fallback (Legacy/Loose "Thoughts:" format)
+        if (!responseMatch && !thoughtMatch) {
             const looseMatch = responseText.match(/Thoughts?:[\s\S]*?\n\n/i);
-            if (looseMatch && !thoughtContent) {
-                responseText = responseText.replace(looseMatch[0], "").trim();
+            if (looseMatch) {
                 thoughtContent = looseMatch[0].trim();
+                responseText = responseText.replace(looseMatch[0], "").trim();
             }
         }
 
