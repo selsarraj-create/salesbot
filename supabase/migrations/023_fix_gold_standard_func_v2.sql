@@ -1,6 +1,10 @@
 -- Fix match_gold_standards to correctly use training_feedback table
 -- and handle the vector(3072) size from migration 021/022
 
+-- Drop old signatures first to allow return type change
+DROP FUNCTION IF EXISTS match_gold_standards(vector, float, int);
+DROP FUNCTION IF EXISTS match_gold_standards(vector, float, int, text);
+
 CREATE OR REPLACE FUNCTION match_gold_standards(
   query_embedding vector(3072),
   match_threshold float DEFAULT 0.7,
