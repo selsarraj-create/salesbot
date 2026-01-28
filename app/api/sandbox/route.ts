@@ -315,37 +315,50 @@ export async function POST(req: Request) {
                 thinking_config: thinkingConfig
             } as any
         });
-        const prompt = `${SALES_PERSONA_PROMPT}
+        // Context Injection logic
+        const { name: contextName, age: contextAge } = lead.lead_metadata || {};
+        const knownContext = [];
+        if (lead.name || contextName) knownContext.push(`Name: ${lead.name || contextName} (COMPLETED)`);
+        if (contextAge) knownContext.push(`Age: ${contextAge} (COMPLETED)`);
 
-CUSTOM SYSTEM RULES:
-${dynamicBehaviors}
-${dynamicConstraints}
+        const contextString = knownContext.length > 0
+            ? `\nKNOWN DATA (DO NOT ASK):\n- ${knownContext.join('\n- ')}\n`
+            : "";
+
+        const finalPrompt = `
+${SALES_PERSONA_PROMPT}
 
 CUSTOMER CONTEXT:
 Name: ${leadName}
-Age: ${lead?.lead_metadata?.age || 'Unknown'} (IF KNOWN, DO NOT ASK AGAIN)
 Status: ${currentStatus}
-Memory: ${JSON.stringify(contextMemory)}
+Interest: ${lead.lead_code?.includes('KIDS') ? 'Child Modeling' : 'Commercial Modeling'}
+${contextString}
 
-${chatHistory}
-${knowledgeContext}
-${goldStandardContext}
+${dynamicBehaviors}
+${dynamicConstraints}
 
 ${localGuideInstruction}
 ${agencyCorrectionInstruction}
 ${ethicsContext}
+
+${knowledgeContext}
+${goldStandardContext}
 ${prepContext}
 
-Customer's Last Message: "${message}"
+CHAT HISTORY:
+${chatHistory}
 
 INSTRUCTION:
-1. CHECK MEMORY: Reference goals.
-2. FORMULA: Acknowledge -> Value -> Discovery Question
-3. SHORT: Under 160 chars.
+Generate the next response.
+1. FIRST, formulate a "Thought Process" (internal monologue) in 2-3 sentences.
+   - CHECK: Do I already have the Name/Age? If YES, skip to Date/Time.
+   - STRATEGY: Verify intent -> Collect missing data -> Close.
+2. THEN, write the response string.
+3. Strict 2-sentence limit for SMS.
+`;
+        Respond as Alex: `;
 
-Respond as Alex:`;
-
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent(finalPrompt);
         const responseText = result.response.text().trim();
 
         // --- POST-GENERATION CHECKS ---
@@ -403,7 +416,7 @@ Respond as Alex:`;
 
             // 4. Update Memory
             const p4 = (async () => {
-                const memPrompt = `Update memory JSON based on:\nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${JSON.stringify(contextMemory)}\nReturn ONE JSON object.`;
+                const memPrompt = `Update memory JSON based on: \nUser: "${message}"\nBot: "${responseText}"\nCurrent: ${ JSON.stringify(contextMemory) } \nReturn ONE JSON object.`;
                 const memRes = await model.generateContent(memPrompt);
                 const jsonMatch = memRes.response.text().match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
@@ -415,7 +428,7 @@ Respond as Alex:`;
 
             // 5. Lead Scoring
             const p5 = (async () => {
-                const scorePrompt = `Rate Intent (0-100) based on:\n"${message}" -> "${responseText}"\nStatus: ${currentStatus}\nReturn NUMBER only.`;
+                const scorePrompt = `Rate Intent(0 - 100) based on: \n"${message}" -> "${responseText}"\nStatus: ${ currentStatus } \nReturn NUMBER only.`;
                 const scoreRes = await model.generateContent(scorePrompt);
                 const score = parseInt(scoreRes.response.text().replace(/\D/g, '')) || 0;
                 await supabase.from('leads').update({ priority_score: score }).eq('id', lead_id);

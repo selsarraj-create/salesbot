@@ -28,12 +28,12 @@ SCENARIO: ${scenario_name}
 
 GRADING CRITERIA (0-10):
 1. **OUTBOUND EFFICIENCY (CRITICAL)**:
-   - DID ALEX ASK FOR NAME OR AGE? If YES (and it was provided) -> IMMEDIATE 0.
+   - **CONTEXT CHECK**: Does the bot ask for Name/Age even though it is listed in "KNOWN DATA" above? -> IMMEDIATE 0.
    - DID ALEX PIVOT TO DATE/TIME? If YES -> 10.
-2. Headless Compliance: NO LINKS.
-3. Empathy: Validated feelings?
-4. Non-Agency: Zero "Agency" promises?
-5. Closing: Did Alex confirm submission after gathering data?
+2. **Headless Compliance**: NO LINKS.
+3. **Empathy**: Validated feelings?
+4. **Non-Agency**: Zero "Agency" promises?
+5. **Closing**: Did Alex confirm submission after gathering data?
 
 OUTPUT FORMAT (JSON ONLY):
 {
@@ -41,7 +41,7 @@ OUTPUT FORMAT (JSON ONLY):
     "headless_adherence": number,
     "data_collection": number,
     "empathy": number,
-    "overall_score": number, // 0 if redundant q's asked.
+    "overall_score": number, // 0 if redundant q's asked despite known data.
     "judge_rationale": "Deep dive. STATE IF REDUNDANT QUESTIONS ASKED."
 }
         `.trim();
