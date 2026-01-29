@@ -443,8 +443,10 @@ Respond as Alex:`;
         if (result.response.candidates?.[0]?.content?.parts?.[0]?.thought) {
             // @ts-ignore
             thoughtContent = result.response.candidates[0].content.parts[0].thought;
+            console.log('[API] Native Thought Content Found:', thoughtContent, typeof thoughtContent);
         } else if (thoughtMatch) {
             thoughtContent = thoughtMatch[1].trim();
+            console.log('[API] Regex Thought Content Found:', thoughtContent.substring(0, 50));
         }
 
         // 2. Extract Response (Prioritize Explicit Tags)
