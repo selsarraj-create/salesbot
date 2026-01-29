@@ -55,9 +55,9 @@ OUTPUT FORMAT (JSON ONLY):
 
         if (conversationText.length < 50) return null; // Too short to grade
 
-        // 3. Generate with Gemini 2.0 Flash
+        // 3. Generate with Gemini 3 Pro Preview
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash",
+            model: "gemini-3-pro-preview",
             generationConfig: {
                 // @ts-ignore
                 thinking_config: {

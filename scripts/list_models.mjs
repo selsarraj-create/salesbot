@@ -59,8 +59,8 @@ async function listModels() {
         console.log("\n--- EMBEDDING MODELS ---");
         embeddingModels.forEach(m => console.log(`- ${m.name} (Supported: ${m.supportedGenerationMethods})`));
 
-        console.log("\n--- OTHER MODELS (First 5) ---");
-        otherModels.slice(0, 5).forEach(m => console.log(`- ${m.name}`));
+        console.log("\n--- OTHER MODELS (All) ---");
+        otherModels.forEach(m => console.log(`- ${m.name}`));
 
     } catch (error) {
         console.error("❌ FAILED to list models:", error.message);
