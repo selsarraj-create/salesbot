@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle, Trash2, Download } from 'lucide-react';
+import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle, Trash2, Download, Eye } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { KnowledgeVector } from '@/lib/supabase/types';
 
@@ -26,12 +26,11 @@ export default function AssetLab() {
             .from('knowledge_vectors')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(50); // Increased limit from 10 to 50
+            .limit(50);
 
         if (data) setAssets(data);
     }, []);
 
-    // Fetch existing assets on mount
     useEffect(() => {
         fetchAssets();
     }, [fetchAssets]);
@@ -42,8 +41,6 @@ export default function AssetLab() {
         try {
             const res = await fetch(`/api/training/assets?id=${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Delete failed');
-
-            // Remove from UI
             setAssets(prev => prev.filter(a => a.id !== id));
         } catch (error) {
             console.error(error);
@@ -61,7 +58,6 @@ export default function AssetLab() {
             setUploads(prev => [...prev, uploadStatus]);
 
             try {
-                // Upload file
                 const formData = new FormData();
                 formData.append('file', file);
 
@@ -70,20 +66,16 @@ export default function AssetLab() {
                     body: formData
                 });
 
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
+                if (!response.ok) throw new Error('Upload failed');
 
                 const result = await response.json();
 
-                // Update status
                 setUploads(prev => prev.map(u =>
                     u.filename === file.name
                         ? { ...u, status: 'success', result }
                         : u
                 ));
 
-                // Refresh assets
                 fetchAssets();
 
             } catch (error: any) {
@@ -205,6 +197,19 @@ export default function AssetLab() {
                                                         </Badge>
                                                     </div>
                                                     <div className="flex items-center gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-text-tertiary hover:text-electric-cyan hover:bg-cyan-500/10 p-2 h-auto"
+                                                            onClick={() => {
+                                                                const blob = new Blob([asset.content], { type: 'text/plain' });
+                                                                const url = URL.createObjectURL(blob);
+                                                                window.open(url, '_blank');
+                                                            }}
+                                                            title="View Extracted Content"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
                                                         {asset.metadata?.url && (
                                                             <Button
                                                                 variant="ghost"
@@ -234,7 +239,7 @@ export default function AssetLab() {
                                                         <p className="text-text-tertiary text-xs mb-1">AI Critique:</p>
                                                         <div className="flex gap-2">
                                                             <Badge variant="outline" className={getCritiqueColor(asset.critique.objection_quality)}>
-                                                                Objection: {asset.critique.objection_quality}/10
+                                                                Obj: {asset.critique.objection_quality}/10
                                                             </Badge>
                                                             <Badge variant="outline" className={getCritiqueColor(asset.critique.tone)}>
                                                                 Tone: {asset.critique.tone}/10
