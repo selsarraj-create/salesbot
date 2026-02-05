@@ -5,7 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle, Trash2 } from 'lucide-react';
+import { Upload, FileAudio, FileText, Loader2, CheckCircle2, XCircle, Trash2, Download } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { KnowledgeVector } from '@/lib/supabase/types';
 
@@ -204,14 +204,27 @@ export default function AssetLab() {
                                                             {asset.content_type}
                                                         </Badge>
                                                     </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-text-tertiary hover:text-red-400 hover:bg-red-500/10 p-2 h-auto"
-                                                        onClick={() => deleteAsset(asset.id)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    <div className="flex items-center gap-1">
+                                                        {asset.metadata?.url && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-text-tertiary hover:text-electric-cyan hover:bg-cyan-500/10 p-2 h-auto"
+                                                                onClick={() => window.open(asset.metadata?.url, '_blank')}
+                                                                title="Download Original"
+                                                            >
+                                                                <Download className="w-4 h-4" />
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-text-tertiary hover:text-red-400 hover:bg-red-500/10 p-2 h-auto"
+                                                            onClick={() => deleteAsset(asset.id)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                                 <p className="text-text-secondary text-sm line-clamp-2">
                                                     {asset.content.substring(0, 150)}...

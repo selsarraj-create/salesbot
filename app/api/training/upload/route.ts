@@ -49,6 +49,22 @@ export async function POST(req: Request) {
             mime_type: file.type
         };
 
+        // 1. Upload to Supabase Storage ("assets" bucket)
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('assets')
+            .upload(fileName, file, { contentType: file.type });
+
+        if (uploadError) {
+            console.error('[Upload API] Storage Upload Error (Non-Fatal):', uploadError);
+        } else if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(fileName);
+            metadata.url = publicUrl;
+            metadata.storage_path = uploadData.path;
+            console.log('[Upload API] File uploaded to storage:', publicUrl);
+        }
+
         // Process based on file type
         if (file.type.startsWith('audio/')) {
             console.log('[Upload API] Processing audio file...');
