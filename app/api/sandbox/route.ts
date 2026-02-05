@@ -15,7 +15,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 // Alex Persona Prompt
 // Alex Persona Prompt
 // Alex Persona Prompt
-const SALES_PERSONA_PROMPT = `SYSTEM INSTRUCTIONS: ALEX (BOOKER AI) — EDGE TALENT
+// Default Fallback Prompt (if no Asset found)
+const DEFAULT_PERSONA_PROMPT = `SYSTEM INSTRUCTIONS: ALEX (BOOKER AI) — EDGE TALENT
 
 Apply Rigid Sequential Execution for ALEXSCRIPT.pdf.
 
@@ -60,9 +61,35 @@ Listen First: Before generating any script line, check the user's latest message
 Answer First: If a question is detected, you MUST answer it directly and succinctly. Suspend the script to address their concern.
 Pivot Second: Only after the answer is given, pivot back to the qualification flow (e.g., '...The investment is typically £X. To ensure we tailor this...').`;
 
+async function fetchBestProtocol() {
+    try {
+        // 1. Real-Time Retrieval & Conflict Resolution (Latest Version)
+        const { data, error } = await supabase
+            .from('knowledge_vectors')
+            .select('content, metadata')
+            .ilike('metadata->>filename', '%ALEX_PROTOCOL%')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (data && data.content) {
+            console.log('[Protocol Sync] Loaded latest ALEX_PROTOCOL:', data.metadata?.filename);
+            return data.content;
+        }
+    } catch (e) {
+        console.warn('[Protocol Sync] Failed to fetch protocol, using default.');
+    }
+    return null;
+}
+
 
 export async function POST(req: Request) {
     try {
+        // Automatic Asset Synchronization (Cold Start & Conflict Resolution)
+        // We fetch the latest 'ALEX_PROTOCOL' from the DB to ensure we are always on vLatest.
+        const dynamicProtocol = await fetchBestProtocol();
+        const SALES_PERSONA_PROMPT = dynamicProtocol || DEFAULT_PERSONA_PROMPT;
+
         const body = await req.json();
         const { lead_id, message, simulate_latency, action, lead_context, skip_user_insert } = body;
 
