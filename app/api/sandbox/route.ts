@@ -67,13 +67,13 @@ async function fetchBestProtocol() {
         const { data, error } = await supabase
             .from('knowledge_vectors')
             .select('content, metadata')
-            .ilike('metadata->>filename', '%ALEX_PROTOCOL%')
+            .ilike('metadata->>filename', '%alexscript.txt%')
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
 
         if (data && data.content) {
-            console.log('[Protocol Sync] Loaded latest ALEX_PROTOCOL:', data.metadata?.filename);
+            console.log('[Protocol Sync] Loaded latest alexscript.txt:', data.metadata?.filename);
             return data.content;
         }
     } catch (e) {
