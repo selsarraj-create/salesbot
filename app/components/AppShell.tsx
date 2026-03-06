@@ -14,9 +14,10 @@ const NAV_ITEMS = [
 interface AppShellProps {
     children: React.ReactNode;
     title: string;
+    hideTopbar?: boolean;
 }
 
-export default function AppShell({ children, title }: AppShellProps) {
+export default function AppShell({ children, title, hideTopbar }: AppShellProps) {
     const pathname = usePathname();
 
     return (
@@ -52,17 +53,19 @@ export default function AppShell({ children, title }: AppShellProps) {
 
             {/* ── Main area ── */}
             <div className="rd-main">
-                <header className="rd-topbar">
-                    <h1 className="rd-topbar-title">{title}</h1>
-                    <div className="rd-topbar-right">
-                        <button className="rd-topbar-icon" aria-label="Notifications">
-                            🔔
-                        </button>
-                        <div className="rd-topbar-avatar">
-                            <span>RD</span>
+                {!hideTopbar && (
+                    <header className="rd-topbar">
+                        <h1 className="rd-topbar-title">{title}</h1>
+                        <div className="rd-topbar-right">
+                            <button className="rd-topbar-icon" aria-label="Notifications">
+                                🔔
+                            </button>
+                            <div className="rd-topbar-avatar">
+                                <span>RD</span>
+                            </div>
                         </div>
-                    </div>
-                </header>
+                    </header>
+                )}
 
                 <div className="rd-page-content">
                     {children}
