@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/auth-context';
 import type { Database } from '@/lib/supabase/types';
 
 export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => void }) {
+    const { profile } = useAuth();
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [age, setAge] = useState(''); // New State
@@ -39,6 +41,7 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
                 status: 'New',
                 is_manual_mode: false,
                 is_test: true,
+                tenant_id: profile?.tenant_id,
                 lead_metadata: { age: age || '22' } // Store Age in metadata
             };
 
