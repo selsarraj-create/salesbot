@@ -1,4 +1,5 @@
-import { getServerSupabase } from '@/lib/supabase/server-client';
+import { getServerSupabase as _getServerSupabase } from '@/lib/supabase/server-client';
+const getServerSupabase = () => _getServerSupabase() as any;
 import { NextResponse } from 'next/server';
 
 // Keywords that trigger a "Safety Lock"

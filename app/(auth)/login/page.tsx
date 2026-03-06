@@ -20,31 +20,19 @@ function LoginForm() {
         setError('');
         setLoading(true);
 
-        // Listen for the SIGNED_IN event — this fires AFTER session cookies are written
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-            if (event === 'SIGNED_IN') {
-                subscription.unsubscribe();
-                window.location.href = redirect;
-            }
-        });
-
         const { error: authError } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
 
         if (authError) {
-            subscription.unsubscribe();
             setError(authError.message);
             setLoading(false);
             return;
         }
 
-        // Fallback: if onAuthStateChange doesn't fire within 2s, redirect anyway
-        setTimeout(() => {
-            subscription.unsubscribe();
-            window.location.href = redirect;
-        }, 2000);
+        // With createClient (localStorage), session is already persisted
+        window.location.href = redirect;
     };
 
     return (

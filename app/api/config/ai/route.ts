@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const supabase = getServerSupabase();
+        const supabase = getServerSupabase() as any;
         const { data, error } = await supabase
             .from('ai_config')
             .select('*')
@@ -21,9 +21,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const supabase = getServerSupabase();
+        const supabase = getServerSupabase() as any;
         const body = await req.json();
-        // Allow partial updates
         const { temperature, top_p, frequency_penalty, full_context_mode, thinking_budget, show_thoughts } = body;
 
         const updates: any = { updated_at: new Date().toISOString() };

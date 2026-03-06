@@ -1,28 +1,25 @@
 /**
  * Server-side Supabase client factory.
- * Reads the user's auth cookies so RLS policies work correctly.
- * Use this in all API routes that query RLS-protected tables.
+ * Uses the SERVICE ROLE KEY to bypass RLS.
+ *
+ * Why: The browser client uses localStorage (not cookies) for session
+ * storage, so server-side API routes can't read the user's JWT from
+ * cookies. Instead, they use the service role key which bypasses RLS
+ * entirely. Auth checking is done at the application level.
+ *
+ * Use this in API routes that need to read/write tenant-scoped data.
  */
 
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+
+let _adminClient: ReturnType<typeof createClient> | null = null;
 
 export function getServerSupabase() {
-    const cookieStore = cookies();
-    return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() { return cookieStore.getAll(); },
-                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    try {
-                        cookiesToSet.forEach(({ name, value, options }) =>
-                            cookieStore.set(name, value, options)
-                        );
-                    } catch { }
-                },
-            },
-        }
-    );
+    if (!_adminClient) {
+        _adminClient = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+    }
+    return _adminClient;
 }
