@@ -17,6 +17,8 @@ export interface Tenant {
     system_prompt?: string;
     plan?: 'free' | 'pro' | 'enterprise';
     is_active?: boolean;
+    monthly_ad_spend?: number;
+    chatbot_name?: string;
 }
 
 export type UserRole = 'super_admin' | 'owner' | 'manager' | 'agent';

@@ -1100,3 +1100,293 @@
         display: none;
     }
 }
+
+/* ═══════════════════════════════════════════
+   ANALYTICS VIEW
+   ═══════════════════════════════════════════ */
+
+/* ── Toggle button in topbar ── */
+.rd-topbar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.rd-topbar-toggle.active {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: #6366f1;
+}
+
+.rd-topbar-toggle:hover {
+    background: rgba(99, 102, 241, 0.08);
+}
+
+/* ── Content wrapper ── */
+.rd-content-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+/* ── Analytics view layout ── */
+.rd-analytics-view {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1200px;
+}
+
+.rd-analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .rd-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Analytics card base ── */
+.rd-analytics-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+}
+
+.rd-analytics-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 16px;
+}
+
+.rd-analytics-empty {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* ═══════════════════════════════════════════
+   AI PERFORMANCE CARD
+   ═══════════════════════════════════════════ */
+.rd-ai-perf {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border: none;
+    color: #fff;
+}
+
+.rd-ai-perf .rd-analytics-card-title {
+    color: #94a3b8;
+}
+
+.rd-perf-hero {
+    text-align: center;
+    padding: 12px 0 20px;
+}
+
+.rd-perf-hero-num {
+    display: block;
+    font-size: 56px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6366f1, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.rd-perf-hero-label {
+    display: block;
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+.rd-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.rd-perf-stat {
+    text-align: center;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.rd-perf-stat-value {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.rd-perf-stat-label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+@media (max-width: 640px) {
+    .rd-perf-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ═══════════════════════════════════════════
+   CONVERSION FUNNEL
+   ═══════════════════════════════════════════ */
+.rd-funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rd-funnel-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 40px 40px;
+    align-items: center;
+    gap: 10px;
+}
+
+.rd-funnel-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    text-align: right;
+}
+
+.rd-funnel-bar-wrap {
+    height: 28px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.rd-funnel-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.rd-funnel-count {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: right;
+}
+
+.rd-funnel-pct {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: right;
+}
+
+/* ═══════════════════════════════════════════
+   BOOKINGS FEED
+   ═══════════════════════════════════════════ */
+.rd-bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rd-booking-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.rd-booking-badge {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.rd-booking-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.rd-booking-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.rd-booking-date {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════
+   LOST REASONS
+   ═══════════════════════════════════════════ */
+.rd-lost-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rd-lost-row {
+    display: grid;
+    grid-template-columns: 1fr auto 40px 40px;
+    align-items: center;
+    gap: 10px;
+}
+
+.rd-lost-bar-wrap {
+    height: 24px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.rd-lost-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+}
+
+.rd-lost-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.rd-lost-count {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: right;
+}
+
+.rd-lost-pct {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: right;
+}

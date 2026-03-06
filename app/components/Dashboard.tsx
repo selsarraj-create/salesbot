@@ -4,12 +4,17 @@ import { useState } from 'react';
 import LeadsSidebar from './LeadsSidebar';
 import ChatWindow from './ChatWindow';
 import MetricsPanel from './MetricsPanel';
+import AiPerformance from './analytics/AiPerformance';
+import ConversionFunnel from './analytics/ConversionFunnel';
+import BookingsFeed from './analytics/BookingsFeed';
+import LostReasons from './analytics/LostReasons';
 import { supabase } from '@/lib/supabase/client';
 import type { Lead } from '@/lib/supabase/types';
 
 export default function Dashboard() {
     const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [showAnalytics, setShowAnalytics] = useState(true);
 
     const handleSelectLead = async (leadId: string) => {
         setSelectedLeadId(leadId);
@@ -58,6 +63,12 @@ export default function Dashboard() {
                 <header className="rd-topbar">
                     <h1 className="rd-topbar-title">Dashboard</h1>
                     <div className="rd-topbar-right">
+                        <button
+                            className={`rd-topbar-toggle ${showAnalytics ? 'active' : ''}`}
+                            onClick={() => setShowAnalytics(!showAnalytics)}
+                        >
+                            📊 Analytics
+                        </button>
                         <button className="rd-topbar-icon" aria-label="Notifications">
                             🔔
                         </button>
@@ -68,9 +79,27 @@ export default function Dashboard() {
                 </header>
 
                 {/* ── Content area ── */}
-                <div className="rd-content">
-                    <ChatWindow lead={selectedLead} onToggleTakeover={handleToggleTakeover} />
-                    <MetricsPanel />
+                <div className="rd-content-wrap">
+                    {showAnalytics ? (
+                        <div className="rd-analytics-view">
+                            {/* Top row: AI Performance full-width */}
+                            <AiPerformance />
+
+                            {/* Grid: Funnel + Bookings */}
+                            <div className="rd-analytics-grid">
+                                <ConversionFunnel />
+                                <BookingsFeed />
+                            </div>
+
+                            {/* Bottom: Lost Reasons */}
+                            <LostReasons />
+                        </div>
+                    ) : (
+                        <div className="rd-content">
+                            <ChatWindow lead={selectedLead} onToggleTakeover={handleToggleTakeover} />
+                            <MetricsPanel />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

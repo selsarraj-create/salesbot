@@ -10,6 +10,7 @@ export default function SettingsPage() {
     const [businessName, setBusinessName] = useState('');
     const [chatbotName, setChatbotName] = useState('');
     const [email, setEmail] = useState('');
+    const [adSpend, setAdSpend] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,7 +24,8 @@ export default function SettingsPage() {
     useEffect(() => {
         if (tenant) {
             setBusinessName(tenant.name || '');
-            setChatbotName((tenant as any).chatbot_name || 'Alex');
+            setChatbotName(tenant.chatbot_name || 'Alex');
+            setAdSpend(String(tenant.monthly_ad_spend || ''));
         }
         if (user) {
             setEmail(user.email || '');
@@ -35,13 +37,14 @@ export default function SettingsPage() {
         setMessage('');
 
         try {
-            // Update tenant name & chatbot name
+            // Update tenant name & chatbot name & ad spend
             if (tenant) {
                 const { error: tenantError } = await supabase
                     .from('tenants' as any)
                     .update({
                         name: businessName,
                         chatbot_name: chatbotName,
+                        monthly_ad_spend: adSpend ? parseFloat(adSpend) : 0,
                     } as any)
                     .eq('id', tenant.id);
 
@@ -139,6 +142,22 @@ export default function SettingsPage() {
                             className="rd-settings-input"
                             placeholder="you@company.com"
                         />
+                    </div>
+
+                    <div className="rd-settings-field">
+                        <label className="rd-settings-label">Monthly Ad Spend (£)</label>
+                        <input
+                            type="number"
+                            value={adSpend}
+                            onChange={(e) => setAdSpend(e.target.value)}
+                            className="rd-settings-input"
+                            placeholder="2000"
+                            min="0"
+                            step="100"
+                        />
+                        <span className="rd-settings-hint">
+                            Used to calculate cost per lead and cost per booking on the dashboard
+                        </span>
                     </div>
 
                     {message && (
