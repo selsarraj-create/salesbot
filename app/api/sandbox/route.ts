@@ -453,6 +453,7 @@ Respond as Alex:`;
         }
 
         let responseText = result.response.text();
+        const rawResponseText = responseText; // Save ORIGINAL before any parsing
 
         // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
         const thoughtRegex = /\[\[\[THOUGHT\]\]\]([\s\S]*?)\[\[\[END_THOUGHT\]\]\]/i;
@@ -468,25 +469,24 @@ Respond as Alex:`;
         if (result.response.candidates?.[0]?.content?.parts?.[0]?.thought) {
             // @ts-ignore
             thoughtContent = result.response.candidates[0].content.parts[0].thought;
-            console.log('[API] Native Thought Content Found:', thoughtContent, typeof thoughtContent);
+            console.log('[API] Native Thought Content Found:', thoughtContent.substring(0, 80));
         } else if (thoughtMatch) {
             thoughtContent = thoughtMatch[1].trim();
             console.log('[API] Regex Thought Content Found:', thoughtContent.substring(0, 50));
         }
 
         // 2. Extract Response (Prioritize Explicit Tags)
-        if (responseMatch) {
+        if (responseMatch && responseMatch[1].trim().length > 0) {
             responseText = responseMatch[1].trim();
         } else if (thoughtMatch) {
-            // Fallback: If no response tags, take everything AFTER the thought block
-            // This handles cases where model forgets [[[RESPONSE]]] tags but faithfully used [[[THOUGHT]]]
+            // Fallback: If no response tags (or empty), take everything AFTER the thought block
             const textAfterThought = responseText.split(thoughtMatch[0])[1];
             if (textAfterThought && textAfterThought.trim().length > 0) {
-                responseText = textAfterThought.trim();
-            } else {
-                // Fatal: Model outputted thoughts but NO response text
-                console.warn('Model outputted thoughts but no response text. Using fallback.');
-                responseText = "Thanks for your patience! Let me check on that for you. 😊";
+                // Strip any leftover [[[RESPONSE]]] / [[[END_RESPONSE]]] wrappers
+                responseText = textAfterThought
+                    .replace(/\[\[\[RESPONSE\]\]\]/gi, '')
+                    .replace(/\[\[\[END_RESPONSE\]\]\]/gi, '')
+                    .trim();
             }
         }
 
@@ -499,10 +499,27 @@ Respond as Alex:`;
             }
         }
 
-        // 4. EMPTY RESPONSE SAFEGUARD — never send a blank message
+        // 4. EMPTY RESPONSE SAFEGUARD — fall back to raw text with thoughts stripped
         if (!responseText || responseText.trim().length === 0) {
-            console.error('[API] EMPTY RESPONSE DETECTED after all parsing. Using fallback.');
-            responseText = "Great question! Let me look into that for you — one moment. 😊";
+            console.warn('[API] Response empty after parsing. Falling back to raw model output.');
+            // Strip thought blocks and tag wrappers from raw text
+            let cleaned = rawResponseText
+                .replace(thoughtRegex, '')
+                .replace(responseRegex, '')
+                .replace(/\[\[\[RESPONSE\]\]\]/gi, '')
+                .replace(/\[\[\[END_RESPONSE\]\]\]/gi, '')
+                .replace(/\[\[\[THOUGHT\]\]\]/gi, '')
+                .replace(/\[\[\[END_THOUGHT\]\]\]/gi, '')
+                .trim();
+
+            if (cleaned.length > 0) {
+                responseText = cleaned;
+                console.log('[API] Recovered response from raw text:', responseText.substring(0, 80));
+            } else {
+                // Absolute last resort — this should almost never happen
+                console.error('[API] FATAL: No response text recoverable. Using emergency fallback.');
+                responseText = "Thanks for your message! Let me get back to you shortly. 😊";
+            }
         }
 
         // --- POST-GENERATION CHECKS ---
