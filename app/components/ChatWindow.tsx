@@ -93,48 +93,58 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
 
     if (!lead) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-charcoal">
-                <div className="text-center text-text-secondary">
-                    <svg
-                        className="mx-auto h-12 w-12 text-text-secondary mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                        />
-                    </svg>
-                    <p className="text-lg font-medium">Select a lead to view conversation</p>
+            <div className="flex-1 flex items-center justify-center bg-charcoal p-8">
+                <div className="max-w-xl w-full">
+                    <div className="mb-8 relative">
+                        <div className="absolute inset-0 bg-electric-cyan/20 blur-[100px] rounded-full" />
+                        <h2 className="text-3xl font-light text-text-primary mb-2 relative">Welcome back, Alex.</h2>
+                        <p className="text-text-secondary relative">Select a lead from the sidebar to start engaging, or use the quick actions below.</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 relative">
+                        <div className="bg-surface/40 hover:bg-surface/60 transition-colors p-5 rounded-2xl border border-surface-light/30 cursor-pointer group">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 group-hover:bg-emerald-500/20 transition-colors">
+                                <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                            </div>
+                            <h3 className="text-sm font-medium text-text-primary mb-1">Create Test Lead</h3>
+                            <p className="text-xs text-text-secondary">Simulate a new conversation in the sandbox environment.</p>
+                        </div>
+
+                        <div className="bg-surface/40 hover:bg-surface/60 transition-colors p-5 rounded-2xl border border-surface-light/30 cursor-pointer group">
+                            <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center mb-4 group-hover:bg-indigo-500/20 transition-colors">
+                                <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            </div>
+                            <h3 className="text-sm font-medium text-text-primary mb-1">View Analytics</h3>
+                            <p className="text-xs text-text-secondary">Analyze conversion rates and AI response quality.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex-1 flex flex-col bg-charcoal">
+        <div className="flex-1 flex flex-col bg-charcoal relative">
             {/* Header */}
-            <div className="p-4 border-b border-surface-light bg-surface">
+            <div className="px-6 py-5 border-b border-surface/50 bg-charcoal/80 backdrop-blur-xl z-10">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-semibold text-text-primary">
+                        <h3 className="text-lg font-medium text-text-primary tracking-tight">
                             {lead.name || lead.phone}
                         </h3>
-                        <p className="text-sm text-text-secondary">
-                            {lead.lead_code} • {lead.status}
-                        </p>
+                        <div className="flex items-center gap-3 mt-1">
+                            <span className="text-[11px] font-mono text-text-secondary/70">{lead.lead_code}</span>
+                            <span className="text-[11px] text-text-secondary">{lead.status}</span>
+                        </div>
                     </div>
                     <button
                         onClick={handleToggleTakeover}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all ${lead.is_manual_mode
-                            ? 'bg-electric-cyan text-charcoal hover:bg-electric-cyan/90 shadow-glow'
-                            : 'bg-surface-light text-text-primary hover:bg-surface border border-surface-light'
+                        className={`px-4 py-2 text-sm rounded-full font-medium transition-all duration-300 ${lead.is_manual_mode
+                            ? 'bg-electric-cyan text-charcoal shadow-[0_0_15px_rgba(56,189,248,0.4)]'
+                            : 'bg-surface/50 text-text-primary hover:bg-surface border border-surface-light/30'
                             }`}
                     >
-                        {lead.is_manual_mode ? '🔓 Release' : '🔒 Takeover'}
+                        {lead.is_manual_mode ? '🔓 Release to AI' : '🔒 Takeover Chat'}
                     </button>
                 </div>
             </div>

@@ -20,8 +20,8 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 215 27.9% 16.9%; /* slate-800 for subtle borders */
+    --input: 215 27.9% 16.9%;
     --ring: 193 100% 63%;
     --radius: 0.5rem;
   }
@@ -39,15 +39,15 @@
 
 @layer utilities {
   .glass-effect {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .glow-active {
-    box-shadow: 0 0 20px rgba(64, 224, 255, 0.3);
-    background: rgba(64, 224, 255, 0.05);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    background: rgba(56, 189, 248, 0.05);
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -55,11 +55,11 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #151A21;
+    background: #0F172A;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #1E2530;
+    background: #334155;
     border-radius: 4px;
   }
 

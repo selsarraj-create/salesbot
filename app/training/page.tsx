@@ -45,21 +45,22 @@ export default function TrainingPage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="max-w-7xl mx-auto mb-6">
-                <div className="flex gap-2 p-1 bg-surface rounded-lg border border-surface-light">
+            <div className="max-w-5xl mx-auto mb-8">
+                <div className="flex p-1 bg-surface/30 backdrop-blur-lg rounded-2xl border border-surface-light/30 shadow-inner">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
                         return (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md transition-all ${activeTab === tab.id
-                                    ? 'bg-electric-cyan/10 border border-electric-cyan/30'
-                                    : 'hover:bg-charcoal'
+                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
+                                    ? 'bg-charcoal shadow-sm ring-1 ring-surface-light/50 text-text-primary'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface/40'
                                     }`}
                             >
-                                <Icon className={`w-4 h-4 ${activeTab === tab.id ? tab.color : 'text-text-secondary'}`} />
-                                <span className={`font-medium ${activeTab === tab.id ? 'text-text-primary' : 'text-text-secondary'}`}>
+                                <Icon className={`w-4 h-4 ${isActive ? tab.color : 'text-text-secondary/70'}`} />
+                                <span className={isActive ? 'text-text-primary' : 'text-text-secondary'}>
                                     {tab.label}
                                 </span>
                             </button>

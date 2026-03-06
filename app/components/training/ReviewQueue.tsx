@@ -211,23 +211,13 @@ export default function ReviewQueue() {
                                         <Checkbox
                                             checked={selectedItems.has(item.id)}
                                             onCheckedChange={() => toggleSelection(item.id)}
+                                            className="border-surface-light"
                                         />
-                                        <Badge variant="outline" className="border-electric-cyan text-electric-cyan">
+                                        <Badge variant="outline" className="border-electric-cyan border-opacity-30 text-electric-cyan bg-electric-cyan/5">
                                             {item.lead_context?.lead_code || 'Lead'}
                                         </Badge>
-                                        {(item.quality_score !== undefined || item.manual_score !== undefined) && (
-                                            <Badge
-                                                variant="outline"
-                                                className={`font-mono ${(item.manual_score ?? item.quality_score ?? 0) < 6 ? 'border-red-500 text-red-500 bg-red-500/10' :
-                                                    (item.manual_score ?? item.quality_score ?? 0) < 8 ? 'border-yellow-500 text-yellow-500 bg-yellow-500/10' :
-                                                        'border-green-500 text-green-500 bg-green-500/10'
-                                                    }`}
-                                            >
-                                                Score: {item.manual_score ?? item.quality_score}/10 {item.manual_score && '👑'}
-                                            </Badge>
-                                        )}
                                         <span className="text-xs text-text-tertiary">
-                                            {new Date(item.timestamp).toLocaleString()}
+                                            {new Date(item.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                                         </span>
                                     </div>
                                     <div className="flex gap-2">
@@ -244,29 +234,63 @@ export default function ReviewQueue() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                {item.previous_message && item.previous_message !== '(No context found)' && (
-                                    <div className="mb-3 pl-3 border-l-2 border-surface-light ml-6 relative">
-                                        <div className="absolute -left-[27px] top-0 w-5 h-full border-b border-l border-surface-light rounded-bl-xl opacity-30"></div>
-                                        <p className="text-xs text-text-tertiary uppercase tracking-wider mb-1">Lead Input</p>
-                                        <p className="text-text-secondary italic text-sm">"{item.previous_message}"</p>
-                                    </div>
-                                )}
-
-                                <div className="bg-charcoal p-4 rounded-md border border-surface-light ml-6">
-                                    {item.thought_content && (
-                                        <div className="mb-4 border-l-2 border-yellow-400/50 pl-3">
-                                            <details className="group">
-                                                <summary className="text-xs font-mono text-yellow-400/80 cursor-pointer hover:text-yellow-400 flex items-center gap-2 select-none">
-                                                    <span className="group-open:rotate-90 transition-transform">▶</span>
-                                                    <span>Reasoning Chain (Thinking Process)</span>
-                                                </summary>
-                                                <div className="mt-2 text-xs text-blue-300 font-mono bg-black/20 p-3 rounded overflow-x-auto whitespace-pre-wrap">
-                                                    {item.thought_content}
-                                                </div>
-                                            </details>
+                                {/* Conversational UI Thread */}
+                                <div className="space-y-4 pl-8 border-l border-surface-light/30 relative mt-2">
+                                    {/* Lead Message Bubble */}
+                                    {item.previous_message && item.previous_message !== '(No context found)' && (
+                                        <div className="relative">
+                                            <div className="absolute -left-[33px] top-4 w-4 h-px bg-surface-light/50"></div>
+                                            <div className="inline-block max-w-[85%] bg-surface-light/20 border border-surface-light/30 rounded-2xl rounded-tl-sm px-4 py-3">
+                                                <p className="text-[11px] text-text-tertiary font-medium uppercase tracking-wider mb-1">Lead Input</p>
+                                                <p className="text-text-primary text-sm leading-relaxed">{item.previous_message}</p>
+                                            </div>
                                         </div>
                                     )}
-                                    <p className="text-text-primary whitespace-pre-wrap">{item.content}</p>
+
+                                    {/* AI Response Bubble */}
+                                    <div className="relative">
+                                        <div className="absolute -left-[33px] top-4 w-4 h-px bg-surface-light/50"></div>
+                                        <div className="inline-block max-w-[95%] bg-charcoal border border-surface-light/50 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
+
+                                            {/* AI Header with Integrated Score */}
+                                            <div className="flex items-center gap-3 mb-3 pb-2 border-b border-surface-light/30">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-electric-cyan opacity-40"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-electric-cyan"></span>
+                                                    </span>
+                                                    <p className="text-xs font-medium text-electric-cyan tracking-wide">Alex (AI)</p>
+                                                </div>
+
+                                                {(item.quality_score !== undefined || item.manual_score !== undefined) && (
+                                                    <div className="flex items-center gap-1.5 ml-auto">
+                                                        <div className={`h-1.5 w-1.5 rounded-full ${(item.manual_score ?? item.quality_score ?? 0) < 6 ? 'bg-rose-500' : (item.manual_score ?? item.quality_score ?? 0) < 8 ? 'bg-amber-400' : 'bg-emerald-400'}`}></div>
+                                                        <span className="text-[11px] font-mono text-text-secondary">
+                                                            Score: {item.manual_score ?? item.quality_score}/10 {item.manual_score && '👑'}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* AI Internal Reasoning */}
+                                            {item.thought_content && (
+                                                <div className="mb-4">
+                                                    <details className="group">
+                                                        <summary className="text-[11px] font-mono text-text-secondary/70 hover:text-text-secondary cursor-pointer flex items-center gap-1.5 select-none transition-colors">
+                                                            <span className="group-open:rotate-90 transition-transform opacity-50">▶</span>
+                                                            <span className="opacity-80">Reasoning Chain</span>
+                                                        </summary>
+                                                        <div className="mt-2 text-[11px] text-text-secondary/80 font-mono italic bg-surface-light/10 border-l border-surface-light/50 p-3 rounded-r-md overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                                                            {item.thought_content}
+                                                        </div>
+                                                    </details>
+                                                </div>
+                                            )}
+
+                                            {/* Final Output Text */}
+                                            <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap">{item.content}</p>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {selectedId === item.id && (

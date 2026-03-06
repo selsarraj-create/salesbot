@@ -10,21 +10,21 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                // Dark Mode Professional Palette (2026)
-                'charcoal': '#0B0D10',
-                'surface': '#151A21',
-                'surface-light': '#1E2530',
-                'electric-cyan': '#40E0FF',
-                'text-primary': '#E9EEF5',
-                'text-secondary': '#9BA3AF',
+                // Dark Mode Professional Palette (2026) - Neo-Minimalist
+                'charcoal': '#0F172A',      // slate-900
+                'surface': '#1E293B',       // slate-800
+                'surface-light': '#334155', // slate-700
+                'electric-cyan': '#38BDF8', // sky-400
+                'text-primary': '#F8FAFC',  // slate-50
+                'text-secondary': '#94A3B8',// slate-400
 
-                // Status Colors (Dark Mode Optimized)
-                'status-booked': '#40E0FF',
-                'status-booking': '#6366F1',
-                'status-qualifying': '#F59E0B',
-                'status-distance': '#FB923C',
-                'status-human': '#EF4444',
-                'status-new': '#6B7280',
+                // Status Colors (Soft Semantics)
+                'status-booked': '#34D399',     // emerald-400
+                'status-booking': '#818CF8',    // indigo-400
+                'status-qualifying': '#FBBF24', // amber-400
+                'status-distance': '#F87171',   // red-400
+                'status-human': '#F43F5E',      // rose-400
+                'status-new': '#94A3B8',        // slate-400
 
                 // shadcn/ui compatibility
                 border: "hsl(var(--border))",

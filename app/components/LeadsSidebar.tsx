@@ -10,12 +10,12 @@ interface LeadsSidebarProps {
 }
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
-    'New': 'bg-status-new',
-    'Qualifying': 'bg-status-qualifying',
-    'Booking_Offered': 'bg-status-booking',
-    'Booked': 'bg-status-booked',
-    'Objection_Distance': 'bg-status-distance',
-    'Human_Required': 'bg-status-human',
+    'New': 'bg-slate-500/10 text-slate-300',
+    'Qualifying': 'bg-amber-500/10 text-amber-400',
+    'Booking_Offered': 'bg-indigo-500/10 text-indigo-400',
+    'Booked': 'bg-emerald-500/10 text-emerald-400',
+    'Objection_Distance': 'bg-rose-500/10 text-rose-400',
+    'Human_Required': 'bg-red-500/10 text-red-500',
 };
 
 const STATUS_LABELS: Record<LeadStatus, string> = {
@@ -74,12 +74,12 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
 
     if (loading) {
         return (
-            <div className="w-80 bg-surface border-r border-surface-light p-4">
+            <div className="w-80 bg-charcoal border-r border-surface/50 p-4">
                 <div className="animate-pulse">
-                    <div className="h-8 bg-surface-light rounded mb-4"></div>
+                    <div className="h-8 bg-surface rounded mb-4"></div>
                     <div className="space-y-3">
                         {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="h-20 bg-surface-light rounded"></div>
+                            <div key={i} className="h-20 bg-surface rounded"></div>
                         ))}
                     </div>
                 </div>
@@ -88,13 +88,13 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
     }
 
     return (
-        <div className="w-80 bg-surface border-r border-surface-light flex flex-col h-screen">
-            <div className="p-4 border-b border-surface-light">
-                <h2 className="text-xl font-bold text-text-primary">Active Leads</h2>
-                <p className="text-sm text-text-secondary">{leads.length} total</p>
+        <div className="w-80 bg-charcoal border-r border-surface/50 flex flex-col h-screen">
+            <div className="p-5 border-b border-surface/50">
+                <h2 className="text-xl font-semibold text-text-primary tracking-tight">Active Leads</h2>
+                <p className="text-sm text-text-secondary mt-1">{leads.length} total</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1">
                 {leads.length === 0 ? (
                     <div className="text-center text-text-secondary mt-8">
                         <p>No leads yet</p>
@@ -105,52 +105,52 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                         <button
                             key={lead.id}
                             onClick={() => onSelectLead(lead.id)}
-                            className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLeadId === lead.id
-                                ? 'glow-active border-electric-cyan/50'
-                                : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
+                            className={`w-full text-left p-4 rounded-xl transition-all duration-200 group ${selectedLeadId === lead.id
+                                ? 'bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.2)]'
+                                : 'bg-transparent hover:bg-surface/50'
                                 }`}
                         >
-                            <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1">
-                                    <p className="font-semibold text-text-primary">
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1 min-w-0 pr-2">
+                                    <h3 className="text-base font-medium text-text-primary truncate">
                                         {lead.name || lead.phone}
-                                    </p>
+                                    </h3>
                                     {lead.name && (
-                                        <p className="text-xs text-text-secondary">{lead.phone}</p>
+                                        <p className="text-xs text-text-secondary mt-0.5 truncate">{lead.phone}</p>
                                     )}
                                 </div>
-                                <div className="flex gap-1">
-                                    {lead.is_test && (
-                                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded border border-yellow-500/30">
-                                            TEST
-                                        </span>
-                                    )}
-                                    {lead.is_manual_mode && (
-                                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded border border-purple-500/30">
-                                            Manual
+                                <div className="text-right flex flex-col items-end gap-1 flex-shrink-0">
+                                    <span className="text-[10px] font-mono text-text-secondary/70">{lead.lead_code}</span>
+                                    {(lead.priority_score || 0) > 0 && (
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${(lead.priority_score || 0) >= 80 ? 'text-emerald-400 bg-emerald-400/10' :
+                                            (lead.priority_score || 0) >= 50 ? 'text-amber-400 bg-amber-400/10' :
+                                                'text-text-secondary bg-surface-light/50'
+                                            }`}>
+                                            ★ {lead.priority_score}
                                         </span>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mt-auto">
+                                <div className="flex gap-1.5">
+                                    {lead.is_test && (
+                                        <span className="text-[10px] font-medium bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded-full">
+                                            TEST
+                                        </span>
+                                    )}
+                                    {lead.is_manual_mode && (
+                                        <span className="text-[10px] font-medium bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">
+                                            MANUAL
+                                        </span>
+                                    )}
+                                </div>
                                 <span
-                                    className={`text-xs px-2 py-1 rounded text-white ${STATUS_COLORS[lead.status as LeadStatus]
+                                    className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${STATUS_COLORS[lead.status as LeadStatus]
                                         }`}
                                 >
                                     {STATUS_LABELS[lead.status as LeadStatus]}
                                 </span>
-                                <div className="flex items-center gap-2">
-                                    {(lead.priority_score || 0) > 0 && (
-                                        <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${(lead.priority_score || 0) >= 80 ? 'text-green-400 bg-green-400/10' :
-                                                (lead.priority_score || 0) >= 50 ? 'text-yellow-400 bg-yellow-400/10' :
-                                                    'text-text-secondary'
-                                            }`}>
-                                            {lead.priority_score}
-                                        </span>
-                                    )}
-                                    <span className="text-xs text-text-secondary">{lead.lead_code}</span>
-                                </div>
                             </div>
                         </button>
                     ))
