@@ -236,14 +236,11 @@ Generate the opening SMS now.`;
             });
         }
 
-        // --- DEMENTIA FIX (Context Injection) ---
-        // Instead of ONLY putting it in chatHistory, we also explicitly isolate it for the prompt.
-        let userMsgPreview = `Customer: ${message.trim()}`;
-        // Only append to history if there is actual history and it's not a brand new start, 
-        // to avoid duplicating it if DB somehow caught up.
-        if (!chatHistory.includes(message.trim())) {
-            chatHistory += `${userMsgPreview}\n`;
-        }
+        // --- CURRENT MESSAGE IS ISOLATED ---
+        // The current user message is presented SEPARATELY in the prompt
+        // (in the "CURRENT CUSTOMER MESSAGE TO RESPOND TO" block).
+        // Do NOT inject it into chatHistory — that caused the AI to confuse
+        // old questions with the current message.
 
         // Knowledge & Gold Standards
         let knowledgeContext = '';
