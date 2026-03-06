@@ -239,16 +239,16 @@ export default function FlightSimulator() {
     }, [messages]);
 
     return (
-        <Card className="h-[600px] flex flex-col bg-charcoal border-surface-light">
-            <CardHeader className="border-b border-surface-light bg-surface/50">
+        <Card className="h-[600px] flex flex-col bg-white border border-gray-100 shadow-sm overflow-hidden">
+            <CardHeader className="border-b border-gray-100 bg-panel-bg py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <CardTitle className="text-text-primary flex items-center gap-2">
-                            <Zap className="text-yellow-400" />
+                        <CardTitle className="text-text-dark flex items-center gap-2 text-lg">
+                            <Zap className="text-amber-500" />
                             Flight Simulator
                         </CardTitle>
                         <Select onValueChange={setSelectedScenarioId} disabled={isRunning}>
-                            <SelectTrigger className="w-[300px] bg-background border-surface-light text-text-primary">
+                            <SelectTrigger className="w-[300px] bg-white border-gray-200 text-text-dark">
                                 <SelectValue placeholder="Select Scenario" />
                             </SelectTrigger>
                             <SelectContent>
@@ -262,15 +262,15 @@ export default function FlightSimulator() {
                     </div>
                     <div className="flex gap-2">
                         {!isRunning ? (
-                            <Button onClick={startSimulation} disabled={!selectedScenarioId} className="bg-green-600 hover:bg-green-700 text-white">
+                            <Button onClick={startSimulation} disabled={!selectedScenarioId} className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm">
                                 <Play className="w-4 h-4 mr-2" /> Start Test
                             </Button>
                         ) : (
-                            <Button onClick={() => setIsRunning(false)} variant="destructive">
+                            <Button onClick={() => setIsRunning(false)} variant="destructive" className="bg-rose-500 hover:bg-rose-600 text-white shadow-sm">
                                 <Pause className="w-4 h-4 mr-2" /> Pause
                             </Button>
                         )}
-                        <Button variant="outline" onClick={() => { setIsRunning(false); setMessages([]); }} className="border-surface-light">
+                        <Button variant="outline" onClick={() => { setIsRunning(false); setMessages([]); }} className="border-gray-200 text-text-muted-dark hover:bg-gray-50">
                             <RefreshCw className="w-4 h-4" />
                         </Button>
                     </div>
@@ -278,32 +278,32 @@ export default function FlightSimulator() {
 
                 {/* Scenario Info Card */}
                 {selectedScenarioId && (
-                    <div className="mt-4 p-4 rounded-lg bg-surface/30 border border-surface-light text-text-secondary text-sm">
+                    <div className="mt-4 p-4 rounded-xl bg-white border border-gray-200 shadow-sm text-sm">
                         {(() => {
                             const s = scenarios.find(sc => sc.id === selectedScenarioId);
                             if (!s) return null;
                             return (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="md:col-span-2">
-                                        <h4 className="text-electric-cyan font-medium mb-1">🎯 Persona Objective</h4>
-                                        <p className="opacity-90">{s.lead_persona}</p>
+                                        <h4 className="text-brand-blue font-semibold mb-1">🎯 Persona Objective</h4>
+                                        <p className="text-text-muted-dark leading-relaxed">{s.lead_persona}</p>
                                     </div>
                                     <div className="space-y-2">
                                         <div>
-                                            <span className="text-electric-cyan font-medium">Identity: </span>
-                                            <span className="text-white">{s.lead_name || 'Unknown'} ({s.lead_age || '?'})</span>
+                                            <span className="text-text-muted-dark font-medium text-xs uppercase tracking-wider">Identity: </span>
+                                            <span className="text-text-dark font-medium">{s.lead_name || 'Unknown'} ({s.lead_age || '?'})</span>
                                         </div>
                                         <div>
-                                            <span className="text-electric-cyan font-medium">Difficulty: </span>
+                                            <span className="text-text-muted-dark font-medium text-xs uppercase tracking-wider">Difficulty: </span>
                                             <Badge variant="outline" className={
-                                                s.difficulty_level === 'Hard' ? 'text-red-400 border-red-400' :
-                                                    s.difficulty_level === 'Medium' ? 'text-yellow-400 border-yellow-400' :
-                                                        'text-green-400 border-green-400'
+                                                s.difficulty_level === 'Hard' ? 'text-rose-600 border-rose-200 bg-rose-50' :
+                                                    s.difficulty_level === 'Medium' ? 'text-amber-600 border-amber-200 bg-amber-50' :
+                                                        'text-emerald-600 border-emerald-200 bg-emerald-50'
                                             }>{s.difficulty_level}</Badge>
                                         </div>
                                         <div>
-                                            <span className="text-electric-cyan font-medium">Goal: </span>
-                                            <span className="text-white text-xs">{s.target_outcome}</span>
+                                            <span className="text-text-muted-dark font-medium text-xs uppercase tracking-wider">Goal: </span>
+                                            <span className="text-text-dark text-xs">{s.target_outcome}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -312,20 +312,24 @@ export default function FlightSimulator() {
                     </div>
                 )}
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+            <CardContent className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar bg-main-bg">
                 {messages.length === 0 && (
-                    <div className="text-center text-text-secondary mt-20">
-                        <p>Select a scenario and press Start to launch the AI vs AI battle.</p>
+                    <div className="text-center text-text-muted-dark mt-20">
+                        <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+                            <Zap className="w-7 h-7 text-amber-500" />
+                        </div>
+                        <p className="font-medium text-text-dark">Ready for Battle</p>
+                        <p className="text-sm mt-1">Select a scenario and press Start to launch the AI vs AI simulation.</p>
                     </div>
                 )}
                 {messages.map((msg) => (
                     <div key={msg.id} className={`flex ${msg.sender === 'bot' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] px-4 py-3 rounded-lg ${msg.sender === 'bot'
-                            ? 'bg-electric-cyan/10 border border-electric-cyan/30 text-electric-cyan'
-                            : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                        <div className={`max-w-[80%] px-5 py-3.5 rounded-2xl ${msg.sender === 'bot'
+                            ? 'bg-brand-blue/5 border border-brand-blue/15 text-text-dark rounded-tr-sm'
+                            : 'bg-rose-50 border border-rose-100 text-text-dark rounded-tl-sm'
                             }`}>
-                            <div className="text-xs opacity-70 mb-1">{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
-                            {msg.content}
+                            <div className={`text-[11px] font-semibold uppercase tracking-wider mb-1.5 ${msg.sender === 'bot' ? 'text-brand-blue' : 'text-rose-500'}`}>{msg.sender === 'bot' ? 'Alex (Defender)' : 'Simulated Lead (Attacker)'}</div>
+                            <p className="text-[14px] leading-relaxed">{msg.content}</p>
                         </div>
                     </div>
                 ))}
@@ -335,8 +339,8 @@ export default function FlightSimulator() {
             {/* Grade Controls */}
             {
                 turnCount > 2 && !isRunning && (
-                    <div className="p-4 border-t border-surface-light bg-surface/50">
-                        <Button onClick={() => gradeSimulation()} className="w-full bg-cyan-600 hover:bg-cyan-700">
+                    <div className="p-4 border-t border-gray-100 bg-white">
+                        <Button onClick={() => gradeSimulation()} className="w-full bg-brand-blue hover:bg-blue-600 text-white shadow-sm">
                             👨‍⚖️ Grade Performance (The Judge)
                         </Button>
                     </div>

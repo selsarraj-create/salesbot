@@ -33,12 +33,12 @@ export default function AnalyticsDashboard() {
             <SourceIntelligence />
 
             {/* Placeholder for Follow-up Stats */}
-            <Card className="bg-surface border-surface-light">
+            <Card className="bg-white border border-gray-100 shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-text-primary">Follow-up Performance</CardTitle>
+                    <CardTitle className="text-text-dark">Follow-up Performance</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-center h-[200px] text-text-secondary text-sm italic">
+                    <div className="flex items-center justify-center h-[200px] text-text-muted-dark text-sm italic">
                         Processing 24h/72h recovery data...
                     </div>
                 </CardContent>

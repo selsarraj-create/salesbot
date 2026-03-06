@@ -139,17 +139,17 @@ export default function RulesEngine() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-            {/* Left Column: Live Logic Viewer */}
-            <Card className="bg-surface border-surface-light flex flex-col">
-                <CardHeader className="border-b border-surface-light bg-charcoal">
-                    <CardTitle className="flex items-center gap-2 text-text-primary">
-                        <ShieldAlert className="w-5 h-5 text-electric-cyan" />
+            {/* Left Column: Live Logic Viewer — intentionally dark for terminal feel */}
+            <Card className="bg-sidebar-bg border-sidebar-surface flex flex-col overflow-hidden shadow-sm">
+                <CardHeader className="border-b border-sidebar-surface">
+                    <CardTitle className="flex items-center gap-2 text-text-light">
+                        <ShieldAlert className="w-5 h-5 text-brand-blue" />
                         Current System Instructions
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-auto p-4 bg-black/30 font-mono text-sm">
-                    <div className="space-y-4 text-text-secondary">
-                        <div className="opacity-70 whitespace-pre-wrap">
+                <CardContent className="flex-1 overflow-auto p-5 font-mono text-sm">
+                    <div className="space-y-4 text-text-muted-light">
+                        <div className="opacity-80 whitespace-pre-wrap leading-relaxed">
                             {`// Core Persona Logic (Immutable)
 SYSTEM INSTRUCTIONS: ALEX (BOOKER AI) — EDGE TALENT
 
@@ -183,16 +183,16 @@ INTERRUPTION & PIVOT PROTOCOL:
                         </div>
 
                         {activeRulesText ? (
-                            <div className="text-green-400 p-2 border-l-2 border-green-400 bg-green-400/5 animate-pulse-slow">
+                            <div className="text-emerald-400 p-3 border-l-2 border-emerald-400 bg-emerald-400/10 rounded-r-lg">
                                 {`// DYNAMIC RULES INJECTED:\n${activeRulesText}`}
                             </div>
                         ) : (
-                            <div className="text-text-tertiary italic p-2">
+                            <div className="text-text-muted-light/50 italic p-2">
                                 // No active dynamic rules. Using core logic only.
                             </div>
                         )}
 
-                        <div className="opacity-50">
+                        <div className="opacity-40">
                             {`...
 ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                         </div>
@@ -200,15 +200,15 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                 </CardContent>
             </Card>
 
-            {/* Right Column: Rule Editor */}
-            <Card className="bg-surface border-surface-light flex flex-col">
-                <CardHeader className="border-b border-surface-light">
+            {/* Right Column: Rule Editor — light theme */}
+            <Card className="bg-white border border-gray-100 shadow-sm flex flex-col overflow-hidden">
+                <CardHeader className="border-b border-gray-100 bg-panel-bg">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-text-primary">Active Rules</CardTitle>
+                        <CardTitle className="text-text-dark text-lg">Active Rules</CardTitle>
                         <Button
                             size="sm"
                             variant="outline"
-                            className="text-electric-cyan border-electric-cyan hover:bg-electric-cyan/10 gap-2"
+                            className="text-brand-blue border-brand-blue/30 hover:bg-brand-blue/5 gap-2"
                             onClick={() => window.location.reload()}
                         >
                             <RefreshCw className="w-4 h-4" />
@@ -217,11 +217,11 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                     </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 overflow-auto p-4 space-y-4">
+                <CardContent className="flex-1 overflow-auto p-4 space-y-4 custom-scrollbar">
                     {/* Add Rule Input */}
                     <div className="flex gap-2">
                         <select
-                            className="bg-charcoal text-text-secondary border border-surface-light rounded-md px-2 text-sm focus:outline-hidden focus:border-electric-cyan"
+                            className="bg-panel-bg text-text-dark border border-gray-200 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue/30"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value as any)}
                         >
@@ -232,10 +232,10 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                             placeholder="Enter new rule (e.g. 'Always ask for phone number')"
                             value={newRule}
                             onChange={(e) => setNewRule(e.target.value)}
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark focus:ring-brand-blue/30 focus:border-brand-blue/30"
                             onKeyDown={(e) => e.key === 'Enter' && addRule()}
                         />
-                        <Button onClick={addRule} size="icon" className="bg-electric-cyan text-charcoal hover:bg-cyan-400">
+                        <Button onClick={addRule} size="icon" className="bg-brand-blue text-white hover:bg-blue-600 shrink-0">
                             <Plus className="w-5 h-5" />
                         </Button>
                     </div>
@@ -243,27 +243,27 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                     {/* Rules List */}
                     <div className="space-y-2 mt-4">
                         {loading ? (
-                            <div className="text-center text-text-tertiary py-4">Loading rules...</div>
+                            <div className="text-center text-text-muted-dark py-4">Loading rules...</div>
                         ) : rules.length === 0 ? (
-                            <div className="text-center text-text-secondary py-8 border-2 border-dashed border-surface-light rounded-lg">
+                            <div className="text-center text-text-muted-dark py-8 border-2 border-dashed border-gray-200 rounded-xl">
                                 No rules defined. Add one above.
                             </div>
                         ) : (
                             rules.map((rule) => (
                                 <div
                                     key={rule.id}
-                                    className={`flex items-center justify-between p-3 rounded-md border transition-all ${rule.is_active
-                                        ? 'bg-charcoal border-surface-light'
-                                        : 'bg-charcoal/50 border-transparent opacity-60'
+                                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${rule.is_active
+                                        ? 'bg-white border-gray-100 shadow-sm'
+                                        : 'bg-gray-50 border-transparent opacity-60'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1">
                                         <Badge
                                             variant="outline"
                                             className={`${rule.category === 'constraint'
-                                                ? 'text-red-400 border-red-400/30'
-                                                : 'text-blue-400 border-blue-400/30'
-                                                } capitalize w-20 justify-center`}
+                                                ? 'text-rose-600 border-rose-200 bg-rose-50'
+                                                : 'text-brand-blue border-brand-blue/20 bg-brand-blue/5'
+                                                } capitalize w-20 justify-center text-[11px]`}
                                         >
                                             {rule.category}
                                         </Badge>
@@ -273,18 +273,18 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                                 <Input
                                                     value={editText}
                                                     onChange={(e) => setEditText(e.target.value)}
-                                                    className="bg-black/20 border-surface-light h-8 text-text-primary"
+                                                    className="bg-panel-bg border-gray-200 h-8 text-text-dark focus:ring-brand-blue/30"
                                                     autoFocus
                                                 />
-                                                <Button size="sm" variant="ghost" onClick={() => saveRule(rule.id)} className="h-8 w-8 p-0 text-green-400">
+                                                <Button size="sm" variant="ghost" onClick={() => saveRule(rule.id)} className="h-8 w-8 p-0 text-emerald-500 hover:bg-emerald-50">
                                                     <Check className="w-4 h-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" onClick={cancelEditing} className="h-8 w-8 p-0 text-gray-400">
+                                                <Button size="sm" variant="ghost" onClick={cancelEditing} className="h-8 w-8 p-0 text-gray-400 hover:bg-gray-100">
                                                     <X className="w-4 h-4" />
                                                 </Button>
                                             </div>
                                         ) : (
-                                            <p className="text-text-primary text-sm font-medium line-clamp-2 leading-snug">
+                                            <p className="text-text-dark text-sm font-medium line-clamp-2 leading-snug">
                                                 {rule.rule_text}
                                             </p>
                                         )}
@@ -292,7 +292,7 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
 
                                     <div className="flex items-center gap-2 pl-2">
                                         {rule.is_locked ? (
-                                            <div className="flex items-center gap-2 px-2 py-1 bg-red-500/10 rounded border border-red-500/20 text-red-500 text-xs font-bold" title="Locked: Contains safety keywords">
+                                            <div className="flex items-center gap-2 px-2.5 py-1 bg-rose-50 rounded-lg border border-rose-200 text-rose-600 text-xs font-bold" title="Locked: Contains safety keywords">
                                                 <Lock className="w-3 h-3" />
                                                 LOCKED
                                             </div>
@@ -301,11 +301,12 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                                 <Switch
                                                     checked={rule.is_active}
                                                     onCheckedChange={() => toggleRule(rule.id, rule.is_active)}
+                                                    className="data-[state=checked]:bg-brand-blue"
                                                 />
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="text-text-tertiary hover:text-electric-cyan p-2 h-auto"
+                                                    className="text-text-muted-dark hover:text-brand-blue hover:bg-brand-blue/5 p-2 h-auto"
                                                     onClick={() => startEditing(rule)}
                                                     disabled={!!editingId} // Disable other edits while one is active
                                                 >
@@ -314,7 +315,7 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="text-text-tertiary hover:text-red-400 p-2 h-auto"
+                                                    className="text-text-muted-dark hover:text-rose-500 hover:bg-rose-50 p-2 h-auto"
                                                     onClick={() => deleteRule(rule.id)}
                                                     disabled={!!editingId}
                                                 >

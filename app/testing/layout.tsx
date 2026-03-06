@@ -6,14 +6,14 @@ export default function TestingLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-charcoal">
+        <div className="min-h-screen bg-main-bg">
             {/* Navigation Bar */}
-            <div className="bg-surface border-b border-surface-light px-6 py-3">
+            <div className="bg-white border-b border-gray-100 px-6 py-3 shadow-sm">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold text-text-primary">Testing Sandbox</h1>
+                    <h1 className="text-xl font-bold text-text-dark">Testing Sandbox</h1>
                     <Link
                         href="/"
-                        className="px-4 py-2 bg-surface-light text-text-primary rounded-lg font-medium hover:bg-surface border border-surface-light transition-colors"
+                        className="px-4 py-2 bg-panel-bg text-text-dark rounded-lg font-medium hover:bg-gray-200 border border-gray-200 transition-colors"
                     >
                         ← Back to Dashboard
                     </Link>

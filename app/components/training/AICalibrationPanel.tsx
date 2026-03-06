@@ -102,20 +102,20 @@ export default function AICalibrationPanel() {
     };
 
     return (
-        <Card className="bg-surface border-surface-light h-full overflow-y-auto">
-            <CardHeader className="border-b border-surface-light bg-charcoal/50">
+        <Card className="bg-white border border-gray-100 shadow-sm h-full overflow-y-auto custom-scrollbar">
+            <CardHeader className="border-b border-gray-100 bg-panel-bg">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="flex items-center gap-2 text-text-primary">
-                            <Settings className="w-5 h-5 text-electric-cyan" />
+                        <CardTitle className="flex items-center gap-2 text-text-dark text-lg">
+                            <Settings className="w-5 h-5 text-brand-blue" />
                             AI Calibration
                         </CardTitle>
-                        <CardDescription className="text-text-tertiary">
+                        <CardDescription className="text-text-muted-dark mt-1">
                             Real-time parameters for gemini-2.5-flash
                         </CardDescription>
                     </div>
                     {saving ? (
-                        <Badge variant="outline" className="border-electric-cyan/50 text-electric-cyan animate-pulse">Saving...</Badge>
+                        <Badge variant="outline" className="border-brand-blue/30 text-brand-blue animate-pulse bg-brand-blue/5">Saving...</Badge>
                     ) : (
                         <div className="h-6"></div>
                     )}
@@ -125,33 +125,33 @@ export default function AICalibrationPanel() {
 
                 {/* --- PRESET BUTTONS --- */}
                 <div className="grid grid-cols-3 gap-3">
-                    <button onClick={() => applyPreset('fast')} className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-light bg-charcoal hover:bg-surface-light/50 transition-colors group">
-                        <Rocket className="w-5 h-5 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-medium text-text-primary">Fast SMS</span>
-                        <span className="text-[10px] text-text-tertiary mt-1">Budget: 0</span>
+                    <button onClick={() => applyPreset('fast')} className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-emerald-200 transition-all group shadow-sm">
+                        <Rocket className="w-5 h-5 text-emerald-500 mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-semibold text-text-dark">Fast SMS</span>
+                        <span className="text-[10px] text-text-muted-dark mt-1 font-mono">Budget: 0</span>
                     </button>
-                    <button onClick={() => applyPreset('balanced')} className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-light bg-charcoal hover:bg-surface-light/50 transition-colors group">
-                        <Scale className="w-5 h-5 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-medium text-text-primary">Balanced</span>
-                        <span className="text-[10px] text-text-tertiary mt-1">Budget: 1k</span>
+                    <button onClick={() => applyPreset('balanced')} className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-brand-blue/30 transition-all group shadow-sm">
+                        <Scale className="w-5 h-5 text-brand-blue mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-semibold text-text-dark">Balanced</span>
+                        <span className="text-[10px] text-text-muted-dark mt-1 font-mono">Budget: 1k</span>
                     </button>
-                    <button onClick={() => applyPreset('crusher')} className="flex flex-col items-center justify-center p-3 rounded-lg border border-surface-light bg-charcoal hover:bg-surface-light/50 transition-colors group">
-                        <ShieldAlert className="w-5 h-5 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-medium text-text-primary">Obj. Crusher</span>
-                        <span className="text-[10px] text-text-tertiary mt-1">Budget: 4k</span>
+                    <button onClick={() => applyPreset('crusher')} className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-amber-200 transition-all group shadow-sm">
+                        <ShieldAlert className="w-5 h-5 text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-semibold text-text-dark">Obj. Crusher</span>
+                        <span className="text-[10px] text-text-muted-dark mt-1 font-mono">Budget: 4k</span>
                     </button>
                 </div>
 
-                <div className="h-px bg-surface-light my-2" />
+                <div className="h-px bg-gray-100 my-2" />
 
                 {/* --- THINKING CONTROLS --- */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Lightbulb className="w-4 h-4 text-yellow-400" />
-                            <label className="text-sm font-medium text-text-primary">Thinking Budget (Tokens)</label>
+                            <Lightbulb className="w-4 h-4 text-amber-500" />
+                            <label className="text-sm font-medium text-text-dark">Thinking Budget (Tokens)</label>
                         </div>
-                        <span className="text-sm font-mono text-electric-cyan bg-electric-cyan/10 px-2 py-0.5 rounded">
+                        <span className="text-sm font-mono text-brand-blue bg-brand-blue/5 px-2.5 py-0.5 rounded-lg">
                             {config.thinking_budget || 0}
                         </span>
                     </div>
@@ -163,30 +163,31 @@ export default function AICalibrationPanel() {
                         onChange={(e) => updateConfig('thinking_budget', parseInt(e.target.value))}
                         onMouseUp={commitChange}
                         onTouchEnd={commitChange}
-                        className="w-full h-2 bg-surface-light rounded-lg appearance-none cursor-pointer accent-yellow-400"
+                        className="w-full"
                     />
 
-                    <div className="flex items-center justify-between p-3 bg-charcoal rounded-lg border border-surface-light">
+                    <div className="flex items-center justify-between p-3.5 bg-panel-bg rounded-xl border border-gray-200">
                         <div className="flex items-center gap-2">
                             <LabelWithTooltip label="Show Thought Summary" tooltip="If ON, the AI's internal reasoning will be visible in the Review Queue." />
                         </div>
                         <Switch
                             checked={!!config.show_thoughts}
                             onCheckedChange={(c) => handleToggle('show_thoughts', c)}
+                            className="data-[state=checked]:bg-brand-blue"
                         />
                     </div>
                 </div>
 
-                <div className="h-px bg-surface-light my-2" />
+                <div className="h-px bg-gray-100 my-2" />
 
                 {/* Temperature */}
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Thermometer className="w-4 h-4 text-orange-400" />
-                            <label className="text-sm font-medium text-text-primary">Temperature (Creativity)</label>
+                            <Thermometer className="w-4 h-4 text-orange-500" />
+                            <label className="text-sm font-medium text-text-dark">Temperature (Creativity)</label>
                         </div>
-                        <span className="text-sm font-mono text-electric-cyan bg-electric-cyan/10 px-2 py-0.5 rounded">
+                        <span className="text-sm font-mono text-brand-blue bg-brand-blue/5 px-2.5 py-0.5 rounded-lg">
                             {config.temperature.toFixed(1)}
                         </span>
                     </div>
@@ -198,7 +199,7 @@ export default function AICalibrationPanel() {
                         onChange={(e) => updateConfig('temperature', parseFloat(e.target.value))}
                         onMouseUp={commitChange}
                         onTouchEnd={commitChange}
-                        className="w-full h-2 bg-surface-light rounded-lg appearance-none cursor-pointer accent-electric-cyan"
+                        className="w-full"
                     />
                 </div>
 
@@ -206,10 +207,10 @@ export default function AICalibrationPanel() {
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <BrainCircuit className="w-4 h-4 text-purple-400" />
-                            <label className="text-sm font-medium text-text-primary">Top P (Focus)</label>
+                            <BrainCircuit className="w-4 h-4 text-purple-500" />
+                            <label className="text-sm font-medium text-text-dark">Top P (Focus)</label>
                         </div>
-                        <span className="text-sm font-mono text-electric-cyan bg-electric-cyan/10 px-2 py-0.5 rounded">
+                        <span className="text-sm font-mono text-brand-blue bg-brand-blue/5 px-2.5 py-0.5 rounded-lg">
                             {config.top_p.toFixed(2)}
                         </span>
                     </div>
@@ -221,20 +222,20 @@ export default function AICalibrationPanel() {
                         onChange={(e) => updateConfig('top_p', parseFloat(e.target.value))}
                         onMouseUp={commitChange}
                         onTouchEnd={commitChange}
-                        className="w-full h-2 bg-surface-light rounded-lg appearance-none cursor-pointer accent-purple-400"
+                        className="w-full"
                     />
                 </div>
 
                 {/* Full Context Toggle */}
-                <div className="flex items-center justify-between p-4 bg-charcoal rounded-lg border border-surface-light group hover:border-electric-cyan/30 transition-colors">
+                <div className="flex items-center justify-between p-4 bg-panel-bg rounded-xl border border-gray-200 group hover:border-brand-blue/20 transition-colors">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                            <Zap className={`w-4 h-4 ${config.full_context_mode ? 'text-yellow-400' : 'text-text-tertiary'}`} />
-                            <label className="font-medium text-text-primary cursor-pointer" onClick={() => handleToggle('full_context_mode', !config.full_context_mode)}>
+                            <Zap className={`w-4 h-4 ${config.full_context_mode ? 'text-amber-500' : 'text-text-muted-dark'}`} />
+                            <label className="font-medium text-text-dark cursor-pointer" onClick={() => handleToggle('full_context_mode', !config.full_context_mode)}>
                                 Live Training (Full Context)
                             </label>
                         </div>
-                        <p className="text-xs text-text-secondary max-w-[220px]">
+                        <p className="text-xs text-text-muted-dark max-w-[220px]">
                             {config.full_context_mode
                                 ? "ON: Injecting ALL assets every message."
                                 : "OFF: Optimized Keyword Caching."}
@@ -243,6 +244,7 @@ export default function AICalibrationPanel() {
                     <Switch
                         checked={config.full_context_mode}
                         onCheckedChange={(c) => handleToggle('full_context_mode', c)}
+                        className="data-[state=checked]:bg-brand-blue"
                     />
                 </div>
 
@@ -254,9 +256,9 @@ export default function AICalibrationPanel() {
 function LabelWithTooltip({ label, tooltip }: { label: string, tooltip: string }) {
     return (
         <div className="flex items-center gap-2 group relative">
-            <span className="text-sm font-medium text-text-primary">{label}</span>
-            <Info className="w-3.5 h-3.5 text-text-tertiary cursor-help" />
-            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2 bg-black/90 text-xs text-white rounded border border-surface-light z-50 pointer-events-none">
+            <span className="text-sm font-medium text-text-dark">{label}</span>
+            <Info className="w-3.5 h-3.5 text-text-muted-dark cursor-help" />
+            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-2.5 bg-sidebar-bg text-xs text-text-light rounded-lg border border-sidebar-surface z-50 pointer-events-none shadow-lg">
                 {tooltip}
             </div>
         </div>

@@ -6,16 +6,16 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 export default function SourceIntelligence() {
     // Mock data for now - will be replaced by real DB query
     const data = [
-        { source: '#TikTok', conversion: 45, volume: 150, color: '#FF3366' }, // Video
-        { source: '#Instagram', conversion: 40, volume: 120, color: '#C13584' }, // Photo
-        { source: '#Google', conversion: 65, volume: 80, color: '#4285F4' }, // Search (Higher intent)
-        { source: '#Referral', conversion: 80, volume: 30, color: '#00FF88' }, // Trust
+        { source: '#TikTok', conversion: 45, volume: 150, color: '#F43F5E' }, // Rose
+        { source: '#Instagram', conversion: 40, volume: 120, color: '#A855F7' }, // Purple
+        { source: '#Google', conversion: 65, volume: 80, color: '#0066FF' }, // Brand Blue
+        { source: '#Referral', conversion: 80, volume: 30, color: '#10B981' }, // Emerald
     ];
 
     return (
-        <Card className="bg-surface border-surface-light">
+        <Card className="bg-white border border-gray-100 shadow-sm">
             <CardHeader>
-                <CardTitle className="text-text-primary text-lg">Lead Source Intelligence</CardTitle>
+                <CardTitle className="text-text-dark text-lg">Lead Source Intelligence</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="h-[250px] w-full">
@@ -25,17 +25,17 @@ export default function SourceIntelligence() {
                             <YAxis
                                 dataKey="source"
                                 type="category"
-                                stroke="#888888"
+                                stroke="#9CA3AF"
                                 fontSize={12}
                                 tickLine={false}
                                 axisLine={false}
                                 width={80}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                contentStyle={{ backgroundColor: '#1A1F2E', borderColor: '#2A2F3E', color: '#fff' }}
+                                cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                                contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB', color: '#1F2937', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                             />
-                            <Bar dataKey="conversion" name="Conversion Rate %" radius={[0, 4, 4, 0]}>
+                            <Bar dataKey="conversion" name="Conversion Rate %" radius={[0, 6, 6, 0]}>
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
@@ -43,7 +43,7 @@ export default function SourceIntelligence() {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-                <p className="text-xs text-center text-text-secondary mt-2">
+                <p className="text-xs text-center text-text-muted-dark mt-2">
                     Top Performer: #Referral (80% Conv.) • Highest Volume: #TikTok
                 </p>
             </CardContent>

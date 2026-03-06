@@ -98,35 +98,37 @@ export default function AssetLab() {
     });
 
     const getCritiqueColor = (score: number) => {
-        if (score >= 8) return 'text-green-400';
-        if (score >= 6) return 'text-yellow-400';
-        return 'text-red-400';
+        if (score >= 8) return 'text-emerald-600 bg-emerald-50 border-emerald-200';
+        if (score >= 6) return 'text-amber-600 bg-amber-50 border-amber-200';
+        return 'text-rose-600 bg-rose-50 border-rose-200';
     };
 
     return (
         <div className="space-y-6">
             {/* Upload Zone */}
-            <Card className="bg-surface border-surface-light">
+            <Card className="bg-white border border-gray-100 shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-text-primary flex items-center gap-2">
-                        <Upload className="w-5 h-5 text-electric-cyan" />
+                    <CardTitle className="text-text-dark flex items-center gap-2 text-lg">
+                        <Upload className="w-5 h-5 text-brand-blue" />
                         Asset Lab
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div
                         {...getRootProps()}
-                        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all ${isDragActive
-                            ? 'border-electric-cyan bg-electric-cyan/10'
-                            : 'border-surface-light hover:border-electric-cyan/50'
+                        className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${isDragActive
+                            ? 'border-brand-blue bg-brand-blue/5'
+                            : 'border-gray-300 hover:border-brand-blue/50 hover:bg-gray-50'
                             }`}
                     >
                         <input {...getInputProps()} />
-                        <Upload className="w-12 h-12 mx-auto mb-4 text-text-secondary" />
-                        <p className="text-text-primary font-medium mb-2">
+                        <div className="w-14 h-14 rounded-full bg-panel-bg flex items-center justify-center mx-auto mb-4">
+                            <Upload className="w-7 h-7 text-text-muted-dark" />
+                        </div>
+                        <p className="text-text-dark font-medium mb-1">
                             {isDragActive ? 'Drop files here...' : 'Drag & drop files here'}
                         </p>
-                        <p className="text-text-secondary text-sm">
+                        <p className="text-text-muted-dark text-sm">
                             Audio (mp3, wav) or Documents (pdf, txt)
                         </p>
                     </div>
@@ -135,12 +137,15 @@ export default function AssetLab() {
                     {uploads.length > 0 && (
                         <div className="mt-4 space-y-2">
                             {uploads.map((upload, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-charcoal rounded-lg">
+                                <div key={idx} className={`flex items-center justify-between p-3.5 rounded-xl border ${upload.status === 'success' ? 'bg-emerald-50 border-emerald-100' :
+                                        upload.status === 'error' ? 'bg-rose-50 border-rose-100' :
+                                            'bg-panel-bg border-gray-100'
+                                    }`}>
                                     <div className="flex items-center gap-3">
-                                        {upload.status === 'uploading' && <Loader2 className="w-4 h-4 animate-spin text-electric-cyan" />}
-                                        {upload.status === 'success' && <CheckCircle2 className="w-4 h-4 text-green-400" />}
-                                        {upload.status === 'error' && <XCircle className="w-4 h-4 text-red-400" />}
-                                        <span className="text-text-primary text-sm">{upload.filename}</span>
+                                        {upload.status === 'uploading' && <Loader2 className="w-4 h-4 animate-spin text-brand-blue" />}
+                                        {upload.status === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                                        {upload.status === 'error' && <XCircle className="w-4 h-4 text-rose-500" />}
+                                        <span className="text-text-dark text-sm font-medium">{upload.filename}</span>
                                     </div>
                                     {upload.status === 'success' && upload.result?.critique && (
                                         <div className="flex gap-2">
@@ -156,7 +161,7 @@ export default function AssetLab() {
                                         </div>
                                     )}
                                     {upload.status === 'error' && (
-                                        <span className="text-red-400 text-sm">{upload.error}</span>
+                                        <span className="text-rose-500 text-sm">{upload.error}</span>
                                     )}
                                 </div>
                             ))}
@@ -166,33 +171,38 @@ export default function AssetLab() {
             </Card>
 
             {/* Asset Library */}
-            <Card className="bg-surface border-surface-light">
+            <Card className="bg-white border border-gray-100 shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-text-primary">Knowledge Base</CardTitle>
+                    <CardTitle className="text-text-dark text-lg">Knowledge Base</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-3">
                         {assets.length === 0 ? (
-                            <p className="text-text-secondary text-center py-8">
-                                No assets uploaded yet. Upload audio or documents to get started.
-                            </p>
+                            <div className="text-text-muted-dark text-center py-10 border-2 border-dashed border-gray-200 rounded-2xl">
+                                <p className="font-medium text-text-dark mb-1">No assets yet</p>
+                                <p className="text-sm">Upload audio or documents to get started.</p>
+                            </div>
                         ) : (
                             assets.map((asset) => (
-                                <div key={asset.id} className="p-4 bg-charcoal rounded-lg border border-surface-light">
+                                <div key={asset.id} className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:border-brand-blue/20 transition-colors">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start gap-3 flex-1">
                                             {asset.content_type === 'audio_transcript' ? (
-                                                <FileAudio className="w-5 h-5 text-electric-cyan mt-1" />
+                                                <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <FileAudio className="w-4 h-4 text-purple-500" />
+                                                </div>
                                             ) : (
-                                                <FileText className="w-5 h-5 text-electric-cyan mt-1" />
+                                                <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <FileText className="w-4 h-4 text-brand-blue" />
+                                                </div>
                                             )}
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-text-primary font-medium">
+                                                        <span className="text-text-dark font-medium">
                                                             {asset.metadata?.filename || 'Untitled'}
                                                         </span>
-                                                        <Badge variant="outline" className="text-xs">
+                                                        <Badge variant="outline" className="text-[10px] text-text-muted-dark border-gray-200">
                                                             {asset.content_type}
                                                         </Badge>
                                                     </div>
@@ -200,7 +210,7 @@ export default function AssetLab() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="text-text-tertiary hover:text-electric-cyan hover:bg-cyan-500/10 p-2 h-auto"
+                                                            className="text-text-muted-dark hover:text-brand-blue hover:bg-brand-blue/5 p-2 h-auto"
                                                             onClick={() => {
                                                                 const blob = new Blob([asset.content], { type: 'text/plain' });
                                                                 const url = URL.createObjectURL(blob);
@@ -214,7 +224,7 @@ export default function AssetLab() {
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                className="text-text-tertiary hover:text-electric-cyan hover:bg-cyan-500/10 p-2 h-auto"
+                                                                className="text-text-muted-dark hover:text-brand-blue hover:bg-brand-blue/5 p-2 h-auto"
                                                                 onClick={() => window.open(asset.metadata?.url, '_blank')}
                                                                 title="Download Original"
                                                             >
@@ -224,20 +234,20 @@ export default function AssetLab() {
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
-                                                            className="text-text-tertiary hover:text-red-400 hover:bg-red-500/10 p-2 h-auto"
+                                                            className="text-text-muted-dark hover:text-rose-500 hover:bg-rose-50 p-2 h-auto"
                                                             onClick={() => deleteAsset(asset.id)}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </div>
                                                 </div>
-                                                <p className="text-text-secondary text-sm line-clamp-2">
+                                                <p className="text-text-muted-dark text-sm line-clamp-2 leading-relaxed">
                                                     {asset.content.substring(0, 150)}...
                                                 </p>
                                                 {asset.critique && (
-                                                    <div className="mt-2">
-                                                        <p className="text-text-tertiary text-xs mb-1">AI Critique:</p>
-                                                        <div className="flex gap-2">
+                                                    <div className="mt-3 p-3 bg-panel-bg rounded-lg">
+                                                        <p className="text-text-muted-dark text-[11px] font-medium uppercase tracking-wider mb-2">AI Critique</p>
+                                                        <div className="flex gap-2 mb-2">
                                                             <Badge variant="outline" className={getCritiqueColor(asset.critique.objection_quality)}>
                                                                 Obj: {asset.critique.objection_quality}/10
                                                             </Badge>
@@ -248,7 +258,7 @@ export default function AssetLab() {
                                                                 Closing: {asset.critique.closing_power}/10
                                                             </Badge>
                                                         </div>
-                                                        <p className="text-text-secondary text-xs mt-2">{asset.critique.summary}</p>
+                                                        <p className="text-text-muted-dark text-xs leading-relaxed">{asset.critique.summary}</p>
                                                     </div>
                                                 )}
                                             </div>

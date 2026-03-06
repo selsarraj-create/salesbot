@@ -76,7 +76,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
         return (
             <div className="w-80 bg-sidebar-bg border-r border-sidebar-surface p-4">
                 <div className="animate-pulse">
-                    <div className="h-8 bg-surface rounded mb-4"></div>
+                    <div className="h-8 bg-sidebar-surface rounded mb-4"></div>
                     <div className="space-y-3">
                         {[1, 2, 3, 4, 5].map((i) => (
                             <div key={i} className="h-20 bg-sidebar-surface rounded"></div>

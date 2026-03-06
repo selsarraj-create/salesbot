@@ -37,9 +37,9 @@ export default function LiveStatus() {
     }, []);
 
     if (loading || !status) return (
-        <Card className="bg-surface border-surface-light h-full">
-            <CardHeader><CardTitle className="text-text-primary text-sm">Concierge Status</CardTitle></CardHeader>
-            <CardContent className="text-text-secondary text-xs">Loading live feeds...</CardContent>
+        <Card className="bg-white border border-gray-100 shadow-sm h-full">
+            <CardHeader><CardTitle className="text-text-dark text-sm">Concierge Status</CardTitle></CardHeader>
+            <CardContent className="text-text-muted-dark text-xs">Loading live feeds...</CardContent>
         </Card>
     );
 
@@ -47,58 +47,66 @@ export default function LiveStatus() {
     const isBadWeather = ['Rain', 'Heavy Rain', 'Storm'].includes(status.weather.condition);
 
     return (
-        <Card className="bg-surface border-surface-light h-full">
+        <Card className="bg-white border border-gray-100 shadow-sm h-full">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-text-primary text-sm flex items-center gap-2">
+                    <CardTitle className="text-text-dark text-sm flex items-center gap-2">
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
                         Concierge Live
                     </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={checkStatus} title="Refresh">
+                    <Button variant="ghost" size="icon" onClick={checkStatus} title="Refresh" className="text-text-muted-dark hover:bg-gray-100 h-8 w-8">
                         <span className="text-xs">↻</span>
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
                 {/* TfL Status */}
-                <div className="flex items-center justify-between p-2 bg-charcoal rounded border border-surface-light">
-                    <div className="flex items-center gap-2">
-                        <Train className="w-4 h-4 text-text-secondary" />
-                        <span className="text-sm text-text-primary">Northern Line</span>
+                <div className="flex items-center justify-between p-3 bg-panel-bg rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Train className="w-3.5 h-3.5 text-blue-500" />
+                        </div>
+                        <span className="text-sm text-text-dark font-medium">Northern Line</span>
                     </div>
-                    <Badge variant={northern?.status === 'Good Service' ? 'outline' : 'destructive'}>
+                    <Badge variant={northern?.status === 'Good Service' ? 'outline' : 'destructive'}
+                        className={northern?.status === 'Good Service' ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : ''}>
                         {northern?.status || 'Unknown'}
                     </Badge>
                 </div>
 
                 {/* Thameslink Status */}
-                <div className="flex items-center justify-between p-2 bg-charcoal rounded border border-surface-light">
-                    <div className="flex items-center gap-2">
-                        <Train className="w-4 h-4 text-text-secondary" />
-                        <span className="text-sm text-text-primary">Thameslink</span>
+                <div className="flex items-center justify-between p-3 bg-panel-bg rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-purple-50 flex items-center justify-center">
+                            <Train className="w-3.5 h-3.5 text-purple-500" />
+                        </div>
+                        <span className="text-sm text-text-dark font-medium">Thameslink</span>
                     </div>
-                    <Badge variant={status.tfl.find(t => t.line === 'Thameslink')?.status === 'Good Service' ? 'outline' : 'destructive'}>
+                    <Badge variant={status.tfl.find(t => t.line === 'Thameslink')?.status === 'Good Service' ? 'outline' : 'destructive'}
+                        className={status.tfl.find(t => t.line === 'Thameslink')?.status === 'Good Service' ? 'text-emerald-600 border-emerald-200 bg-emerald-50' : ''}>
                         {status.tfl.find(t => t.line === 'Thameslink')?.status || 'Unknown'}
                     </Badge>
                 </div>
 
                 {/* Weather Status */}
-                <div className="flex items-center justify-between p-2 bg-charcoal rounded border border-surface-light">
-                    <div className="flex items-center gap-2">
-                        {isBadWeather ? <CloudRain className="w-4 h-4 text-blue-400" /> : <Sun className="w-4 h-4 text-yellow-400" />}
-                        <span className="text-sm text-text-primary">NW5 Weather</span>
+                <div className="flex items-center justify-between p-3 bg-panel-bg rounded-xl border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isBadWeather ? 'bg-blue-50' : 'bg-amber-50'}`}>
+                            {isBadWeather ? <CloudRain className="w-3.5 h-3.5 text-blue-500" /> : <Sun className="w-3.5 h-3.5 text-amber-500" />}
+                        </div>
+                        <span className="text-sm text-text-dark font-medium">NW5 Weather</span>
                     </div>
                     <div className="text-right">
-                        <span className="block text-sm font-medium text-text-primary">{status.weather.temp}°C</span>
-                        <span className="text-xs text-text-secondary">{status.weather.condition}</span>
+                        <span className="block text-sm font-semibold text-text-dark">{status.weather.temp}°C</span>
+                        <span className="text-[11px] text-text-muted-dark">{status.weather.condition}</span>
                     </div>
                 </div>
 
                 {/* Manual Trigger */}
-                <Button className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs h-8">
+                <Button className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs h-9 shadow-sm font-medium">
                     <AlertTriangle className="w-3 h-3 mr-2" />
                     Emergency Broadcast
                 </Button>

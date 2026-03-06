@@ -23,9 +23,9 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
         }));
 
     const getBarColor = (sentiment: number) => {
-        if (sentiment >= 0.3) return '#00FF88'; // Emerald
-        if (sentiment <= -0.3) return '#FF3366'; // Red
-        return '#FFB800'; // Amber
+        if (sentiment >= 0.3) return '#10B981'; // Emerald-500
+        if (sentiment <= -0.3) return '#F43F5E'; // Rose-500
+        return '#F59E0B'; // Amber-500
     };
 
     // Calculate Friction Points (drops > 0.5)
@@ -41,16 +41,16 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
         : '0.00';
 
     return (
-        <Card className="bg-surface border-surface-light">
+        <Card className="bg-white border border-gray-100 shadow-sm">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-text-primary text-lg">Sentiment Heatmap</CardTitle>
+                    <CardTitle className="text-text-dark text-lg">Sentiment Heatmap</CardTitle>
                     <div className="flex gap-2">
-                        <Badge variant="outline" className={`${Number(avgSentiment) > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <Badge variant="outline" className={`${Number(avgSentiment) > 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : 'text-rose-600 bg-rose-50 border-rose-200'}`}>
                             Avg: {avgSentiment}
                         </Badge>
                         {frictionPoints > 0 && (
-                            <Badge variant="destructive" className="flex items-center gap-1">
+                            <Badge variant="destructive" className="flex items-center gap-1 bg-rose-500">
                                 <AlertTriangle className="w-3 h-3" />
                                 {frictionPoints} Friction Points
                             </Badge>
@@ -61,7 +61,7 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
             <CardContent>
                 <div className="h-[200px] w-full">
                     {data.length === 0 ? (
-                        <div className="h-full flex items-center justify-center text-text-secondary text-sm">
+                        <div className="h-full flex items-center justify-center text-text-muted-dark text-sm">
                             No sentiment data available
                         </div>
                     ) : (
@@ -69,7 +69,7 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
                             <BarChart data={data}>
                                 <XAxis
                                     dataKey="index"
-                                    stroke="#888888"
+                                    stroke="#D1D5DB"
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
@@ -83,11 +83,11 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
                                         if (active && payload && payload.length) {
                                             const item = payload[0].payload;
                                             return (
-                                                <div className="bg-charcoal border border-surface-light p-3 rounded-lg shadow-xl max-w-xs">
-                                                    <p className="text-sm font-medium mb-1 text-text-primary">
+                                                <div className="bg-white border border-gray-200 p-3 rounded-xl shadow-lg max-w-xs">
+                                                    <p className="text-sm font-medium mb-1 text-text-dark">
                                                         Msg #{item.index}: {item.sentiment.toFixed(2)}
                                                     </p>
-                                                    <p className="text-xs text-text-secondary truncate">
+                                                    <p className="text-xs text-text-muted-dark truncate">
                                                         {item.content}
                                                     </p>
                                                 </div>
@@ -96,7 +96,7 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
                                         return null;
                                     }}
                                 />
-                                <ReferenceLine y={0} stroke="#444" strokeDasharray="3 3" />
+                                <ReferenceLine y={0} stroke="#E5E7EB" strokeDasharray="3 3" />
                                 <Bar dataKey="sentiment" radius={[4, 4, 0, 0]}>
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={getBarColor(entry.sentiment)} />
@@ -106,7 +106,7 @@ export default function SentimentHeatmap({ messages }: SentimentHeatmapProps) {
                         </ResponsiveContainer>
                     )}
                 </div>
-                <div className="flex justify-between text-xs text-text-secondary mt-2">
+                <div className="flex justify-between text-xs text-text-muted-dark mt-2">
                     <span>Start of Convo</span>
                     <span>Recent</span>
                 </div>
