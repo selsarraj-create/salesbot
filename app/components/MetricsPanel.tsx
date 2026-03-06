@@ -17,10 +17,7 @@ export default function MetricsPanel() {
                 .from('leads')
                 .select('status');
 
-            if (error) {
-                console.error('Error fetching metrics:', error);
-                return;
-            }
+            if (error) { console.error('Error fetching metrics:', error); return; }
 
             const leadsData = (leads as any[]) || [];
             const total = leadsData.length;
@@ -33,70 +30,93 @@ export default function MetricsPanel() {
 
         fetchMetrics();
 
-        // Subscribe to changes
         const channel = supabase
             .channel('metrics-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'leads',
-                },
-                () => {
-                    fetchMetrics();
-                }
-            )
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
+                fetchMetrics();
+            })
             .subscribe();
 
-        return () => {
-            channel.unsubscribe();
-        };
+        return () => { channel.unsubscribe(); };
     }, []);
 
+    const convRate = metrics.total > 0 ? Math.round((metrics.booked / metrics.total) * 100) : 0;
+    // SVG donut params
+    const radius = 52;
+    const circumference = 2 * Math.PI * radius;
+    const filled = (convRate / 100) * circumference;
+    const remaining = circumference - filled;
+
     return (
-        <div className="w-80 bg-panel-bg border-l border-gray-100 p-6 overflow-y-auto custom-scrollbar">
-            <h2 className="text-sm font-semibold text-text-muted-dark uppercase tracking-wider mb-6">Overview</h2>
+        <aside className="rd-metrics">
+            <h2 className="rd-metrics-heading">Analytics Metrics</h2>
 
-            <div className="grid grid-cols-2 gap-3">
-                {/* Total Leads */}
-                <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-2xl flex flex-col justify-center">
-                    <p className="text-3xl font-light text-text-dark mb-1">{metrics.total}</p>
-                    <p className="text-[11px] font-medium text-text-muted-dark uppercase tracking-wider">Total Leads</p>
-                </div>
-
-                {/* New Leads */}
-                <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-2xl flex flex-col justify-center">
-                    <p className="text-3xl font-light text-slate-700 mb-1">{metrics.new}</p>
-                    <p className="text-[11px] font-medium text-text-muted-dark uppercase tracking-wider">New</p>
-                </div>
-
-                {/* Qualifying */}
-                <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-2xl flex flex-col justify-center">
-                    <p className="text-3xl font-light text-amber-600 mb-1">{metrics.qualifying}</p>
-                    <p className="text-[11px] font-medium text-text-muted-dark uppercase tracking-wider">Qualifying</p>
-                </div>
-
-                {/* Booked */}
-                <div className="bg-white border border-gray-100 shadow-sm p-4 rounded-2xl flex flex-col justify-center">
-                    <p className="text-3xl font-light text-emerald-600 mb-1">{metrics.booked}</p>
-                    <p className="text-[11px] font-medium text-text-muted-dark uppercase tracking-wider">Booked</p>
-                </div>
-            </div>
-
-            {/* System Status */}
-            <div className="mt-8 bg-white border border-gray-100 shadow-sm p-5 rounded-2xl">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-blue"></span>
+            {/* ── Conversion donut ── */}
+            <div className="rd-metric-card rd-metric-donut-card">
+                <div className="rd-donut-wrap">
+                    <svg viewBox="0 0 120 120" className="rd-donut-svg">
+                        <circle
+                            cx="60" cy="60" r={radius}
+                            fill="none" stroke="#e5e7eb" strokeWidth="10"
+                        />
+                        <circle
+                            cx="60" cy="60" r={radius}
+                            fill="none" stroke="#3b82f6" strokeWidth="10"
+                            strokeDasharray={`${filled} ${remaining}`}
+                            strokeDashoffset={circumference / 4}
+                            strokeLinecap="round"
+                            className="rd-donut-arc"
+                        />
+                    </svg>
+                    <div className="rd-donut-label">
+                        <span className="rd-donut-pct">{convRate}%</span>
+                        <span className="rd-donut-sub">Conversion<br />Rate</span>
                     </div>
-                    <p className="text-sm font-medium text-text-dark">System Online</p>
                 </div>
-                <p className="text-xs text-text-muted-dark">
-                    Real-time monitoring active
-                </p>
+                <div className="rd-donut-detail">
+                    <span className="rd-donut-detail-label">Conversion Rate</span>
+                    <span className="rd-donut-detail-value">
+                        Completed {metrics.booked} / {metrics.total}
+                    </span>
+                </div>
             </div>
-        </div>
+
+            {/* ── Lead Count ── */}
+            <div className="rd-metric-card">
+                <div className="rd-metric-content">
+                    <span className="rd-metric-label">Lead Count</span>
+                    <div className="rd-metric-row">
+                        <span className="rd-metric-big">{metrics.total.toLocaleString()}</span>
+                        <span className="rd-metric-badge rd-badge-green">
+                            +{metrics.new > 0 ? metrics.new : 0} new
+                        </span>
+                    </div>
+                    <span className="rd-metric-sublabel">Total leads</span>
+                </div>
+            </div>
+
+            {/* ── Booking Count ── */}
+            <div className="rd-metric-card">
+                <div className="rd-metric-content">
+                    <span className="rd-metric-label">Booking Count</span>
+                    <div className="rd-metric-row">
+                        <span className="rd-metric-big">{metrics.booked}</span>
+                        <span className="rd-metric-badge rd-badge-blue">
+                            {convRate}%
+                        </span>
+                    </div>
+                    <span className="rd-metric-sublabel">Total bookings</span>
+                </div>
+            </div>
+
+            {/* ── System status ── */}
+            <div className="rd-metric-card rd-metric-status">
+                <div className="rd-status-row">
+                    <span className="rd-status-pulse" />
+                    <span className="rd-status-text">System Online</span>
+                </div>
+                <span className="rd-status-sub">Real-time monitoring active</span>
+            </div>
+        </aside>
     );
 }

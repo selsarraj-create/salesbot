@@ -13,19 +13,14 @@ export default function Dashboard() {
 
     const handleSelectLead = async (leadId: string) => {
         setSelectedLeadId(leadId);
-
-        // Fetch full lead details
         const { data, error } = await supabase
             .from('leads')
             .select('*')
             .eq('id', leadId)
             .single();
 
-        if (error) {
-            console.error('Error fetching lead:', error);
-        } else {
-            setSelectedLead(data);
-        }
+        if (error) console.error('Error fetching lead:', error);
+        else setSelectedLead(data);
     };
 
     const handleToggleTakeover = async (leadId: string, enabled: boolean) => {
@@ -38,7 +33,6 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                // Update local state
                 setSelectedLead((prev) =>
                     prev ? { ...prev, is_manual_mode: enabled } : null
                 );
@@ -53,13 +47,32 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="flex h-screen bg-main-bg">
+        <div className="rd-app">
             <LeadsSidebar
                 selectedLeadId={selectedLeadId}
                 onSelectLead={handleSelectLead}
             />
-            <ChatWindow lead={selectedLead} onToggleTakeover={handleToggleTakeover} />
-            <MetricsPanel />
+
+            <div className="rd-main">
+                {/* ── Top bar ── */}
+                <header className="rd-topbar">
+                    <h1 className="rd-topbar-title">Dashboard</h1>
+                    <div className="rd-topbar-right">
+                        <button className="rd-topbar-icon" aria-label="Notifications">
+                            🔔
+                        </button>
+                        <div className="rd-topbar-avatar">
+                            <span>RD</span>
+                        </div>
+                    </div>
+                </header>
+
+                {/* ── Content area ── */}
+                <div className="rd-content">
+                    <ChatWindow lead={selectedLead} onToggleTakeover={handleToggleTakeover} />
+                    <MetricsPanel />
+                </div>
+            </div>
         </div>
     );
 }
