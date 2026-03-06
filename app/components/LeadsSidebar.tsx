@@ -43,8 +43,15 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
     const { user, profile } = useAuth();
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/login';
+        try {
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error('Error during global sign out:', error);
+        } finally {
+            // Force local cleanup just in case
+            localStorage.clear();
+            window.location.href = '/login';
+        }
     };
 
     useEffect(() => {
