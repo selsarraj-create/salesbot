@@ -55,6 +55,15 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
     };
 
     useEffect(() => {
+        // Don't query until auth is ready — otherwise RLS blocks everything
+        if (!user) {
+            setLeads([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+
         async function fetchLeads() {
             const { data, error } = await supabase
                 .from('leads')
@@ -87,7 +96,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
         });
 
         return () => { channel.unsubscribe(); };
-    }, []);
+    }, [user]);
 
     return (
         <aside className="rd-sidebar">

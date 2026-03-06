@@ -1,15 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
+import { getServerSupabase } from '@/lib/supabase/server-client';
 import { NextResponse } from 'next/server';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Keywords that trigger a "Safety Lock"
 const SAFETY_KEYWORDS = ['agency', 'guarantee', 'promise', 'legal', 'scam'];
 
 export async function GET(req: Request) {
     try {
+        const supabase = getServerSupabase();
         const { data: rules, error } = await supabase
             .from('system_rules')
             .select('*')
@@ -25,6 +22,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const supabase = getServerSupabase();
         const { rule_text, category } = await req.json();
 
         if (!rule_text || !category) {
@@ -58,6 +56,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const supabase = getServerSupabase();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
 
@@ -92,6 +91,7 @@ export async function DELETE(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
+        const supabase = getServerSupabase();
         const { id, is_active, rule_text } = await req.json();
 
         if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
@@ -122,3 +122,4 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+

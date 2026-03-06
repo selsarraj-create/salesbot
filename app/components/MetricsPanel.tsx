@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/auth-context';
 
 export default function MetricsPanel() {
+    const { user } = useAuth();
     const [metrics, setMetrics] = useState({
         total: 0,
         new: 0,
@@ -12,6 +14,8 @@ export default function MetricsPanel() {
     });
 
     useEffect(() => {
+        if (!user) return;
+
         async function fetchMetrics() {
             const { data: leads, error } = await supabase
                 .from('leads')
@@ -38,7 +42,7 @@ export default function MetricsPanel() {
             .subscribe();
 
         return () => { channel.unsubscribe(); };
-    }, []);
+    }, [user]);
 
     const convRate = metrics.total > 0 ? Math.round((metrics.booked / metrics.total) * 100) : 0;
     // SVG donut params

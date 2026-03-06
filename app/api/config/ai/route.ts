@@ -1,14 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { getServerSupabase } from '@/lib/supabase/server-client';
 import { NextResponse } from 'next/server';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
+        const supabase = getServerSupabase();
         const { data, error } = await supabase
             .from('ai_config')
             .select('*')
@@ -24,6 +21,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const supabase = getServerSupabase();
         const body = await req.json();
         // Allow partial updates
         const { temperature, top_p, frequency_penalty, full_context_mode, thinking_budget, show_thoughts } = body;
