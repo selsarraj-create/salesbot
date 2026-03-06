@@ -63,18 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        // Get initial session
-        supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
-            setUser(currentUser);
-            if (currentUser) {
-                fetchProfileAndTenant(currentUser.id);
-            }
-            setLoading(false);
-        });
-
-        // Listen for auth changes
+        // Only use onAuthStateChange — it fires INITIAL_SESSION on setup.
+        // Do NOT also call getUser() — that causes lock contention
+        // ("Lock broken by another request with the 'steal' option").
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (_event, session) => {
                 const currentUser = session?.user ?? null;
                 setUser(currentUser);
 
