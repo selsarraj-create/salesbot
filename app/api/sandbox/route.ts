@@ -521,10 +521,47 @@ Respond as Alex:`;
             .replace(/\[\[\[END_THOUGHT\]\]\]/gi, '')
             .trim();
 
-        // Step 4: EMPTY RESPONSE SAFEGUARD
+        // Step 4: EMPTY RESPONSE SAFEGUARD — check thought content as last resort
         if (!responseText || responseText.trim().length === 0) {
-            console.error('[API] FATAL: No response text from model. Parts:', JSON.stringify(responseParts.map((p: any) => ({ thought: p.thought, textLen: p.text?.length }))));
-            responseText = "Thanks for your message! Let me get back to you shortly. 😊";
+            console.warn('[API] Response text empty. Checking thought content for embedded response...');
+
+            // The model sometimes puts EVERYTHING (including the response) inside native thinking
+            // Check if the thought content contains [[[RESPONSE]]] tags
+            if (thoughtContent) {
+                const thoughtResponseMatch = thoughtContent.match(responseRegex);
+                if (thoughtResponseMatch && thoughtResponseMatch[1].trim().length > 0) {
+                    responseText = thoughtResponseMatch[1].trim();
+                    console.log('[API] Recovered response from thought content tags:', responseText.substring(0, 80));
+                } else {
+                    // No tags in thought — take the last meaningful paragraph as the intended response
+                    // (the model's thought usually ends with the actual SMS it planned to send)
+                    const thoughtLines = thoughtContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    // Find lines that look like a response (not analysis/planning)
+                    const candidateLines = thoughtLines.filter(l =>
+                        !l.startsWith('Plan:') &&
+                        !l.startsWith('-') &&
+                        !l.startsWith('I ') &&
+                        !l.startsWith('The ') &&
+                        !l.startsWith('My ') &&
+                        !l.startsWith('CHECK') &&
+                        !l.startsWith('STAGE') &&
+                        !l.includes('need to') &&
+                        !l.includes('should') &&
+                        l.length > 15
+                    );
+                    if (candidateLines.length > 0) {
+                        // Take the last candidate — usually the final response the model composed
+                        responseText = candidateLines[candidateLines.length - 1];
+                        console.log('[API] Extracted response from thought tail:', responseText.substring(0, 80));
+                    }
+                }
+            }
+
+            // If STILL empty after all recovery attempts
+            if (!responseText || responseText.trim().length === 0) {
+                console.error('[API] FATAL: No response recoverable. Parts:', JSON.stringify(responseParts.map((p: any) => ({ thought: p.thought, textLen: p.text?.length }))));
+                responseText = "Thanks for your message! Let me get back to you shortly. 😊";
+            }
         }
 
         // --- POST-GENERATION CHECKS ---
