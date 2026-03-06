@@ -6,13 +6,35 @@ import TestChatWindow from '../components/TestChatWindow';
 import { supabase } from '@/lib/supabase/client';
 import type { Lead } from '@/lib/supabase/types';
 import { Badge } from '@/components/ui/badge';
-import { Trash2 } from 'lucide-react';
+import { Trash2, CheckSquare, Square, MinusSquare } from 'lucide-react';
 
 export default function TestingPage() {
     const [testLeads, setTestLeads] = useState<Lead[]>([]);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
+
+    const isAllChecked = testLeads.length > 0 && checkedIds.size === testLeads.length;
+    const isSomeChecked = checkedIds.size > 0 && checkedIds.size < testLeads.length;
+
+    const toggleCheck = (e: React.MouseEvent, leadId: string) => {
+        e.stopPropagation();
+        setCheckedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(leadId)) next.delete(leadId);
+            else next.add(leadId);
+            return next;
+        });
+    };
+
+    const toggleAll = () => {
+        if (isAllChecked || isSomeChecked) {
+            setCheckedIds(new Set());
+        } else {
+            setCheckedIds(new Set(testLeads.map(l => l.id)));
+        }
+    };
 
     const fetchTestLeads = async () => {
         setLoading(true);
@@ -30,63 +52,45 @@ export default function TestingPage() {
         setLoading(false);
     };
 
-    const deleteAllTestLeads = async () => {
-        if (!confirm(`Delete all ${testLeads.length} test leads and their messages? This cannot be undone.`)) return;
-
+    const deleteByIds = async (ids: string[]) => {
         setDeleting(true);
         try {
-            // Get all test lead IDs
-            const leadIds = testLeads.map(l => l.id);
-
-            // Delete messages first (foreign key)
             const { error: msgError } = await supabase
                 .from('messages')
                 .delete()
-                .in('lead_id', leadIds);
-
+                .in('lead_id', ids);
             if (msgError) console.error('Error deleting messages:', msgError);
 
-            // Delete the leads
             const { error: leadError } = await supabase
                 .from('leads')
                 .delete()
-                .eq('is_test', true);
+                .in('id', ids);
 
             if (leadError) {
                 console.error('Error deleting leads:', leadError);
-                alert('Failed to delete test leads');
+                alert('Failed to delete leads');
             } else {
-                setSelectedLead(null);
-                setTestLeads([]);
+                if (selectedLead && ids.includes(selectedLead.id)) setSelectedLead(null);
+                setTestLeads(prev => prev.filter(l => !ids.includes(l.id)));
+                setCheckedIds(new Set());
             }
         } catch (err) {
-            console.error('Delete all error:', err);
-            alert('Failed to delete test leads');
+            console.error('Delete error:', err);
+            alert('Failed to delete leads');
         } finally {
             setDeleting(false);
         }
     };
 
-    const deleteSingleLead = async (e: React.MouseEvent, leadId: string) => {
-        e.stopPropagation(); // Don't select the lead
-        if (!confirm('Delete this test lead and its messages?')) return;
+    const deleteSelected = async () => {
+        const ids = Array.from(checkedIds);
+        if (!confirm(`Delete ${ids.length} selected test lead${ids.length > 1 ? 's' : ''} and their messages? This cannot be undone.`)) return;
+        await deleteByIds(ids);
+    };
 
-        try {
-            // Delete messages first
-            await supabase.from('messages').delete().eq('lead_id', leadId);
-            // Delete the lead
-            const { error } = await supabase.from('leads').delete().eq('id', leadId);
-
-            if (error) {
-                alert('Failed to delete lead');
-            } else {
-                if (selectedLead?.id === leadId) setSelectedLead(null);
-                setTestLeads(prev => prev.filter(l => l.id !== leadId));
-            }
-        } catch (err) {
-            console.error('Delete error:', err);
-            alert('Failed to delete lead');
-        }
+    const deleteAllTestLeads = async () => {
+        if (!confirm(`Delete all ${testLeads.length} test leads and their messages? This cannot be undone.`)) return;
+        await deleteByIds(testLeads.map(l => l.id));
     };
 
     useEffect(() => {
@@ -143,17 +147,42 @@ export default function TestingPage() {
                     {/* Test Leads List */}
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-text-dark">Test Leads ({testLeads.length})</h3>
-                            {testLeads.length > 0 && (
-                                <button
-                                    onClick={deleteAllTestLeads}
-                                    disabled={deleting}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors disabled:opacity-50"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    {deleting ? 'Deleting...' : 'Delete All'}
-                                </button>
-                            )}
+                            <div className="flex items-center gap-3">
+                                {testLeads.length > 0 && (
+                                    <button onClick={toggleAll} className="text-text-muted-dark hover:text-brand-blue transition-colors" title={isAllChecked ? 'Deselect all' : 'Select all'}>
+                                        {isAllChecked ? (
+                                            <CheckSquare className="w-5 h-5 text-brand-blue" />
+                                        ) : isSomeChecked ? (
+                                            <MinusSquare className="w-5 h-5 text-brand-blue" />
+                                        ) : (
+                                            <Square className="w-5 h-5" />
+                                        )}
+                                    </button>
+                                )}
+                                <h3 className="font-semibold text-text-dark">Test Leads ({testLeads.length})</h3>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {checkedIds.size > 0 && (
+                                    <button
+                                        onClick={deleteSelected}
+                                        disabled={deleting}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-rose-500 hover:bg-rose-600 rounded-lg transition-colors disabled:opacity-50 shadow-sm"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        {deleting ? 'Deleting...' : `Delete Selected (${checkedIds.size})`}
+                                    </button>
+                                )}
+                                {testLeads.length > 0 && checkedIds.size === 0 && (
+                                    <button
+                                        onClick={deleteAllTestLeads}
+                                        disabled={deleting}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors disabled:opacity-50"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        {deleting ? 'Deleting...' : 'Delete All'}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         {loading ? (
                             <p className="text-sm text-text-muted-dark">Loading...</p>
@@ -161,32 +190,43 @@ export default function TestingPage() {
                             <p className="text-sm text-text-muted-dark">No test leads yet. Create one above!</p>
                         ) : (
                             <div className="space-y-2.5">
-                                {testLeads.map((lead) => (
-                                    <button
-                                        key={lead.id}
-                                        onClick={() => setSelectedLead(lead)}
-                                        className={`w-full text-left p-3.5 rounded-xl border transition-all group ${selectedLead?.id === lead.id
-                                            ? 'bg-brand-blue/5 border-brand-blue ring-1 ring-brand-blue/50 shadow-sm'
-                                            : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-brand-blue/30'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between mb-1.5">
-                                            <p className="font-medium text-[15px] text-text-dark">{lead.name || lead.phone}</p>
-                                            <div className="flex items-center gap-2">
-                                                <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-600 border-yellow-200">TEST</Badge>
-                                                <span
-                                                    onClick={(e) => deleteSingleLead(e, lead.id)}
-                                                    className="p-1 rounded-md text-gray-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                                                    title="Delete this lead"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </span>
+                                {testLeads.map((lead) => {
+                                    const isChecked = checkedIds.has(lead.id);
+                                    return (
+                                        <div
+                                            key={lead.id}
+                                            className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all group cursor-pointer ${isChecked
+                                                    ? 'bg-rose-50/50 border-rose-200'
+                                                    : selectedLead?.id === lead.id
+                                                        ? 'bg-brand-blue/5 border-brand-blue ring-1 ring-brand-blue/50 shadow-sm'
+                                                        : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-brand-blue/30'
+                                                }`}
+                                            onClick={() => setSelectedLead(lead)}
+                                        >
+                                            {/* Checkbox */}
+                                            <button
+                                                onClick={(e) => toggleCheck(e, lead.id)}
+                                                className="mt-0.5 shrink-0 text-text-muted-dark hover:text-brand-blue transition-colors"
+                                            >
+                                                {isChecked ? (
+                                                    <CheckSquare className="w-4.5 h-4.5 text-rose-500" />
+                                                ) : (
+                                                    <Square className="w-4.5 h-4.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                )}
+                                            </button>
+
+                                            {/* Lead info */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <p className="font-medium text-[15px] text-text-dark truncate">{lead.name || lead.phone}</p>
+                                                    <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-600 border-yellow-200 shrink-0">TEST</Badge>
+                                                </div>
+                                                <p className="text-xs font-mono text-text-muted-dark/80">{lead.lead_code}</p>
+                                                <p className="text-xs font-medium text-text-muted-dark mt-1.5">{lead.status}</p>
                                             </div>
                                         </div>
-                                        <p className="text-xs font-mono text-text-muted-dark/80">{lead.lead_code}</p>
-                                        <p className="text-xs font-medium text-text-muted-dark mt-1.5">{lead.status}</p>
-                                    </button>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
@@ -203,4 +243,3 @@ export default function TestingPage() {
         </div>
     );
 }
-
