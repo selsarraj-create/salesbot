@@ -1,16 +1,16 @@
 /**
  * Browser-side Supabase client.
+ * Uses standard createClient with localStorage for session management.
  * Auth-aware — passes JWT automatically for RLS enforcement.
  * Includes Realtime subscription helpers.
  */
 
-import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from './types';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * Subscribe to real-time changes on the messages table.
