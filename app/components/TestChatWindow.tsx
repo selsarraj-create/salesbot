@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase, subscribeToMessages } from '@/lib/supabase/client';
 import type { Message, Lead } from '@/lib/supabase/types';
 
-import { Trash2, Download } from 'lucide-react';
+import { Trash2, Download, Smartphone } from 'lucide-react';
 
 interface TestChatWindowProps {
     lead: Lead | null;
@@ -23,6 +23,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const [deleting, setDeleting] = useState(false);
     const [simulateLatency, setSimulateLatency] = useState(true);
     const [thinking, setThinking] = useState(false);
+    const [whatsappMode, setWhatsappMode] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -111,14 +112,42 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
 
             if (res.ok) {
                 const data = await res.json();
-                if (data.response) {
-                    // We rely on subscription to add the message
+                // If WhatsApp mode is ON, also send the opener via WhatsApp
+                if (whatsappMode && data.response && lead?.phone) {
+                    await sendWhatsApp(lead.phone, data.response);
                 }
             }
         } catch (e) {
             console.error('Failed to initiate:', e);
         } finally {
             setThinking(false);
+        }
+    };
+
+    // Send a message via Twilio WhatsApp
+    const sendWhatsApp = async (to: string, message: string) => {
+        try {
+            const res = await fetch('/api/whatsapp-send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ to, message })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                console.error('WhatsApp send failed:', err);
+            } else {
+                console.log('WhatsApp message sent successfully');
+            }
+        } catch (e) {
+            console.error('WhatsApp send error:', e);
+        }
+    };
+
+    // Toggle WhatsApp mode on/off and update the lead in Supabase
+    const handleWhatsAppToggle = async (enabled: boolean) => {
+        setWhatsappMode(enabled);
+        if (lead) {
+            await (supabase as any).from('leads').update({ whatsapp_mode: enabled }).eq('id', lead.id);
         }
     };
 
@@ -256,6 +285,9 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                         <CardTitle className="flex items-center gap-2 text-text-primary">
                             {lead.name || lead.phone}
                             <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
+                            {whatsappMode && (
+                                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">📱 WhatsApp</Badge>
+                            )}
                         </CardTitle>
                         <CardDescription className="text-text-secondary">
                             {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
@@ -346,34 +378,55 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             </CardContent>
 
             <div className="border-t border-surface-light p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                    <Switch
-                        checked={simulateLatency}
-                        onCheckedChange={setSimulateLatency}
-                        id="latency-toggle"
-                    />
-                    <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
-                        Simulate SMS Latency (1-3s delay)
-                    </label>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={simulateLatency}
+                            onCheckedChange={setSimulateLatency}
+                            id="latency-toggle"
+                            disabled={whatsappMode}
+                        />
+                        <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
+                            Simulate SMS Latency
+                        </label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            checked={whatsappMode}
+                            onCheckedChange={handleWhatsAppToggle}
+                            id="whatsapp-toggle"
+                            className="data-[state=checked]:bg-green-500"
+                        />
+                        <label htmlFor="whatsapp-toggle" className="text-sm cursor-pointer text-text-primary flex items-center gap-1">
+                            <Smartphone className="h-4 w-4" /> WhatsApp Mode
+                        </label>
+                    </div>
                 </div>
 
-                <div className="flex gap-2">
-                    <Input
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
-                        placeholder="Type your message..."
-                        disabled={sending}
-                        className="bg-charcoal border-surface-light text-text-primary"
-                    />
-                    <Button
-                        onClick={handleSendMessage}
-                        disabled={sending || !inputMessage.trim()}
-                        className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
-                    >
-                        {sending ? 'Sending...' : 'Send'}
-                    </Button>
-                </div>
+                {whatsappMode ? (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
+                        <p className="text-sm text-green-400 font-medium">📱 WhatsApp Mode Active</p>
+                        <p className="text-xs text-green-300/70 mt-1">Reply from your phone. Messages will appear here in real-time.</p>
+                    </div>
+                ) : (
+                    <div className="flex gap-2">
+                        <Input
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
+                            placeholder="Type your message..."
+                            disabled={sending}
+                            className="bg-charcoal border-surface-light text-text-primary"
+                        />
+                        <Button
+                            onClick={handleSendMessage}
+                            disabled={sending || !inputMessage.trim()}
+                            className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
+                        >
+                            {sending ? 'Sending...' : 'Send'}
+                        </Button>
+                    </div>
+                )}
             </div>
         </Card>
     );

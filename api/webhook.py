@@ -58,8 +58,8 @@ async def twilio_webhook(
         lead_name = lead.get("name")
         current_status = lead.get("status", "New")
         
-        # SAFETY CHECK: Skip processing for test leads to prevent accidental messaging costs
-        if lead.get("is_test", False):
+        # SAFETY CHECK: Skip processing for test leads UNLESS whatsapp_mode is enabled
+        if lead.get("is_test", False) and not lead.get("whatsapp_mode", False):
             print(f"⚠️ Test lead detected: {phone}. Skipping Twilio response to prevent messaging costs.")
             twiml = MessagingResponse()
             return Response(content=str(twiml), media_type="application/xml")
