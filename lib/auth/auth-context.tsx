@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { UserProfile, Tenant } from '@/lib/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-const PUBLIC_PATHS = ['/login', '/signup', '/homepage'];
+const PUBLIC_PATHS = ['/login', '/signup', '/homepage', '/diag'];
 
 interface AuthContextType {
     user: User | null;
