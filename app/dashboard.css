@@ -352,6 +352,32 @@
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
+.rd-settings-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.rd-settings-input-wrap .rd-settings-input {
+    padding-right: 44px;
+}
+
+.rd-settings-eye {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.rd-settings-eye:hover {
+    opacity: 1;
+}
+
 .rd-settings-hint {
     display: block;
     font-size: 12px;

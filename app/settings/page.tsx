@@ -17,6 +17,8 @@ export default function SettingsPage() {
     const [passwordSaving, setPasswordSaving] = useState(false);
     const [message, setMessage] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
+    const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
 
     useEffect(() => {
         if (tenant) {
@@ -161,24 +163,44 @@ export default function SettingsPage() {
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">New Password</label>
-                        <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="••••••••"
-                        />
+                        <div className="rd-settings-input-wrap">
+                            <input
+                                type={showNewPw ? 'text' : 'password'}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="rd-settings-input"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                className="rd-settings-eye"
+                                onClick={() => setShowNewPw(!showNewPw)}
+                                aria-label="Toggle password visibility"
+                            >
+                                {showNewPw ? '🙈' : '👁️'}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Confirm New Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="••••••••"
-                        />
+                        <div className="rd-settings-input-wrap">
+                            <input
+                                type={showConfirmPw ? 'text' : 'password'}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="rd-settings-input"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                className="rd-settings-eye"
+                                onClick={() => setShowConfirmPw(!showConfirmPw)}
+                                aria-label="Toggle password visibility"
+                            >
+                                {showConfirmPw ? '🙈' : '👁️'}
+                            </button>
+                        </div>
                     </div>
 
                     {passwordMessage && (
