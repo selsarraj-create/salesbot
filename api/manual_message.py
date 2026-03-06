@@ -1,6 +1,6 @@
 """
 Manual message sending endpoint for human agent takeover.
-Allows dashboard users to send SMS messages directly to leads.
+Allows dashboard users to send WhatsApp messages directly to leads.
 """
 
 from fastapi import FastAPI, HTTPException
@@ -31,7 +31,7 @@ class ManualMessageRequest(BaseModel):
 @app.post("/api/manual_message")
 async def send_manual_message(request: ManualMessageRequest):
     """
-    Send manual message from human agent to lead.
+    Send manual WhatsApp message from human agent to lead.
     Only works when lead is in manual mode.
     
     Args:
@@ -56,11 +56,11 @@ async def send_manual_message(request: ManualMessageRequest):
         
         phone = lead["phone"]
         
-        # Send SMS via Twilio
+        # Send WhatsApp message via Twilio
         message = twilio_client.messages.create(
             body=request.message,
-            from_=TWILIO_PHONE,
-            to=phone
+            from_=f"whatsapp:{TWILIO_PHONE}",
+            to=f"whatsapp:{phone}"
         )
         
         # Save message to database

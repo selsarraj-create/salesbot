@@ -1,5 +1,5 @@
 """
-Enhanced FastAPI webhook endpoint for Twilio SMS integration.
+Enhanced FastAPI webhook endpoint for Twilio WhatsApp integration.
 Handles incoming messages with manual takeover support and enhanced status workflow.
 """
 
@@ -25,13 +25,13 @@ from .utils.sales_prompts import get_compliance_message
 
 load_dotenv()
 
-app = FastAPI(title="SMS Sales Bot", version="2.0.0")
+app = FastAPI(title="WhatsApp Sales Bot", version="3.0.0")
 
 
 @app.get("/")
 async def root():
     """Health check endpoint."""
-    return {"status": "ok", "service": "SMS Sales Bot with Dashboard", "version": "2.0.0"}
+    return {"status": "ok", "service": "WhatsApp Sales Bot with Dashboard", "version": "3.0.0"}
 
 
 @app.post("/api/webhook")
@@ -41,11 +41,11 @@ async def twilio_webhook(
     MessageSid: str = Form(...)
 ):
     """
-    Enhanced Twilio SMS webhook endpoint with manual takeover support.
-    Receives incoming SMS, processes with AI (if not in manual mode), and returns response.
+    Enhanced Twilio WhatsApp webhook endpoint with manual takeover support.
+    Receives incoming WhatsApp messages, processes with AI (if not in manual mode), and returns response.
     
     Args:
-        From: Sender's phone number (E.164 format)
+        From: Sender's phone number (whatsapp:+E.164 format, prefix stripped before storage)
         Body: Message content
         MessageSid: Twilio message identifier
         
@@ -53,11 +53,11 @@ async def twilio_webhook(
         TwiML response for Twilio
     """
     try:
-        # Normalize phone number
-        phone = From.strip()
+        # Normalize phone number — strip whatsapp: prefix for clean E.164 storage
+        phone = From.strip().replace("whatsapp:", "")
         incoming_message = Body.strip()
         
-        print(f"Received SMS from {phone}: {incoming_message}")
+        print(f"Received WhatsApp from {phone}: {incoming_message}")
         
         # Get or create lead
         lead = get_or_create_lead(phone)
@@ -66,7 +66,7 @@ async def twilio_webhook(
         
         # SAFETY CHECK: Skip processing for test leads to prevent accidental SMS costs
         if lead.get("is_test", False):
-            print(f"⚠️ Test lead detected: {phone}. Skipping Twilio response to prevent SMS costs.")
+            print(f"⚠️ Test lead detected: {phone}. Skipping Twilio response to prevent messaging costs.")
             twiml = MessagingResponse()
             return Response(content=str(twiml), media_type="application/xml")
         

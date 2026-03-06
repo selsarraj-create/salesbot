@@ -1,6 +1,6 @@
-# Full-Stack SMS Sales Bot & Real-Time Dashboard
+# Full-Stack WhatsApp Sales Bot & Real-Time Dashboard
 
-Production-grade SMS conversational AI sales bot with real-time monitoring dashboard. Built with Next.js, FastAPI, Gemini 3 Pro, and Supabase Realtime.
+Production-grade WhatsApp conversational AI sales bot with real-time monitoring dashboard. Built with Next.js, FastAPI, Gemini 3 Pro, and Supabase Realtime.
 
 ## 🎯 Features
 
@@ -9,7 +9,8 @@ Production-grade SMS conversational AI sales bot with real-time monitoring dashb
 - **Senior Studio Manager Persona**: Professional, high-energy sales approach
 - **Distance Objection Handling**: "90% of pros started here" rebuttal strategy
 - **Status-Based Workflow**: New → Qualifying → Booking_Offered → Booked
-- **UK SMS Compliance**: Studio name and STOP opt-out in all messages
+- **UK WhatsApp Compliance**: Studio name and STOP opt-out in all messages
+- **Rich Messaging**: Up to 4,096 characters per message (vs 160 for SMS)
 
 ### Real-Time Dashboard
 - **Live Lead Monitoring**: Color-coded sidebar with real-time status updates
@@ -17,6 +18,8 @@ Production-grade SMS conversational AI sales bot with real-time monitoring dashb
 - **Manual Takeover**: Pause AI and send messages as human agent
 - **Analytics**: Metrics with lead code filtering (#FB2024, #IG2024, etc.)
 - **Supabase Realtime**: Sub-second updates without polling
+
+> **Note**: This bot uses Twilio's WhatsApp API for messaging. WhatsApp provides better reach in the UK market (~95% smartphone penetration) and supports longer, richer messages.
 
 ## 🏗️ Architecture
 
@@ -47,7 +50,7 @@ Production-grade SMS conversational AI sales bot with real-time monitoring dashb
          │                                    │
          ▼                                    ▼
 ┌──────────────┐                    ┌──────────────┐
-│ Twilio SMS   │                    │  Gemini 3    │
+│Twilio WhatsApp│                    │  Gemini 3    │
 │   Gateway    │                    │     Pro      │
 └──────────────┘                    └──────────────┘
 ```
@@ -56,7 +59,7 @@ Production-grade SMS conversational AI sales bot with real-time monitoring dashb
 
 - **Vercel Account**: For Next.js + API deployment
 - **Supabase Account**: For PostgreSQL + Realtime
-- **Twilio Account**: For SMS gateway
+- **Twilio Account**: With WhatsApp Sender configured
 - **Google AI API Key**: For Gemini 3 Pro
 
 ## 🚀 Quick Start
@@ -114,9 +117,9 @@ STUDIO_PHONE=+447700900000
 # Run Next.js development server
 npm run dev
 
-# In another terminal, test the API
+# In another terminal, test the API (simulating WhatsApp webhook format)
 curl -X POST http://localhost:3000/api/webhook \
-  -d "From=+447700900000" \
+  -d "From=whatsapp:+447700900000" \
   -d "Body=Hi, I'm interested in modeling" \
   -d "MessageSid=test123"
 ```
@@ -136,15 +139,16 @@ vercel
 # Settings → Environment Variables → Add all from .env
 ```
 
-### 6. Configure Twilio Webhook
+### 6. Configure Twilio WhatsApp Sender
 
-1. Twilio Console → Phone Numbers → Your Number
-2. Messaging → Webhook URL:
+1. Twilio Console → Messaging → WhatsApp Senders
+2. Connect your WhatsApp-enabled number (or use Sandbox for testing)
+3. Set incoming webhook URL:
    ```
    https://your-app.vercel.app/api/webhook
    ```
-3. HTTP Method: `POST`
-4. Save
+4. HTTP Method: `POST`
+5. Save
 
 ## 📁 Project Structure
 
@@ -163,7 +167,7 @@ d:/SALESBOT/
 │       ├── client.ts            # Supabase browser client
 │       └── types.ts             # TypeScript types
 ├── api/                          # FastAPI backend
-│   ├── webhook.py               # Twilio SMS webhook
+│   ├── webhook.py               # Twilio WhatsApp webhook
 │   ├── manual_message.py        # Manual messaging endpoint
 │   ├── toggle_takeover.py       # Takeover control
 │   └── utils/
@@ -241,11 +245,11 @@ Objection_Distance → Human_Required
 ## 🔧 API Endpoints
 
 ### POST /api/webhook
-Twilio SMS webhook. Receives incoming messages, processes with AI, returns TwiML response.
+Twilio WhatsApp webhook. Receives incoming messages, processes with AI, returns TwiML response.
 
 **Request** (from Twilio):
 ```
-From: +447700900000
+From: whatsapp:+447700900000
 Body: "I'm interested but you're too far"
 MessageSid: SM1234567890
 ```
@@ -322,10 +326,10 @@ Enable/disable manual mode.
 
 ## 🧪 Testing
 
-### Test SMS Flow
+### Test WhatsApp Flow
 
 ```bash
-# Send test SMS to your Twilio number
+# Send test WhatsApp message to your Twilio number
 # Expected: AI responds with qualification questions
 
 # Test distance objection
@@ -336,7 +340,7 @@ Enable/disable manual mode.
 ### Test Dashboard
 
 1. Open http://localhost:3000
-2. Send SMS to Twilio number
+2. Send WhatsApp message to Twilio number
 3. Verify lead appears in sidebar
 4. Click lead to view conversation
 5. Test takeover button
@@ -346,7 +350,7 @@ Enable/disable manual mode.
 ### Test Realtime
 
 1. Open dashboard in two browser windows
-2. Send SMS in one window
+2. Send WhatsApp message from your phone
 3. Verify message appears in both windows instantly
 
 ## 🚨 Troubleshooting
@@ -360,8 +364,9 @@ Enable/disable manual mode.
 ### "Manual message fails"
 
 - Verify lead is in manual mode (`is_manual_mode = true`)
-- Check `TWILIO_PHONE_NUMBER` is set correctly
+- Check `TWILIO_PHONE_NUMBER` is set to a WhatsApp-enabled number
 - Ensure Twilio credentials are valid
+- Verify WhatsApp Sender is properly configured in Twilio Console
 
 ### "AI not responding"
 
@@ -374,7 +379,7 @@ Enable/disable manual mode.
 - **Gemini 3 Pro**: Reasoning mode may incur higher costs
 - **Vercel**: 30s timeout may increase function costs
 - **Supabase**: Realtime connections count toward plan limits
-- **Twilio**: UK SMS ~$0.04 per message
+- **Twilio**: WhatsApp messages ~$0.004 per message (10x cheaper than SMS)
 
 ## 📚 Documentation
 
