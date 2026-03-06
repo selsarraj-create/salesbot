@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import AppShell from '../components/AppShell';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +28,7 @@ export default function TrainingPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-main-bg p-6">
+        <AppShell title="AI Command Center">
             {/* Header */}
             <div className="max-w-7xl mx-auto mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -78,6 +79,6 @@ export default function TrainingPage() {
                 {activeTab === 'simulator' && <FlightSimulator />}
                 {activeTab === 'analytics' && <AnalyticsDashboard />}
             </div>
-        </div>
+        </AppShell>
     );
 }

@@ -11,8 +11,8 @@ export function Navigation() {
     const router = useRouter();
     const { user, profile, tenant, loading, signOut } = useAuth();
 
-    // Don't render nav on auth pages, marketing homepage, or dashboard (sidebar handles nav)
-    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/homepage')) {
+    // Don't render nav — sidebar handles navigation on all app routes
+    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/homepage') || pathname.startsWith('/testing') || pathname.startsWith('/training')) {
         return null;
     }
 
