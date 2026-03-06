@@ -254,7 +254,7 @@ Generate the opening SMS now.`;
         }
 
         // Extra Logic (Local Guide / Ethics)
-        const locationKeywords = ['parking', 'driving', 'location', 'get there', 'directions', 'train', 'tube', 'bus'];
+        const locationKeywords = ['parking', 'driving', 'location', 'get there', 'directions', 'train', 'tube', 'bus', 'based', 'where', 'address', 'near', 'far'];
         const needsLocationHelp = locationKeywords.some(w => message.toLowerCase().includes(w));
         let localGuideInstruction = needsLocationHelp ?
             `SPECIAL INSTRUCTION: MENTION "I've sent a map guide. Northern Line is easiest, or Regis Road for parking!"` : "";
@@ -485,8 +485,8 @@ Respond as Alex:`;
                 responseText = textAfterThought.trim();
             } else {
                 // Fatal: Model outputted thoughts but NO response text
-                console.warn('Model outputted thoughts but no response text.');
-                // responseText = "..."; // Let it fall through, might be legacy format
+                console.warn('Model outputted thoughts but no response text. Using fallback.');
+                responseText = "Thanks for your patience! Let me check on that for you. 😊";
             }
         }
 
@@ -497,6 +497,12 @@ Respond as Alex:`;
                 thoughtContent = looseMatch[0].trim();
                 responseText = responseText.replace(looseMatch[0], "").trim();
             }
+        }
+
+        // 4. EMPTY RESPONSE SAFEGUARD — never send a blank message
+        if (!responseText || responseText.trim().length === 0) {
+            console.error('[API] EMPTY RESPONSE DETECTED after all parsing. Using fallback.');
+            responseText = "Great question! Let me look into that for you — one moment. 😊";
         }
 
         // --- POST-GENERATION CHECKS ---
