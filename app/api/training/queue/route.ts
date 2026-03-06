@@ -38,13 +38,13 @@ export async function GET(req: Request) {
 
         // 1. Ignore Short Messages (< 15 chars)
         if (ignoreShort) {
-            filteredMessages = filteredMessages.filter(m => m.content.length >= 15);
+            filteredMessages = filteredMessages.filter((m: any) => m.content.length >= 15);
         }
 
         // 2. High Value Filter (Keywords)
         if (filterHighValue) {
             const TRIGGERS = ['price', 'cost', 'how much', 'book', 'appointment', 'schedule', 'location', 'parking', 'drive', 'train'];
-            filteredMessages = filteredMessages.filter(m => {
+            filteredMessages = filteredMessages.filter((m: any) => {
                 const lower = m.content.toLowerCase();
                 // Check if message contains high intent triggers OR has negative sentiment (needs review)
                 const hasTrigger = TRIGGERS.some(t => lower.includes(t));
@@ -58,17 +58,17 @@ export async function GET(req: Request) {
         }
 
         // Fetch lead data
-        const leadIds = Array.from(new Set(filteredMessages.map(m => m.lead_id)));
+        const leadIds = Array.from(new Set(filteredMessages.map((m: any) => m.lead_id)));
         const { data: leads } = await supabase
             .from('leads')
             .select('id, lead_code, status, priority_score, quality_score, manual_score, judge_rationale')
             .in('id', leadIds);
 
-        const leadsMap = new Map(leads?.map(l => [l.id, l]) || []);
+        const leadsMap = new Map(leads?.map((l: any) => [l.id, l]) || []);
 
         // Fetch previous context
-        const richQueue = (await Promise.all(filteredMessages.map(async (msg) => {
-            const leadData = leadsMap.get(msg.lead_id);
+        const richQueue = (await Promise.all(filteredMessages.map(async (msg: any) => {
+            const leadData: any = leadsMap.get(msg.lead_id);
 
             // Check Failure Filter
             if (filterFailuresOnly) {
