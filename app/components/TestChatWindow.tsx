@@ -24,6 +24,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     const [simulateLatency, setSimulateLatency] = useState(true);
     const [thinking, setThinking] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Fetch messages & Subscribe
     useEffect(() => {
@@ -77,10 +78,16 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         };
     }, [lead]);
 
-    // Scroll to bottom
+    // Scroll to bottom (within container only, not the whole page)
+    const scrollToBottom = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+    };
+
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        scrollToBottom();
+    }, [messages, thinking]);
 
     const initiateOutbound = async (leadId: string) => {
         console.log('Initiating outbound conversation for lead:', leadId);
@@ -280,7 +287,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                 </div>
             </CardHeader>
 
-            <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                 {messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-text-secondary">
                         <p>No messages yet. Start the conversation!</p>
