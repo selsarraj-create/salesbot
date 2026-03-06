@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import type { UserProfile, Tenant } from '@/lib/supabase/types';
@@ -34,10 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
     const [loading, setLoading] = useState(true);
+    const hasRedirected = useRef(false);
 
     const fetchProfileAndTenant = async (userId: string) => {
         try {
-            // Fetch user profile
             const { data: profileData } = await supabase
                 .from('user_profiles' as any)
                 .select('*')
@@ -48,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const typedProfile = profileData as unknown as UserProfile;
                 setProfile(typedProfile);
 
-                // Fetch tenant
                 const { data: tenantData } = await supabase
                     .from('tenants' as any)
                     .select('*')
@@ -63,11 +62,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        // Only use onAuthStateChange — it fires INITIAL_SESSION on setup.
-        // Do NOT also call getUser() — that causes lock contention
-        // ("Lock broken by another request with the 'steal' option").
+        let mounted = true;
+
+        // Step 1: Read session from localStorage via getSession() (no API call, no lock)
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!mounted) return;
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                fetchProfileAndTenant(currentUser.id).then(() => {
+                    if (mounted) setLoading(false);
+                });
+            } else {
+                setLoading(false);
+            }
+        });
+
+        // Step 2: Listen for subsequent auth changes (sign-in, sign-out, token refresh)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (_event, session) => {
+            async (event, session) => {
+                // Skip INITIAL_SESSION — already handled by getSession() above
+                if (event === 'INITIAL_SESSION') return;
+                if (!mounted) return;
+
                 const currentUser = session?.user ?? null;
                 setUser(currentUser);
 
@@ -77,23 +94,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setProfile(null);
                     setTenant(null);
                 }
-                setLoading(false);
             }
         );
 
-        return () => subscription.unsubscribe();
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
-    // Client-side auth redirect
+    // Client-side auth redirect — only fires ONCE
     useEffect(() => {
-        if (!loading && !user && !PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
-            // Unauthenticated visitors on root go to the marketing homepage
+        if (!loading && !user && !hasRedirected.current && !PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+            hasRedirected.current = true;
             window.location.href = pathname === '/' ? '/homepage' : '/login';
         }
     }, [loading, user, pathname]);
 
     const signOut = async () => {
-        await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
         setTenant(null);

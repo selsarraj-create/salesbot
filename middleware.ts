@@ -1,47 +1,21 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+/**
+ * Middleware is intentionally a no-op.
+ *
+ * Auth is handled entirely client-side:
+ * - Browser client uses localStorage for session management
+ * - AuthProvider handles redirects for unauthenticated users
+ * - Server API routes use service role key
+ *
+ * The previous middleware called supabase.auth.getUser() to refresh
+ * session cookies, but since we no longer use cookie-based auth,
+ * this was writing empty/stale cookies that interfered with the
+ * browser's localStorage session.
+ */
 
-export async function middleware(request: NextRequest) {
-    // The middleware's ONLY job: refresh the Supabase session cookie if it's expired.
-    // Page-level auth protection is handled client-side by AuthProvider.
-    // This avoids redirect loops on deployed sites where cookies aren't yet available.
-
-    let supabaseResponse = NextResponse.next({
-        request,
-    });
-
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll();
-                },
-                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
-                    );
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    });
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    );
-                },
-            },
-        }
-    );
-
-    // Refresh session — this is the critical part.
-    // It reads the session cookie, refreshes it if expired, and sets updated cookies.
-    await supabase.auth.getUser();
-
-    return supabaseResponse;
+export function middleware() {
+    // Pass through — no auth processing needed
 }
 
 export const config = {
-    matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-    ],
+    matcher: [],
 };
