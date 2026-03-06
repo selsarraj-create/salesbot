@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase, subscribeToLeads } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/auth-context';
 import type { Lead, LeadStatus } from '@/lib/supabase/types';
 
 interface LeadsSidebarProps {
@@ -39,6 +40,12 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const pathname = usePathname();
+    const { user, profile, signOut } = useAuth();
+
+    const handleSignOut = async () => {
+        await signOut();
+        window.location.href = '/login';
+    };
 
     useEffect(() => {
         async function fetchLeads() {
@@ -142,6 +149,20 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                     })
                 )}
             </div>
+
+            {/* ── Sign out ── */}
+            {user && (
+                <div className="rd-sidebar-footer">
+                    <div className="rd-sidebar-user">
+                        <span className="rd-sidebar-user-email">
+                            {profile?.display_name || user.email}
+                        </span>
+                    </div>
+                    <button onClick={handleSignOut} className="rd-sidebar-signout">
+                        🚪 Sign Out
+                    </button>
+                </div>
+            )}
         </aside>
     );
 }
