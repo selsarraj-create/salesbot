@@ -6,11 +6,13 @@ import TestChatWindow from '../components/TestChatWindow';
 import { supabase } from '@/lib/supabase/client';
 import type { Lead } from '@/lib/supabase/types';
 import { Badge } from '@/components/ui/badge';
+import { Trash2 } from 'lucide-react';
 
 export default function TestingPage() {
     const [testLeads, setTestLeads] = useState<Lead[]>([]);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [loading, setLoading] = useState(true);
+    const [deleting, setDeleting] = useState(false);
 
     const fetchTestLeads = async () => {
         setLoading(true);
@@ -26,6 +28,65 @@ export default function TestingPage() {
             setTestLeads(data || []);
         }
         setLoading(false);
+    };
+
+    const deleteAllTestLeads = async () => {
+        if (!confirm(`Delete all ${testLeads.length} test leads and their messages? This cannot be undone.`)) return;
+
+        setDeleting(true);
+        try {
+            // Get all test lead IDs
+            const leadIds = testLeads.map(l => l.id);
+
+            // Delete messages first (foreign key)
+            const { error: msgError } = await supabase
+                .from('messages')
+                .delete()
+                .in('lead_id', leadIds);
+
+            if (msgError) console.error('Error deleting messages:', msgError);
+
+            // Delete the leads
+            const { error: leadError } = await supabase
+                .from('leads')
+                .delete()
+                .eq('is_test', true);
+
+            if (leadError) {
+                console.error('Error deleting leads:', leadError);
+                alert('Failed to delete test leads');
+            } else {
+                setSelectedLead(null);
+                setTestLeads([]);
+            }
+        } catch (err) {
+            console.error('Delete all error:', err);
+            alert('Failed to delete test leads');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const deleteSingleLead = async (e: React.MouseEvent, leadId: string) => {
+        e.stopPropagation(); // Don't select the lead
+        if (!confirm('Delete this test lead and its messages?')) return;
+
+        try {
+            // Delete messages first
+            await supabase.from('messages').delete().eq('lead_id', leadId);
+            // Delete the lead
+            const { error } = await supabase.from('leads').delete().eq('id', leadId);
+
+            if (error) {
+                alert('Failed to delete lead');
+            } else {
+                if (selectedLead?.id === leadId) setSelectedLead(null);
+                setTestLeads(prev => prev.filter(l => l.id !== leadId));
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Failed to delete lead');
+        }
     };
 
     useEffect(() => {
@@ -81,7 +142,19 @@ export default function TestingPage() {
 
                     {/* Test Leads List */}
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-                        <h3 className="font-semibold text-text-dark mb-4">Test Leads ({testLeads.length})</h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-text-dark">Test Leads ({testLeads.length})</h3>
+                            {testLeads.length > 0 && (
+                                <button
+                                    onClick={deleteAllTestLeads}
+                                    disabled={deleting}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    {deleting ? 'Deleting...' : 'Delete All'}
+                                </button>
+                            )}
+                        </div>
                         {loading ? (
                             <p className="text-sm text-text-muted-dark">Loading...</p>
                         ) : testLeads.length === 0 ? (
@@ -92,14 +165,23 @@ export default function TestingPage() {
                                     <button
                                         key={lead.id}
                                         onClick={() => setSelectedLead(lead)}
-                                        className={`w-full text-left p-3.5 rounded-xl border transition-all ${selectedLead?.id === lead.id
+                                        className={`w-full text-left p-3.5 rounded-xl border transition-all group ${selectedLead?.id === lead.id
                                             ? 'bg-brand-blue/5 border-brand-blue ring-1 ring-brand-blue/50 shadow-sm'
                                             : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-brand-blue/30'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-1.5">
                                             <p className="font-medium text-[15px] text-text-dark">{lead.name || lead.phone}</p>
-                                            <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-600 border-yellow-200">TEST</Badge>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-600 border-yellow-200">TEST</Badge>
+                                                <span
+                                                    onClick={(e) => deleteSingleLead(e, lead.id)}
+                                                    className="p-1 rounded-md text-gray-300 hover:text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                                                    title="Delete this lead"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </span>
+                                            </div>
                                         </div>
                                         <p className="text-xs font-mono text-text-muted-dark/80">{lead.lead_code}</p>
                                         <p className="text-xs font-medium text-text-muted-dark mt-1.5">{lead.status}</p>
@@ -114,10 +196,11 @@ export default function TestingPage() {
                 <div className="lg:col-span-2 h-[calc(100vh-200px)]">
                     <TestChatWindow
                         lead={selectedLead}
-                        onDelete={() => setSelectedLead(null)}
+                        onDelete={() => { setSelectedLead(null); fetchTestLeads(); }}
                     />
                 </div>
             </div>
         </div>
     );
 }
+
