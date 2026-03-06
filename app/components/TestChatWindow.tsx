@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase, subscribeToMessages } from '@/lib/supabase/client';
 import type { Message, Lead } from '@/lib/supabase/types';
 
-import { Trash2 } from 'lucide-react';
+import { Trash2, Download } from 'lucide-react';
 
 interface TestChatWindowProps {
     lead: Lead | null;
@@ -191,6 +191,43 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         }
     };
 
+    const handleExportChat = () => {
+        if (!lead || messages.length === 0) return;
+
+        const lines: string[] = [
+            `=== Chat Export: ${lead.name || lead.phone} ===`,
+            `Lead Code: ${lead.lead_code}`,
+            `Status: ${lead.status}`,
+            `Exported: ${new Date().toLocaleString()}`,
+            `Total Messages: ${messages.length}`,
+            '='.repeat(50),
+            ''
+        ];
+
+        messages.forEach((msg) => {
+            const time = msg.timestamp ? new Date(msg.timestamp).toLocaleString() : 'N/A';
+            const sender = msg.sender_type === 'lead' ? 'Lead' : (msg.sender_type as string) === 'human' ? 'Human' : 'Bot';
+
+            if (msg.thought_content) {
+                lines.push(`[THOUGHT @ ${time}]`);
+                lines.push(msg.thought_content);
+                lines.push('');
+            }
+
+            lines.push(`[${sender} @ ${time}]`);
+            lines.push(msg.content);
+            lines.push('');
+        });
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_${lead.lead_code || lead.id}_${new Date().toISOString().slice(0, 10)}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
     if (!lead) {
         return (
             <Card className="h-full bg-surface border-surface-light">
@@ -217,17 +254,29 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                             {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
                         </CardDescription>
                     </div>
-                    {onDelete && (
+                    <div className="flex items-center gap-1">
                         <Button
                             variant="ghost"
                             size="icon"
-                            onClick={handleDeleteLead}
-                            disabled={deleting}
-                            className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
+                            onClick={handleExportChat}
+                            disabled={messages.length === 0}
+                            title="Export Chat"
+                            className="text-text-secondary hover:text-electric-cyan hover:bg-electric-cyan/10"
                         >
-                            <Trash2 className="h-5 w-5" />
+                            <Download className="h-5 w-5" />
                         </Button>
-                    )}
+                        {onDelete && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleDeleteLead}
+                                disabled={deleting}
+                                className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
+                            >
+                                <Trash2 className="h-5 w-5" />
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </CardHeader>
 
