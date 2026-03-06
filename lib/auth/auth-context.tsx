@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { UserProfile, Tenant } from '@/lib/supabase/types';
 import type { User } from '@supabase/supabase-js';
 
-const PUBLIC_PATHS = ['/login', '/signup'];
+const PUBLIC_PATHS = ['/login', '/signup', '/homepage'];
 
 interface AuthContextType {
     user: User | null;
@@ -94,7 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Client-side auth redirect
     useEffect(() => {
         if (!loading && !user && !PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
-            window.location.href = '/login';
+            // Unauthenticated visitors on root go to the marketing homepage
+            window.location.href = pathname === '/' ? '/homepage' : '/login';
         }
     }, [loading, user, pathname]);
 
