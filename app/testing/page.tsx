@@ -58,6 +58,19 @@ export default function TestingPage() {
     const deleteByIds = async (ids: string[]) => {
         setDeleting(true);
         try {
+            // 1. Get message IDs for these leads
+            const { data: msgs } = await supabase
+                .from('messages')
+                .select('id')
+                .in('lead_id', ids);
+            const msgIds = (msgs || []).map((m: any) => m.id);
+
+            // 2. Delete training_feedback (FK → messages)
+            if (msgIds.length > 0) {
+                await supabase.from('training_feedback').delete().in('message_id', msgIds);
+            }
+
+            // 3. Delete messages (FK → leads)
             const { error: msgError } = await supabase
                 .from('messages')
                 .delete()

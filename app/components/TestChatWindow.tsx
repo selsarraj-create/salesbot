@@ -160,7 +160,18 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
 
         setDeleting(true);
         try {
-            // Delete messages first (foreign key constraint)
+            // Delete training_feedback first (FK → messages)
+            const { data: msgs } = await supabase
+                .from('messages')
+                .select('id')
+                .eq('lead_id', lead.id);
+            const msgIds = (msgs || []).map((m: any) => m.id);
+
+            if (msgIds.length > 0) {
+                await supabase.from('training_feedback').delete().in('message_id', msgIds);
+            }
+
+            // Delete messages (FK → leads)
             const { error: msgError } = await supabase
                 .from('messages')
                 .delete()
