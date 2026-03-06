@@ -414,10 +414,15 @@ Generate the next response.
    - WRAP THIS IN DELIMITERS: [[[THOUGHT]]] ... [[[END_THOUGHT]]]
    - CHECK: Do I already have the Name/Age? If YES, skip to Date/Time.
    - CHECK: What is the CURRENT CUSTOMER MESSAGE asking or saying? 
-   - CRITICAL: If the CURRENT CUSTOMER MESSAGE asks a question (e.g. location, price), ANSWER IT FIRST before pivoting. DO NOT re-answer questions from the CHAT HISTORY.
+   - CRITICAL RULE — CLARIFICATION QUESTIONS: If the customer is asking a clarification question about something YOU just said (e.g. "what investment?", "what do you mean?", "how much?"), you MUST:
+     a) ONLY answer their clarification question clearly and concisely.
+     b) Then RE-ASK the original question you were waiting on (e.g. "Does that make sense?" or "Are you in a position to manage that?").
+     c) DO NOT advance to the next stage. You are STILL on the current stage until they confirm/answer your original question.
+   - CRITICAL RULE — QUESTIONS: If the CURRENT CUSTOMER MESSAGE asks a NEW question (e.g. location, price), ANSWER IT FIRST then pivot back to the current stage. DO NOT re-answer questions from the CHAT HISTORY.
 2. THEN, write the Final SMS Response.
    - WRAP THIS IN DELIMITERS: [[[RESPONSE]]] ... [[[END_RESPONSE]]]
    - Strict 2-sentence limit for SMS.
+   - ONE STAGE PER TURN. Never combine two stage questions in one message.
 
 Respond as Alex:`;
 
