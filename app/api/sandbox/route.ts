@@ -220,7 +220,7 @@ Generate the opening SMS now.`;
         let dynamicBehaviors = "";
         let dynamicConstraints = "";
         if (rulesResult.data) {
-            rulesResult.data.forEach(r => {
+            rulesResult.data.forEach((r: any) => {
                 if (r.category === 'behavior') dynamicBehaviors += `- [DYNAMIC RULE]: ${r.rule_text}\n`;
                 if (r.category === 'constraint') dynamicConstraints += `- [RESTRICTION]: ${r.rule_text}\n`;
             });
