@@ -237,10 +237,11 @@ Generate the opening SMS now.`;
         }
 
         // --- DEMENTIA FIX (Context Injection) ---
-        // Ensure the CURRENT user message is in the history, even if DB insert is pending.
-        const userMsgPreview = `Customer: ${message.trim()}`;
+        // Instead of ONLY putting it in chatHistory, we also explicitly isolate it for the prompt.
+        let userMsgPreview = `Customer: ${message.trim()}`;
+        // Only append to history if there is actual history and it's not a brand new start, 
+        // to avoid duplicating it if DB somehow caught up.
         if (!chatHistory.includes(message.trim())) {
-            console.log('[API] Injecting pending user message into context...');
             chatHistory += `${userMsgPreview}\n`;
         }
 
@@ -402,15 +403,21 @@ ${knowledgeContext}
 ${goldStandardContext}
 ${prepContext}
 
-CHAT HISTORY:
+CHAT HISTORY (FOR CONTEXT ONLY):
 ${chatHistory}
+
+=======================================
+CURRENT CUSTOMER MESSAGE TO RESPOND TO:
+Customer: "${message.trim()}"
+=======================================
 
 INSTRUCTION:
 Generate the next response.
 1. FIRST, formulate a "Thought Process" (internal monologue).
    - WRAP THIS IN DELIMITERS: [[[THOUGHT]]] ... [[[END_THOUGHT]]]
    - CHECK: Do I already have the Name/Age? If YES, skip to Date/Time.
-   - CRITICAL: If the user asked a question (e.g. location, price), ANSWER IT FIRST before pivoting.
+   - CHECK: What is the CURRENT CUSTOMER MESSAGE asking or saying? 
+   - CRITICAL: If the CURRENT CUSTOMER MESSAGE asks a question (e.g. location, price), ANSWER IT FIRST before pivoting. DO NOT re-answer questions from the CHAT HISTORY.
 2. THEN, write the Final SMS Response.
    - WRAP THIS IN DELIMITERS: [[[RESPONSE]]] ... [[[END_RESPONSE]]]
    - Strict 2-sentence limit for SMS.
