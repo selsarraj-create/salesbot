@@ -452,74 +452,79 @@ Respond as Alex:`;
             return NextResponse.json({ status: 'Interrupted', response: null });
         }
 
-        let responseText = result.response.text();
-        const rawResponseText = responseText; // Save ORIGINAL before any parsing
+        // --- RESPONSE EXTRACTION (Handles Native Thinking + Prompt-Based Tags) ---
+        let responseText = '';
+        const rawResponseText = result.response.text(); // May be empty with native thinking
+        let thoughtContent = "";
 
-        // **SAFEGUARD: Extract pure response if Thinking/Thoughts are included**
+        // Step 0: Extract ALL text parts from the response (handles native thinking)
+        // @ts-ignore
+        const responseParts = result.response.candidates?.[0]?.content?.parts || [];
+        let allNonThoughtText = '';
+
+        for (const part of responseParts) {
+            // @ts-ignore - thought is not in the official types yet
+            if (part.thought === true) {
+                // This is a native thinking part
+                thoughtContent = part.text || '';
+                console.log('[API] Native Thought Part:', thoughtContent.substring(0, 80));
+            } else if (part.text) {
+                // This is the actual response text
+                allNonThoughtText += part.text;
+            }
+        }
+
+        // Start with whatever text we have
+        responseText = allNonThoughtText || rawResponseText;
+        console.log('[API] Initial responseText length:', responseText.length);
+
+        // Step 1: Check for prompt-based thought/response tags 
         const thoughtRegex = /\[\[\[THOUGHT\]\]\]([\s\S]*?)\[\[\[END_THOUGHT\]\]\]/i;
         const responseRegex = /\[\[\[RESPONSE\]\]\]([\s\S]*?)\[\[\[END_RESPONSE\]\]\]/i;
 
         const thoughtMatch = responseText.match(thoughtRegex);
         const responseMatch = responseText.match(responseRegex);
 
-        let thoughtContent = "";
-
-        // 1. Extract Thought
-        // @ts-ignore hiding official property check for brevity
-        if (result.response.candidates?.[0]?.content?.parts?.[0]?.thought) {
-            // @ts-ignore
-            thoughtContent = result.response.candidates[0].content.parts[0].thought;
-            console.log('[API] Native Thought Content Found:', thoughtContent.substring(0, 80));
-        } else if (thoughtMatch) {
+        // Extract thought from tags if not already from native parts
+        if (!thoughtContent && thoughtMatch) {
             thoughtContent = thoughtMatch[1].trim();
             console.log('[API] Regex Thought Content Found:', thoughtContent.substring(0, 50));
         }
 
-        // 2. Extract Response (Prioritize Explicit Tags)
+        // Step 2: Extract Response (Prioritize Explicit Tags)
         if (responseMatch && responseMatch[1].trim().length > 0) {
             responseText = responseMatch[1].trim();
         } else if (thoughtMatch) {
-            // Fallback: If no response tags (or empty), take everything AFTER the thought block
+            // Strip thought block, take whatever remains
             const textAfterThought = responseText.split(thoughtMatch[0])[1];
             if (textAfterThought && textAfterThought.trim().length > 0) {
-                // Strip any leftover [[[RESPONSE]]] / [[[END_RESPONSE]]] wrappers
                 responseText = textAfterThought
                     .replace(/\[\[\[RESPONSE\]\]\]/gi, '')
                     .replace(/\[\[\[END_RESPONSE\]\]\]/gi, '')
                     .trim();
             }
-        }
-
-        // 3. Last Result Fallback (Legacy/Loose "Thoughts:" format)
-        if (!responseMatch && !thoughtMatch) {
+        } else if (!thoughtMatch && !responseMatch && responseText) {
+            // No tags at all — model just output plain text (common with native thinking)
+            // Strip any loose "Thoughts:" prefix
             const looseMatch = responseText.match(/Thoughts?:[\s\S]*?\n\n/i);
             if (looseMatch) {
-                thoughtContent = looseMatch[0].trim();
+                thoughtContent = thoughtContent || looseMatch[0].trim();
                 responseText = responseText.replace(looseMatch[0], "").trim();
             }
         }
 
-        // 4. EMPTY RESPONSE SAFEGUARD — fall back to raw text with thoughts stripped
-        if (!responseText || responseText.trim().length === 0) {
-            console.warn('[API] Response empty after parsing. Falling back to raw model output.');
-            // Strip thought blocks and tag wrappers from raw text
-            let cleaned = rawResponseText
-                .replace(thoughtRegex, '')
-                .replace(responseRegex, '')
-                .replace(/\[\[\[RESPONSE\]\]\]/gi, '')
-                .replace(/\[\[\[END_RESPONSE\]\]\]/gi, '')
-                .replace(/\[\[\[THOUGHT\]\]\]/gi, '')
-                .replace(/\[\[\[END_THOUGHT\]\]\]/gi, '')
-                .trim();
+        // Step 3: Clean up any remaining tag artifacts
+        responseText = responseText
+            .replace(/\[\[\[RESPONSE\]\]\]/gi, '')
+            .replace(/\[\[\[END_RESPONSE\]\]\]/gi, '')
+            .replace(/\[\[\[THOUGHT\]\]\]/gi, '')
+            .replace(/\[\[\[END_THOUGHT\]\]\]/gi, '')
+            .trim();
 
-            if (cleaned.length > 0) {
-                responseText = cleaned;
-                console.log('[API] Recovered response from raw text:', responseText.substring(0, 80));
-            } else {
-                // Absolute last resort — this should almost never happen
-                console.error('[API] FATAL: No response text recoverable. Using emergency fallback.');
-                responseText = "Thanks for your message! Let me get back to you shortly. 😊";
-            }
+        // Step 4: EMPTY RESPONSE SAFEGUARD
+        if (!responseText || responseText.trim().length === 0) {
+            console.error('[API] FATAL: No response text from model. Parts:', JSON.stringify(responseParts.map((p: any) => ({ thought: p.thought, textLen: p.text?.length }))));
+            responseText = "Thanks for your message! Let me get back to you shortly. 😊";
         }
 
         // --- POST-GENERATION CHECKS ---
