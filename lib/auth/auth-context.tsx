@@ -1,9 +1,12 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import type { UserProfile, Tenant } from '@/lib/supabase/types';
 import type { User } from '@supabase/supabase-js';
+
+const PUBLIC_PATHS = ['/login', '/signup'];
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +29,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [tenant, setTenant] = useState<Tenant | null>(null);
@@ -86,6 +90,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         return () => subscription.unsubscribe();
     }, []);
+
+    // Client-side auth redirect
+    useEffect(() => {
+        if (!loading && !user && !PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+            window.location.href = '/login';
+        }
+    }, [loading, user, pathname]);
 
     const signOut = async () => {
         await supabase.auth.signOut();
