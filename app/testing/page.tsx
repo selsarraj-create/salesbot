@@ -53,11 +53,11 @@ export default function TestingPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-charcoal p-6">
+        <div className="min-h-screen bg-panel-bg p-6">
             {/* Warning Banner */}
             <div className="mb-6 bg-yellow-500/10 border-l-4 border-yellow-500 p-4 rounded">
                 <div className="flex">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                         <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
@@ -80,29 +80,29 @@ export default function TestingPage() {
                     <TestLeadForm onLeadCreated={fetchTestLeads} />
 
                     {/* Test Leads List */}
-                    <div className="bg-surface rounded-lg border border-surface-light p-4">
-                        <h3 className="font-semibold text-text-primary mb-4">Test Leads ({testLeads.length})</h3>
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                        <h3 className="font-semibold text-text-dark mb-4">Test Leads ({testLeads.length})</h3>
                         {loading ? (
-                            <p className="text-sm text-text-secondary">Loading...</p>
+                            <p className="text-sm text-text-muted-dark">Loading...</p>
                         ) : testLeads.length === 0 ? (
-                            <p className="text-sm text-text-secondary">No test leads yet. Create one above!</p>
+                            <p className="text-sm text-text-muted-dark">No test leads yet. Create one above!</p>
                         ) : (
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 {testLeads.map((lead) => (
                                     <button
                                         key={lead.id}
                                         onClick={() => setSelectedLead(lead)}
-                                        className={`w-full text-left p-3 rounded-lg border transition-all ${selectedLead?.id === lead.id
-                                            ? 'glow-active border-electric-cyan/50'
-                                            : 'bg-charcoal border-surface-light hover:bg-surface-light hover:border-electric-cyan/30'
+                                        className={`w-full text-left p-3.5 rounded-xl border transition-all ${selectedLead?.id === lead.id
+                                            ? 'bg-brand-blue/5 border-brand-blue ring-1 ring-brand-blue/50 shadow-sm'
+                                            : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-brand-blue/30'
                                             }`}
                                     >
-                                        <div className="flex items-center justify-between mb-1">
-                                            <p className="font-medium text-sm text-text-primary">{lead.name || lead.phone}</p>
-                                            <Badge variant="secondary" className="text-xs bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <p className="font-medium text-[15px] text-text-dark">{lead.name || lead.phone}</p>
+                                            <Badge variant="secondary" className="text-xs bg-yellow-50 text-yellow-600 border-yellow-200">TEST</Badge>
                                         </div>
-                                        <p className="text-xs text-text-secondary">{lead.lead_code}</p>
-                                        <p className="text-xs text-text-secondary mt-1">{lead.status}</p>
+                                        <p className="text-xs font-mono text-text-muted-dark/80">{lead.lead_code}</p>
+                                        <p className="text-xs font-medium text-text-muted-dark mt-1.5">{lead.status}</p>
                                     </button>
                                 ))}
                             </div>

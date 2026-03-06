@@ -18,35 +18,35 @@ export default function TrainingPage() {
     const [activeTab, setActiveTab] = useState<TabType>('review');
 
     const tabs = [
-        { id: 'review' as TabType, label: 'Review Queue', icon: Target, color: 'text-electric-cyan' },
-        { id: 'assets' as TabType, label: 'Asset Lab', icon: FileText, color: 'text-green-400' },
-        { id: 'rules' as TabType, label: 'System Rules', icon: Shield, color: 'text-red-400' },
-        { id: 'calibration' as TabType, label: 'Calibration', icon: Settings2, color: 'text-orange-400' },
-        { id: 'simulator' as TabType, label: 'Flight Simulator', icon: Zap, color: 'text-yellow-400' },
-        { id: 'analytics' as TabType, label: 'Analytics', icon: TrendingUp, color: 'text-purple-400' }
+        { id: 'review' as TabType, label: 'Review Queue', icon: Target, color: 'text-brand-blue' },
+        { id: 'assets' as TabType, label: 'Asset Lab', icon: FileText, color: 'text-emerald-500' },
+        { id: 'rules' as TabType, label: 'System Rules', icon: Shield, color: 'text-rose-500' },
+        { id: 'calibration' as TabType, label: 'Calibration', icon: Settings2, color: 'text-amber-500' },
+        { id: 'simulator' as TabType, label: 'Flight Simulator', icon: Zap, color: 'text-yellow-500' },
+        { id: 'analytics' as TabType, label: 'Analytics', icon: TrendingUp, color: 'text-purple-500' }
     ];
 
     return (
-        <div className="min-h-screen bg-charcoal p-6">
+        <div className="min-h-screen bg-main-bg p-6">
             {/* Header */}
             <div className="max-w-7xl mx-auto mb-6">
                 <div className="flex items-center justify-between mb-2">
-                    <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-text-dark flex items-center gap-3">
                         <span className="text-4xl">🎯</span>
                         AI Command Center
                     </h1>
-                    <Badge variant="outline" className="border-electric-cyan text-electric-cyan">
+                    <Badge variant="outline" className="border-brand-blue text-brand-blue bg-brand-blue/5">
                         Apex Mode
                     </Badge>
                 </div>
-                <p className="text-text-secondary">
+                <p className="text-text-muted-dark">
                     Train your AI using real conversations, synthetic simulations, and uploaded knowledge
                 </p>
             </div>
 
             {/* Tab Navigation */}
             <div className="max-w-5xl mx-auto mb-8">
-                <div className="flex p-1 bg-surface/30 backdrop-blur-lg rounded-2xl border border-surface-light/30 shadow-inner">
+                <div className="flex p-1.5 bg-white rounded-2xl border border-gray-100 shadow-sm">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -55,12 +55,12 @@ export default function TrainingPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                                    ? 'bg-charcoal shadow-sm ring-1 ring-surface-light/50 text-text-primary'
-                                    : 'text-text-secondary hover:text-text-primary hover:bg-surface/40'
+                                    ? 'bg-panel-bg shadow-sm ring-1 ring-gray-200 text-text-dark'
+                                    : 'text-text-muted-dark hover:text-text-dark hover:bg-gray-50'
                                     }`}
                             >
-                                <Icon className={`w-4 h-4 ${isActive ? tab.color : 'text-text-secondary/70'}`} />
-                                <span className={isActive ? 'text-text-primary' : 'text-text-secondary'}>
+                                <Icon className={`w-4 h-4 ${isActive ? tab.color : 'text-text-muted-dark/70'}`} />
+                                <span className={isActive ? 'text-text-dark' : 'text-text-muted-dark'}>
                                     {tab.label}
                                 </span>
                             </button>

@@ -67,69 +67,66 @@ export default function TestLeadForm({ onLeadCreated }: { onLeadCreated?: () => 
     };
 
     return (
-        <Card className="bg-surface border-surface-light">
-            <CardHeader>
-                <CardTitle className="text-text-primary">Create Test Lead</CardTitle>
-                <CardDescription className="text-text-secondary">
+        <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden">
+            <CardHeader className="bg-panel-bg border-b border-gray-100">
+                <CardTitle className="text-text-dark">Create Test Lead</CardTitle>
+                <CardDescription className="text-text-muted-dark">
                     Generate a dummy lead for testing. No SMS costs.
                 </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="text-sm font-medium text-text-primary">Name (optional)</label>
+                        <label className="text-sm font-medium text-text-dark">Name (optional)</label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="John Doe"
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark focus:ring-brand-blue/50"
                         />
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-text-primary">Phone (optional)</label>
+                        <label className="text-sm font-medium text-text-dark">Phone (optional)</label>
                         <Input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="+44TEST0001"
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark focus:ring-brand-blue/50"
                         />
-                        <p className="text-xs text-text-secondary mt-1">
+                        <p className="text-xs text-text-muted-dark mt-1">
                             Auto-generated if left empty
                         </p>
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-text-primary">Lead Code (optional)</label>
+                        <label className="text-sm font-medium text-text-dark">Lead Code (optional)</label>
                         <Input
                             value={leadCode}
                             onChange={(e) => setLeadCode(e.target.value)}
                             placeholder="#TEST-01"
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark focus:ring-brand-blue/50"
                         />
-                        <p className="text-xs text-text-secondary mt-1">
-                            Auto-increments if left empty
-                        </p>
-                        <p className="text-xs text-text-secondary mt-1">
+                        <p className="text-xs text-text-muted-dark mt-1">
                             Auto-increments if left empty
                         </p>
                     </div>
 
                     <div>
-                        <label className="text-sm font-medium text-text-primary">Age (optional)</label>
+                        <label className="text-sm font-medium text-text-dark">Age (optional)</label>
                         <Input
                             value={age}
                             onChange={(e) => setAge(e.target.value)}
                             placeholder="21"
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark focus:ring-brand-blue/50"
                         />
                     </div>
 
-                    <Button type="submit" disabled={loading} className="w-full bg-electric-cyan text-charcoal hover:bg-electric-cyan/90">
+                    <Button type="submit" disabled={loading} className="w-full bg-brand-blue text-white hover:bg-blue-600 shadow-sm mt-2">
                         {loading ? 'Creating...' : 'Generate Test Lead'}
                     </Button>
                 </form>
             </CardContent>
-        </Card>
+        </div>
     );
 }

@@ -266,9 +266,9 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
 
     if (!lead) {
         return (
-            <Card className="h-full bg-surface border-surface-light">
+            <Card className="h-full bg-white border border-gray-100 shadow-sm">
                 <CardContent className="flex items-center justify-center h-full">
-                    <div className="text-center text-text-secondary">
+                    <div className="text-center text-text-muted-dark">
                         <p className="text-lg font-medium">Select a test lead to start chatting</p>
                         <p className="text-sm mt-2">Create a test lead using the form on the left</p>
                     </div>
@@ -278,18 +278,18 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     }
 
     return (
-        <Card className="h-full flex flex-col bg-surface border-surface-light">
-            <CardHeader className="border-b border-surface-light">
+        <Card className="h-full flex flex-col bg-white border border-gray-100 shadow-sm">
+            <CardHeader className="border-b border-gray-100 bg-panel-bg py-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="flex items-center gap-2 text-text-primary">
+                        <CardTitle className="flex items-center gap-2 text-text-dark text-lg">
                             {lead.name || lead.phone}
-                            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">TEST</Badge>
+                            <Badge variant="secondary" className="bg-yellow-50 text-yellow-600 border-yellow-200">TEST</Badge>
                             {whatsappMode && (
-                                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">📱 WhatsApp</Badge>
+                                <Badge variant="secondary" className="bg-green-50 text-green-600 border-green-200">📱 WhatsApp</Badge>
                             )}
                         </CardTitle>
-                        <CardDescription className="text-text-secondary">
+                        <CardDescription className="text-text-muted-dark mt-1">
                             {lead.lead_code} • {lead.status} • ⚠️ No SMS Costs
                         </CardDescription>
                     </div>
@@ -300,7 +300,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                             onClick={handleExportChat}
                             disabled={messages.length === 0}
                             title="Export Chat"
-                            className="text-text-secondary hover:text-electric-cyan hover:bg-electric-cyan/10"
+                            className="text-text-muted-dark hover:text-brand-blue hover:bg-brand-blue/10"
                         >
                             <Download className="h-5 w-5" />
                         </Button>
@@ -310,7 +310,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                                 size="icon"
                                 onClick={handleDeleteLead}
                                 disabled={deleting}
-                                className="text-text-secondary hover:text-red-400 hover:bg-red-500/10"
+                                className="text-text-muted-dark hover:text-red-500 hover:bg-red-500/10"
                             >
                                 <Trash2 className="h-5 w-5" />
                             </Button>
@@ -319,9 +319,12 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                 </div>
             </CardHeader>
 
-            <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-main-bg">
                 {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-text-secondary">
+                    <div className="flex flex-col items-center justify-center h-full text-text-muted-dark">
+                        <div className="w-12 h-12 rounded-full bg-brand-blue/5 border border-brand-blue/10 flex items-center justify-center mb-3">
+                            <Smartphone className="w-6 h-6 text-brand-blue/60" />
+                        </div>
                         <p>No messages yet. Start the conversation!</p>
                     </div>
                 ) : (
@@ -334,24 +337,23 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                                 className={`flex ${isLead ? 'justify-start' : 'justify-end'}`}
                             >
                                 <div
-                                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect ${isLead
-                                        ? 'bg-surface/50'
-                                        : 'bg-electric-cyan/10 border-electric-cyan/30'
+                                    className={`max-w-xs lg:max-w-md px-5 py-3.5 rounded-2xl ${isLead
+                                        ? 'bg-white border border-gray-100 shadow-sm rounded-tl-sm'
+                                        : 'bg-panel-bg text-text-dark rounded-tr-sm'
                                         }`}
                                 >
                                     {/* Render Thought Process (Bot Only) */}
                                     {message.thought_content && (
-                                        <div className="mb-2 p-2 rounded bg-black/20 border-l-2 border-blue-400/50">
-                                            <p className="text-xs font-mono text-blue-300 whitespace-pre-wrap">
+                                        <div className="mb-3 p-2.5 rounded-lg bg-white/50 border border-brand-blue/20">
+                                            <p className="text-[11px] font-mono text-brand-blue/80 whitespace-pre-wrap leading-relaxed">
                                                 {message.thought_content}
                                             </p>
                                         </div>
                                     )}
 
-                                    <p className="text-sm text-text-primary whitespace-pre-wrap">{message.content}</p>
-                                    <p className="text-xs mt-1 text-text-secondary">
-                                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''} •{' '}
-                                        {isLead ? 'Lead' : 'Bot'}
+                                    <p className="text-[15px] leading-relaxed text-text-dark whitespace-pre-wrap">{message.content}</p>
+                                    <p className="text-[11px] mt-1.5 text-text-muted-dark/80 font-medium">
+                                        {message.timestamp ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                                     </p>
                                 </div>
                             </div>
@@ -361,13 +363,13 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
 
                 {thinking && (
                     <div className="flex justify-end">
-                        <div className="max-w-xs lg:max-w-md px-4 py-3 rounded-lg glass-effect bg-surface/50 border border-electric-cyan/20">
+                        <div className="max-w-xs lg:max-w-md px-5 py-3.5 rounded-2xl bg-panel-bg border border-gray-100 rounded-tr-sm">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-electric-cyan font-medium">Alex is typing</span>
+                                <span className="text-[13px] text-text-muted-dark font-medium">Alex is typing</span>
                                 <div className="flex gap-1 h-full pt-1">
-                                    <div className="w-1.5 h-1.5 bg-electric-cyan rounded-full animate-bounce"></div>
-                                    <div className="w-1.5 h-1.5 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                    <div className="w-1.5 h-1.5 bg-electric-cyan rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                    <div className="w-1.5 h-1.5 bg-brand-blue/50 rounded-full animate-bounce"></div>
+                                    <div className="w-1.5 h-1.5 bg-brand-blue/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                    <div className="w-1.5 h-1.5 bg-brand-blue/50 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                 </div>
                             </div>
                         </div>
@@ -377,16 +379,17 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                 <div ref={messagesEndRef} />
             </CardContent>
 
-            <div className="border-t border-surface-light p-4 space-y-3">
-                <div className="flex items-center gap-4">
+            <div className="border-t border-gray-100 p-5 space-y-4 bg-white">
+                <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                         <Switch
                             checked={simulateLatency}
                             onCheckedChange={setSimulateLatency}
                             id="latency-toggle"
                             disabled={whatsappMode}
+                            className="data-[state=checked]:bg-brand-blue"
                         />
-                        <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-primary">
+                        <label htmlFor="latency-toggle" className="text-sm cursor-pointer text-text-dark font-medium">
                             Simulate SMS Latency
                         </label>
                     </div>
@@ -397,31 +400,31 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
                             id="whatsapp-toggle"
                             className="data-[state=checked]:bg-green-500"
                         />
-                        <label htmlFor="whatsapp-toggle" className="text-sm cursor-pointer text-text-primary flex items-center gap-1">
-                            <Smartphone className="h-4 w-4" /> WhatsApp Mode
+                        <label htmlFor="whatsapp-toggle" className="text-sm cursor-pointer text-text-dark font-medium flex items-center gap-1">
+                            <Smartphone className="h-4 w-4 text-text-muted-dark" /> WhatsApp Mode
                         </label>
                     </div>
                 </div>
 
                 {whatsappMode ? (
-                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
-                        <p className="text-sm text-green-400 font-medium">📱 WhatsApp Mode Active</p>
-                        <p className="text-xs text-green-300/70 mt-1">Reply from your phone. Messages will appear here in real-time.</p>
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-3.5 text-center shadow-sm">
+                        <p className="text-sm text-green-700 font-medium">📱 WhatsApp Mode Active</p>
+                        <p className="text-xs text-green-600 mt-1">Reply from your phone. Messages will appear here in real-time.</p>
                     </div>
                 ) : (
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                         <Input
                             value={inputMessage}
                             onChange={(e) => setInputMessage(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
-                            placeholder="Type your message..."
+                            placeholder="Type sumulated response..."
                             disabled={sending}
-                            className="bg-charcoal border-surface-light text-text-primary"
+                            className="bg-panel-bg border-gray-200 text-text-dark placeholder:text-text-muted-dark focus:ring-brand-blue/50 h-11 rounded-xl"
                         />
                         <Button
                             onClick={handleSendMessage}
                             disabled={sending || !inputMessage.trim()}
-                            className="bg-electric-cyan text-charcoal hover:bg-electric-cyan/90"
+                            className="bg-brand-blue text-white hover:bg-blue-600 h-11 px-6 rounded-xl shadow-sm transition-all"
                         >
                             {sending ? 'Sending...' : 'Send'}
                         </Button>

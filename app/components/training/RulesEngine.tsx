@@ -221,7 +221,7 @@ ALWAYS MAINTAIN PROFESSIONAL TONE.`}
                     {/* Add Rule Input */}
                     <div className="flex gap-2">
                         <select
-                            className="bg-charcoal text-text-secondary border border-surface-light rounded-md px-2 text-sm focus:outline-none focus:border-electric-cyan"
+                            className="bg-charcoal text-text-secondary border border-surface-light rounded-md px-2 text-sm focus:outline-hidden focus:border-electric-cyan"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value as any)}
                         >
