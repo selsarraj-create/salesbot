@@ -12,7 +12,7 @@ export function Navigation() {
     const { user, profile, tenant, loading, signOut } = useAuth();
 
     // Don't render nav — sidebar handles navigation on all app routes
-    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/homepage') || pathname.startsWith('/testing') || pathname.startsWith('/training')) {
+    if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/homepage') || pathname.startsWith('/testing') || pathname.startsWith('/training') || pathname.startsWith('/settings')) {
         return null;
     }
 

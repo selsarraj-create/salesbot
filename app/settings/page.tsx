@@ -96,7 +96,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <AppShell title="Settings" hideTopbar>
+        <AppShell title="Settings">
             <div className="rd-settings">
                 {/* ── Profile Section ── */}
                 <div className="rd-settings-card">
