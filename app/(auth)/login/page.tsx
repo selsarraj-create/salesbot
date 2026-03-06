@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
+import '../auth.css';
 
 function LoginForm() {
     const searchParams = useSearchParams();
@@ -30,92 +31,111 @@ function LoginForm() {
             return;
         }
 
-        // Full page reload so middleware picks up the new auth cookies
         window.location.href = redirect;
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-            <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-text-dark mb-1.5">
-                        Email
-                    </label>
-                    <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-panel-bg text-text-dark placeholder:text-text-muted-dark focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition-all"
-                        placeholder="you@studio.com"
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-text-dark mb-1.5">
-                        Password
-                    </label>
-                    <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-panel-bg text-text-dark placeholder:text-text-muted-dark focus:outline-none focus:ring-2 focus:ring-brand-blue/50 focus:border-brand-blue transition-all"
-                        placeholder="••••••••"
-                    />
-                </div>
-
-                {error && (
-                    <div className="bg-rose-50 border border-rose-200 text-rose-600 text-sm rounded-xl px-4 py-3">
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 bg-brand-blue text-white font-semibold rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-sm"
-                >
-                    {loading ? 'Signing in...' : 'Sign In'}
-                </button>
-            </form>
-
-            <div className="mt-6 text-center">
-                <p className="text-sm text-text-muted-dark">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/signup" className="text-brand-blue font-medium hover:underline">
-                        Create one
-                    </Link>
-                </p>
+        <form onSubmit={handleLogin} className="rd-auth-form">
+            <div className="rd-auth-field">
+                <label htmlFor="email" className="rd-auth-label">Email</label>
+                <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="rd-auth-input"
+                    placeholder="you@company.com"
+                />
             </div>
-        </div>
+
+            <div className="rd-auth-field">
+                <label htmlFor="password" className="rd-auth-label">Password</label>
+                <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="rd-auth-input"
+                    placeholder="••••••••"
+                />
+            </div>
+
+            {error && (
+                <div className="rd-auth-error">{error}</div>
+            )}
+
+            <button type="submit" disabled={loading} className="rd-auth-submit">
+                {loading ? 'Signing in…' : 'Sign In'}
+            </button>
+        </form>
     );
 }
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen bg-main-bg flex items-center justify-center p-6">
-            <div className="w-full max-w-md">
-                {/* Logo */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-3 mb-2">
-                        <span className="bg-brand-blue text-white text-xl font-bold px-3 py-2 rounded-xl shadow-md">SB</span>
-                        <h1 className="text-3xl font-bold text-text-dark">SalesBot</h1>
+        <div className="rd-auth-page">
+            {/* Left panel — branding */}
+            <div className="rd-auth-brand">
+                <div className="rd-auth-brand-bg" />
+                <div className="rd-auth-brand-grid" />
+                <div className="rd-auth-brand-content">
+                    <Link href="/homepage" className="rd-auth-logo">
+                        <span className="rd-auth-logo-icon">💬</span>
+                        <span className="rd-auth-logo-text">Reply Desk</span>
+                    </Link>
+                    <h2 className="rd-auth-brand-h2">
+                        Turn every message<br />
+                        into a <span className="rd-auth-gradient-text">closed deal</span>
+                    </h2>
+                    <p className="rd-auth-brand-sub">
+                        AI-powered sales chatbot for WhatsApp, SMS &amp; web.
+                        Qualify leads, handle objections, and book appointments — automatically.
+                    </p>
+                    <div className="rd-auth-brand-stats">
+                        <div className="rd-auth-stat">
+                            <span className="rd-auth-stat-num">78%</span>
+                            <span className="rd-auth-stat-label">Conversion Rate</span>
+                        </div>
+                        <div className="rd-auth-stat">
+                            <span className="rd-auth-stat-num">24/7</span>
+                            <span className="rd-auth-stat-label">Always On</span>
+                        </div>
+                        <div className="rd-auth-stat">
+                            <span className="rd-auth-stat-num">&lt;2s</span>
+                            <span className="rd-auth-stat-label">Response</span>
+                        </div>
                     </div>
-                    <p className="text-text-muted-dark mt-2">Sign in to your dashboard</p>
                 </div>
+            </div>
 
-                <Suspense fallback={
-                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center text-text-muted-dark">
-                        Loading...
+            {/* Right panel — form */}
+            <div className="rd-auth-form-panel">
+                <div className="rd-auth-form-wrap">
+                    {/* Mobile-only logo */}
+                    <div className="rd-auth-mobile-logo">
+                        <Link href="/homepage" className="rd-auth-logo">
+                            <span className="rd-auth-logo-icon">💬</span>
+                            <span className="rd-auth-logo-text rd-auth-logo-dark">Reply Desk</span>
+                        </Link>
                     </div>
-                }>
-                    <LoginForm />
-                </Suspense>
+
+                    <h1 className="rd-auth-heading">Welcome back</h1>
+                    <p className="rd-auth-subheading">Sign in to your dashboard</p>
+
+                    <Suspense fallback={
+                        <div className="rd-auth-loading">Loading…</div>
+                    }>
+                        <LoginForm />
+                    </Suspense>
+
+                    <p className="rd-auth-footer-text">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/signup" className="rd-auth-link">Create one</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
 }
-

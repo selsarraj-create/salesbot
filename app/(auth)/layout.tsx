@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "SalesBot — Sign In",
+    title: "Reply Desk — Sign In",
 };
 
 export default function AuthLayout({
