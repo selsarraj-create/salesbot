@@ -3,15 +3,15 @@ Enhanced FastAPI webhook endpoint for Twilio WhatsApp integration.
 Handles incoming messages with manual takeover support and enhanced status workflow.
 """
 
-from fastapi import FastAPI, Form, Response
+from fastapi import APIRouter, Form, Response
 from fastapi.responses import PlainTextResponse
 from twilio.twiml.messaging_response import MessagingResponse
 import os
 from dotenv import load_dotenv
 
-from .utils.supabase_client import get_supabase_client
-from .utils.gemini_client import get_gemini_agent
-from .utils.lead_manager import (
+from api.utils.supabase_client import get_supabase_client
+from api.utils.gemini_client import get_gemini_agent
+from api.utils.lead_manager import (
     get_or_create_lead,
     save_message,
     get_messages,
@@ -21,20 +21,14 @@ from .utils.lead_manager import (
     update_lead_status,
     is_lead_in_manual_mode
 )
-from .utils.sales_prompts import get_compliance_message
+from api.utils.sales_prompts import get_compliance_message
 
 load_dotenv()
 
-app = FastAPI(title="WhatsApp Sales Bot", version="3.0.0")
+router = APIRouter()
 
 
-@app.get("/")
-async def root():
-    """Health check endpoint."""
-    return {"status": "ok", "service": "WhatsApp Sales Bot with Dashboard", "version": "3.0.0"}
-
-
-@app.post("/api/webhook")
+@router.post("/api/webhook")
 async def twilio_webhook(
     From: str = Form(...),
     Body: str = Form(...),
@@ -64,7 +58,7 @@ async def twilio_webhook(
         lead_name = lead.get("name")
         current_status = lead.get("status", "New")
         
-        # SAFETY CHECK: Skip processing for test leads to prevent accidental SMS costs
+        # SAFETY CHECK: Skip processing for test leads to prevent accidental messaging costs
         if lead.get("is_test", False):
             print(f"⚠️ Test lead detected: {phone}. Skipping Twilio response to prevent messaging costs.")
             twiml = MessagingResponse()
@@ -141,7 +135,7 @@ async def twilio_webhook(
         elif incoming_message.strip().isdigit() and current_status == "Booking_Offered":
             slot_number = int(incoming_message.strip())
             if 1 <= slot_number <= 5:
-                from .utils.sales_prompts import get_calendar_slots
+                from api.utils.sales_prompts import get_calendar_slots
                 slots = get_calendar_slots(5)
                 if slot_number <= len(slots):
                     selected_slot = slots[slot_number - 1]
@@ -185,13 +179,13 @@ async def twilio_webhook(
         return Response(content=str(twiml), media_type="application/xml")
 
 
-@app.get("/api/test")
+@router.get("/api/test")
 async def test_connection():
     """
     Test endpoint to verify Supabase and Gemini connections.
     """
     try:
-        from .utils.supabase_client import test_connection
+        from api.utils.supabase_client import test_connection
         
         supabase_ok = test_connection()
         
@@ -210,7 +204,3 @@ async def test_connection():
         }
     except Exception as e:
         return {"error": str(e)}
-
-
-# For Vercel serverless deployment
-handler = app

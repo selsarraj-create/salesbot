@@ -62,7 +62,8 @@ export default function ChatWindow({ lead, onToggleTakeover }: ChatWindowProps) 
 
         setSending(true);
         try {
-            const response = await fetch('/api/manual_message', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            const response = await fetch(`${apiUrl}/api/manual_message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

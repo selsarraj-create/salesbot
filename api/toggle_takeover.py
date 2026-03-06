@@ -3,12 +3,12 @@ Takeover control endpoint for enabling/disabling manual mode.
 Allows dashboard users to pause AI and take over conversations.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .utils.lead_manager import set_manual_mode, get_lead_by_id
+from api.utils.lead_manager import set_manual_mode, get_lead_by_id
 
-app = FastAPI()
+router = APIRouter()
 
 
 class TakeoverRequest(BaseModel):
@@ -16,7 +16,7 @@ class TakeoverRequest(BaseModel):
     enabled: bool
 
 
-@app.post("/api/toggle_takeover")
+@router.post("/api/toggle_takeover")
 async def toggle_takeover(request: TakeoverRequest):
     """
     Enable or disable manual takeover mode for a lead.
@@ -53,7 +53,3 @@ async def toggle_takeover(request: TakeoverRequest):
     except Exception as e:
         print(f"Error toggling takeover: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# For Vercel serverless deployment
-handler = app

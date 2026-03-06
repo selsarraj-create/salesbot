@@ -3,17 +3,17 @@ Manual message sending endpoint for human agent takeover.
 Allows dashboard users to send WhatsApp messages directly to leads.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from twilio.rest import Client
 import os
 from dotenv import load_dotenv
 
-from .utils.lead_manager import get_lead_by_id, save_message, is_lead_in_manual_mode
+from api.utils.lead_manager import get_lead_by_id, save_message, is_lead_in_manual_mode
 
 load_dotenv()
 
-app = FastAPI()
+router = APIRouter()
 
 # Initialize Twilio client
 twilio_client = Client(
@@ -28,7 +28,7 @@ class ManualMessageRequest(BaseModel):
     message: str
 
 
-@app.post("/api/manual_message")
+@router.post("/api/manual_message")
 async def send_manual_message(request: ManualMessageRequest):
     """
     Send manual WhatsApp message from human agent to lead.
@@ -78,7 +78,3 @@ async def send_manual_message(request: ManualMessageRequest):
     except Exception as e:
         print(f"Error sending manual message: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# For Vercel serverless deployment
-handler = app

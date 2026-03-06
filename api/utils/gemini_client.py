@@ -8,7 +8,7 @@ import re
 from typing import Optional, Dict, Any
 import google.generativeai as genai
 from dotenv import load_dotenv
-from .sales_prompts import (
+from api.utils.sales_prompts import (
     SALES_PERSONA_PROMPT,
     OBJECTION_RESPONSES,
     get_calendar_slots,
@@ -16,7 +16,7 @@ from .sales_prompts import (
     get_booking_confirmation,
     get_qualification_questions
 )
-from .lead_manager import format_messages_for_ai
+from api.utils.lead_manager import format_messages_for_ai
 
 load_dotenv()
 
@@ -160,7 +160,7 @@ CRITICAL CONTEXT RULES:
             
             # FAQ Detection
             if analysis["intent"] == "question":
-                from .sales_prompts import FAQ_RESPONSES
+                from api.utils.sales_prompts import FAQ_RESPONSES
                 msg_lower = incoming_message.lower()
                 
                 if any(x in msg_lower for x in ["clothes", "wear", "bring", "outfit", "dress"]):
@@ -202,7 +202,7 @@ Customer's latest message: "{incoming_message}"
 {analysis_context}
 {status_guidance}
 
-Generate your response (keep it under 160 characters if possible, max 300):"""
+Generate your response (concise but informative, WhatsApp allows up to 4,096 characters):"""
         
         try:
             response = self.model.generate_content(prompt)

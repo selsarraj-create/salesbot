@@ -30,7 +30,8 @@ export default function Dashboard() {
 
     const handleToggleTakeover = async (leadId: string, enabled: boolean) => {
         try {
-            const response = await fetch('/api/toggle_takeover', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            const response = await fetch(`${apiUrl}/api/toggle_takeover`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ lead_id: leadId, enabled }),
