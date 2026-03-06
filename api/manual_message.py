@@ -15,12 +15,18 @@ load_dotenv()
 
 router = APIRouter()
 
-# Initialize Twilio client
-twilio_client = Client(
-    os.getenv("TWILIO_ACCOUNT_SID"),
-    os.getenv("TWILIO_AUTH_TOKEN")
-)
+# Lazy Twilio client initialization
+_twilio_client = None
 TWILIO_PHONE = os.getenv("TWILIO_PHONE_NUMBER")
+
+def get_twilio_client():
+    global _twilio_client
+    if _twilio_client is None:
+        _twilio_client = Client(
+            os.getenv("TWILIO_ACCOUNT_SID"),
+            os.getenv("TWILIO_AUTH_TOKEN")
+        )
+    return _twilio_client
 
 
 class ManualMessageRequest(BaseModel):
@@ -57,7 +63,7 @@ async def send_manual_message(request: ManualMessageRequest):
         phone = lead["phone"]
         
         # Send WhatsApp message via Twilio
-        message = twilio_client.messages.create(
+        message = get_twilio_client().messages.create(
             body=request.message,
             from_=f"whatsapp:{TWILIO_PHONE}",
             to=f"whatsapp:{phone}"
