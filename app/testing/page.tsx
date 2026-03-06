@@ -5,11 +5,13 @@ import AppShell from '../components/AppShell';
 import TestLeadForm from '../components/TestLeadForm';
 import TestChatWindow from '../components/TestChatWindow';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/auth-context';
 import type { Lead } from '@/lib/supabase/types';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, CheckSquare, Square, MinusSquare } from 'lucide-react';
 
 export default function TestingPage() {
+    const { user } = useAuth();
     const [testLeads, setTestLeads] = useState<Lead[]>([]);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
@@ -95,6 +97,8 @@ export default function TestingPage() {
     };
 
     useEffect(() => {
+        if (!user) { setLoading(false); return; }
+
         fetchTestLeads();
 
         const channel = supabase
@@ -116,7 +120,7 @@ export default function TestingPage() {
         return () => {
             channel.unsubscribe();
         };
-    }, []);
+    }, [user]);
 
     return (
         <AppShell title="Testing Sandbox">
