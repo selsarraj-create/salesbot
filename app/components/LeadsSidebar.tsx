@@ -40,10 +40,10 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
     const pathname = usePathname();
-    const { user, profile, signOut } = useAuth();
+    const { user, profile } = useAuth();
 
     const handleSignOut = async () => {
-        await signOut();
+        await supabase.auth.signOut();
         window.location.href = '/login';
     };
 
