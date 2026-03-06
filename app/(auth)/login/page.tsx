@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 
 function LoginForm() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get('redirect') || '/';
 
@@ -31,8 +30,8 @@ function LoginForm() {
             return;
         }
 
-        router.push(redirect);
-        router.refresh();
+        // Full page reload so middleware picks up the new auth cookies
+        window.location.href = redirect;
     };
 
     return (
