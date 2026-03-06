@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import SidebarFooter from './SidebarFooter';
 import '../dashboard.css';
 
 const NAV_ITEMS = [
@@ -45,6 +46,8 @@ export default function AppShell({ children, title }: AppShellProps) {
                         );
                     })}
                 </nav>
+
+                <SidebarFooter />
             </aside>
 
             {/* ── Main area ── */}

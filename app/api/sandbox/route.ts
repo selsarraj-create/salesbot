@@ -4,10 +4,9 @@ import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { gradeConversation } from '@/lib/intelligence/judge';
 
-// Initialize Supabase Client (service role to bypass RLS for AI operations)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Initialize Supabase Client (service role, lazy-init to avoid build-time crash)
+let _sb: any;
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);

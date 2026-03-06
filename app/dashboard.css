@@ -269,6 +269,131 @@
     color: #fca5a5;
 }
 
+/* ── Settings link ── */
+.rd-sidebar-settings {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.08);
+    color: #a5b4fc;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.rd-sidebar-settings:hover {
+    background: rgba(99, 102, 241, 0.18);
+    color: #c7d2fe;
+}
+
+/* ═══════════════════════════════════════════
+   SETTINGS PAGE
+   ═══════════════════════════════════════════ */
+.rd-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 640px;
+}
+
+.rd-settings-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 28px;
+}
+
+.rd-settings-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+}
+
+.rd-settings-card-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0 0 20px;
+}
+
+.rd-settings-field {
+    margin-bottom: 16px;
+}
+
+.rd-settings-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.rd-settings-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 14px;
+    color: #1e293b;
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+}
+
+.rd-settings-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.rd-settings-hint {
+    display: block;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.rd-settings-message {
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #f8fafc;
+    margin-bottom: 12px;
+}
+
+.rd-settings-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.rd-settings-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.rd-settings-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ══════════ MAIN AREA ══════════ */
 .rd-main {
     flex: 1;
