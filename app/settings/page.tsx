@@ -48,19 +48,30 @@ export default function SettingsPage() {
     const [quietTz, setQuietTz] = useState('Europe/London');
 
     useEffect(() => {
-        if (tenant) {
-            setBusinessName(tenant.name || '');
-            setChatbotName(tenant.chatbot_name || 'Alex');
-            setAdSpend(String(tenant.monthly_ad_spend || ''));
-            setOutboundUrl(tenant.outbound_webhook_url || '');
-            setQuietStart(tenant.quiet_hours_start || '');
-            setQuietEnd(tenant.quiet_hours_end || '');
-            setQuietTz(tenant.quiet_hours_tz || 'Europe/London');
+        if (!tenant) return;
+        // Fetch fresh tenant data directly from DB (auth context cache may be stale)
+        async function loadTenant() {
+            const { data } = await supabase
+                .from('tenants' as any)
+                .select('*')
+                .eq('id', tenant!.id)
+                .single();
+            if (data) {
+                const t = data as any;
+                setBusinessName(t.name || '');
+                setChatbotName(t.chatbot_name || 'Alex');
+                setAdSpend(String(t.monthly_ad_spend || ''));
+                setOutboundUrl(t.outbound_webhook_url || '');
+                setQuietStart(t.quiet_hours_start || '');
+                setQuietEnd(t.quiet_hours_end || '');
+                setQuietTz(t.quiet_hours_tz || 'Europe/London');
+            }
         }
+        loadTenant();
         if (user) {
             setEmail(user.email || '');
         }
-    }, [tenant, user]);
+    }, [tenant?.id, user]);
 
     // Fetch existing API key prefix + webhook logs
     useEffect(() => {
