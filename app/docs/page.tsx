@@ -79,6 +79,13 @@ const SECTIONS = [
 - **Email** — Your account email
 - **Monthly Ad Spend (£)** — Set your monthly advertising budget; this is used to calculate cost per lead and cost per booking on the Analytics dashboard
 
+**Quiet Hours**
+- Set a start and end time during which the AI will **not send any live messages** to leads
+- Choose your timezone so the schedule is accurate for your location
+- **Sandbox is not affected** — you can test freely during quiet hours
+- Click **Disable Quiet Hours** to turn the feature off entirely
+- Example: Set 21:00 → 08:00 to pause all outbound messages overnight
+
 **Change Password**
 - Update your account password
 
