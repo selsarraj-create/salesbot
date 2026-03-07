@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Play, Pause, RefreshCw, Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/auth/auth-context';
 import { SimulatedScenario } from '@/lib/supabase/types';
 
 interface Message {
@@ -17,6 +18,7 @@ interface Message {
 }
 
 export default function FlightSimulator() {
+    const { tenant } = useAuth();
     const [scenarios, setScenarios] = useState<SimulatedScenario[]>([]);
     const [selectedScenarioId, setSelectedScenarioId] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
@@ -75,13 +77,14 @@ export default function FlightSimulator() {
             console.log('[FlightSimulator] Creating dummy lead:', dummyCode, dummyPhone);
 
             const { data: lead, error } = await supabase.from('leads').insert({
+                tenant_id: tenant?.id,
                 lead_code: dummyCode,
                 status: 'New',
                 name: targetName,
                 phone: dummyPhone,
                 is_test: true,
                 is_manual_mode: false,
-                lead_metadata: { age: targetAge } // Store age in metadata
+                lead_metadata: { age: targetAge }
             } as any).select().single() as any;
 
             if (error) {
