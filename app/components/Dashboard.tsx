@@ -14,7 +14,7 @@ import type { Lead } from '@/lib/supabase/types';
 export default function Dashboard() {
     const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-    const [showAnalytics, setShowAnalytics] = useState(true);
+    const [showAnalytics, setShowAnalytics] = useState(false);
 
     const handleSelectLead = async (leadId: string) => {
         setSelectedLeadId(leadId);
@@ -67,7 +67,7 @@ export default function Dashboard() {
                             className={`rd-topbar-toggle ${showAnalytics ? 'active' : ''}`}
                             onClick={() => setShowAnalytics(!showAnalytics)}
                         >
-                            📊 Analytics
+                            {showAnalytics ? '💬 Conversations' : '📊 Analytics'}
                         </button>
                         <button className="rd-topbar-icon" aria-label="Notifications">
                             🔔
