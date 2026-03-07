@@ -312,6 +312,10 @@ export default function SettingsPage() {
                             Disable Quiet Hours
                         </button>
                     )}
+
+                    <button onClick={handleSaveProfile} disabled={saving} className="rd-settings-save">
+                        {saving ? 'Saving…' : 'Save Changes'}
+                    </button>
                 </div>
 
                 {/* ── Password Section ── */}
