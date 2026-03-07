@@ -183,9 +183,17 @@ INTERRUPTION & PIVOT PROTOCOL:
 - Pivot Second: Return to last uncompleted Stage.`}
                         </div>
 
-                        {activeRulesText ? (
-                            <div className="text-emerald-400 p-3 border-l-2 border-emerald-400 bg-emerald-400/10 rounded-r-lg">
-                                {`// DYNAMIC RULES INJECTED:\n${activeRulesText}`}
+                        {rules.filter(r => r.is_active).length > 0 ? (
+                            <div className="space-y-2">
+                                <div className="text-text-muted-light/60 text-xs">{'// DYNAMIC RULES INJECTED:'}</div>
+                                {rules.filter(r => r.is_active).map(r => (
+                                    <div key={r.id} className={`p-3 border-l-2 rounded-r-lg ${r.category === 'constraint'
+                                            ? 'text-rose-400 border-rose-400 bg-rose-400/10'
+                                            : 'text-emerald-400 border-emerald-400 bg-emerald-400/10'
+                                        }`}>
+                                        {`[${r.category.toUpperCase()}] ${r.rule_text}`}
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <div className="text-text-muted-light/50 italic p-2">
