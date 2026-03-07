@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/lib/auth/auth-context';
 import LeadsSidebar from './LeadsSidebar';
 import ChatWindow from './ChatWindow';
 import MetricsPanel from './MetricsPanel';
@@ -12,6 +13,7 @@ import { supabase } from '@/lib/supabase/client';
 import type { Lead } from '@/lib/supabase/types';
 
 export default function Dashboard() {
+    const { tenant } = useAuth();
     const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [showAnalytics, setShowAnalytics] = useState(false);
@@ -69,12 +71,7 @@ export default function Dashboard() {
                         >
                             {showAnalytics ? '💬 Conversations' : '📊 Analytics'}
                         </button>
-                        <button className="rd-topbar-icon" aria-label="Notifications">
-                            🔔
-                        </button>
-                        <div className="rd-topbar-avatar">
-                            <span>RD</span>
-                        </div>
+                        <span className="rd-topbar-tenant">{tenant?.name || ''}</span>
                     </div>
                 </header>
 
