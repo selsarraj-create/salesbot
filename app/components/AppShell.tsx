@@ -7,8 +7,8 @@ import '../dashboard.css';
 
 const NAV_ITEMS = [
     { href: '/', label: 'Dashboard', icon: '📊' },
-    { href: '/testing', label: 'Inbox', icon: '📥' },
-    { href: '/training', label: 'Training', icon: '⚡' },
+    { href: '/testing', label: 'Sandbox', icon: '📥' },
+    { href: '/training', label: 'Command Center', icon: '⚡' },
 ];
 
 interface AppShellProps {

@@ -33,8 +33,8 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 
 const NAV_ITEMS = [
     { href: '/', label: 'Dashboard', icon: '📊' },
-    { href: '/testing', label: 'Inbox', icon: '📥' },
-    { href: '/training', label: 'Training', icon: '⚡' },
+    { href: '/testing', label: 'Sandbox', icon: '📥' },
+    { href: '/training', label: 'Command Center', icon: '⚡' },
 ];
 
 export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSidebarProps) {
