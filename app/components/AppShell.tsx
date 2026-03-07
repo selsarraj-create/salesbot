@@ -2,13 +2,14 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { LayoutDashboard, MessageSquare, Sliders } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 import '../dashboard.css';
 
 const NAV_ITEMS = [
-    { href: '/', label: 'Dashboard', icon: '📊' },
-    { href: '/testing', label: 'Sandbox', icon: '📥' },
-    { href: '/training', label: 'Command Center', icon: '⚡' },
+    { href: '/', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+    { href: '/testing', label: 'Sandbox', icon: <MessageSquare size={16} /> },
+    { href: '/training', label: 'Command Center', icon: <Sliders size={16} /> },
 ];
 
 interface AppShellProps {

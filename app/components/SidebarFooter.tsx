@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Settings, BookOpen, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
 
 export default function SidebarFooter() {
@@ -25,13 +26,13 @@ export default function SidebarFooter() {
                 </span>
             </div>
             <Link href="/settings" className="rd-sidebar-settings">
-                ⚙️ Settings
+                <Settings size={15} /> Settings
             </Link>
             <Link href="/docs" className="rd-sidebar-settings">
-                📖 Docs
+                <BookOpen size={15} /> Docs
             </Link>
             <button onClick={handleSignOut} className="rd-sidebar-signout">
-                🚪 Sign Out
+                <LogOut size={15} /> Sign Out
             </button>
         </div>
     );

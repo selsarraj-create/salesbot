@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { supabase, subscribeToLeads } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
+import { LayoutDashboard, MessageSquare, Sliders } from 'lucide-react';
 import SidebarFooter from './SidebarFooter';
 import type { Lead, LeadStatus } from '@/lib/supabase/types';
 
@@ -32,9 +33,9 @@ const STATUS_LABELS: Record<LeadStatus, string> = {
 };
 
 const NAV_ITEMS = [
-    { href: '/', label: 'Dashboard', icon: '📊' },
-    { href: '/testing', label: 'Sandbox', icon: '📥' },
-    { href: '/training', label: 'Command Center', icon: '⚡' },
+    { href: '/', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+    { href: '/testing', label: 'Sandbox', icon: <MessageSquare size={16} /> },
+    { href: '/training', label: 'Command Center', icon: <Sliders size={16} /> },
 ];
 
 export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSidebarProps) {
