@@ -8,9 +8,9 @@ import SidebarFooter from './SidebarFooter';
 import '../dashboard.css';
 
 const NAV_ITEMS = [
-    { href: '/', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
-    { href: '/testing', label: 'Sandbox', icon: <MessageSquare size={16} /> },
-    { href: '/training', label: 'Command Center', icon: <Sliders size={16} /> },
+    { href: '/', label: 'Dashboard', Icon: LayoutDashboard },
+    { href: '/testing', label: 'Sandbox', Icon: MessageSquare },
+    { href: '/training', label: 'Command Center', Icon: Sliders },
 ];
 
 interface AppShellProps {
@@ -46,7 +46,7 @@ export default function AppShell({ children, title, hideTopbar }: AppShellProps)
                                 className={`rd-sidebar-nav-item ${isActive ? 'rd-active' : ''}`}
                             >
                                 <div className="rd-sidebar-nav-icon-wrap">
-                                    <span className="rd-sidebar-nav-icon">{item.icon}</span>
+                                    <item.Icon size={16} />
                                 </div>
                                 <span>{item.label}</span>
                             </Link>
