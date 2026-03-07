@@ -5,12 +5,23 @@ import AppShell from '../components/AppShell';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
 
+interface WebhookLog {
+    id: string;
+    direction: string;
+    status_code: number;
+    payload: string;
+    response: string;
+    duration_ms: number;
+    created_at: string;
+}
+
 export default function SettingsPage() {
     const { user, profile, tenant } = useAuth();
     const [businessName, setBusinessName] = useState('');
     const [chatbotName, setChatbotName] = useState('');
     const [email, setEmail] = useState('');
     const [adSpend, setAdSpend] = useState('');
+    const [outboundUrl, setOutboundUrl] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,23 +32,61 @@ export default function SettingsPage() {
     const [showNewPw, setShowNewPw] = useState(false);
     const [showConfirmPw, setShowConfirmPw] = useState(false);
 
+    // Integration state
+    const [apiKey, setApiKey] = useState<string | null>(null);
+    const [generatingKey, setGeneratingKey] = useState(false);
+    const [existingKeyPrefix, setExistingKeyPrefix] = useState('');
+    const [webhookLogs, setWebhookLogs] = useState<WebhookLog[]>([]);
+    const [integrationMessage, setIntegrationMessage] = useState('');
+    const [testingWebhook, setTestingWebhook] = useState(false);
+    const [savingIntegration, setSavingIntegration] = useState(false);
+
     useEffect(() => {
         if (tenant) {
             setBusinessName(tenant.name || '');
             setChatbotName(tenant.chatbot_name || 'Alex');
             setAdSpend(String(tenant.monthly_ad_spend || ''));
+            setOutboundUrl(tenant.outbound_webhook_url || '');
         }
         if (user) {
             setEmail(user.email || '');
         }
     }, [tenant, user]);
 
+    // Fetch existing API key prefix + webhook logs
+    useEffect(() => {
+        if (!tenant) return;
+
+        async function fetchIntegrationData() {
+            const { data: keys } = await supabase
+                .from('api_keys')
+                .select('key_prefix, created_at')
+                .eq('tenant_id', tenant!.id)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (keys && keys.length > 0) {
+                setExistingKeyPrefix((keys[0] as any).key_prefix);
+            }
+
+            // Fetch logs
+            try {
+                const res = await fetch(`/api/webhook/logs?tenant_id=${tenant!.id}`);
+                const data = await res.json();
+                if (data.logs) setWebhookLogs(data.logs);
+            } catch {
+                // Non-fatal
+            }
+        }
+
+        fetchIntegrationData();
+    }, [tenant]);
+
     const handleSaveProfile = async () => {
         setSaving(true);
         setMessage('');
 
         try {
-            // Update tenant name & chatbot name & ad spend
             if (tenant) {
                 const { error: tenantError } = await supabase
                     .from('tenants' as any)
@@ -51,11 +100,8 @@ export default function SettingsPage() {
                 if (tenantError) throw tenantError;
             }
 
-            // Update email if changed
             if (email !== user?.email) {
-                const { error: emailError } = await supabase.auth.updateUser({
-                    email: email,
-                });
+                const { error: emailError } = await supabase.auth.updateUser({ email });
                 if (emailError) throw emailError;
             }
 
@@ -81,12 +127,8 @@ export default function SettingsPage() {
         setPasswordMessage('');
 
         try {
-            const { error } = await supabase.auth.updateUser({
-                password: newPassword,
-            });
-
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
-
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
@@ -97,6 +139,80 @@ export default function SettingsPage() {
             setPasswordSaving(false);
         }
     };
+
+    const handleGenerateKey = async () => {
+        if (!tenant) return;
+        setGeneratingKey(true);
+        try {
+            const res = await fetch('/api/webhook/generate-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tenant_id: tenant.id }),
+            });
+            const data = await res.json();
+            if (data.api_key) {
+                setApiKey(data.api_key);
+                setExistingKeyPrefix(data.api_key.substring(0, 8));
+                setIntegrationMessage('⚠️ Copy this key now — it will not be shown again!');
+            } else {
+                setIntegrationMessage('❌ ' + (data.error || 'Failed to generate key'));
+            }
+        } catch {
+            setIntegrationMessage('❌ Failed to generate key');
+        } finally {
+            setGeneratingKey(false);
+        }
+    };
+
+    const handleSaveOutbound = async () => {
+        if (!tenant) return;
+        setSavingIntegration(true);
+        try {
+            const { error } = await supabase
+                .from('tenants' as any)
+                .update({ outbound_webhook_url: outboundUrl } as any)
+                .eq('id', tenant.id);
+            if (error) throw error;
+            setIntegrationMessage('✅ Outbound webhook URL saved!');
+        } catch (err: any) {
+            setIntegrationMessage('❌ ' + err.message);
+        } finally {
+            setSavingIntegration(false);
+        }
+    };
+
+    const handleTestOutbound = async () => {
+        if (!outboundUrl) {
+            setIntegrationMessage('❌ Set an outbound webhook URL first');
+            return;
+        }
+        setTestingWebhook(true);
+        setIntegrationMessage('');
+        try {
+            const res = await fetch(outboundUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event: 'test.ping',
+                    timestamp: new Date().toISOString(),
+                    tenant_id: tenant?.id,
+                    data: { message: 'Test ping from ReplyDesk' },
+                }),
+            });
+            setIntegrationMessage(res.ok
+                ? `✅ Test successful! Status: ${res.status}`
+                : `⚠️ Received status ${res.status}`
+            );
+        } catch (err: any) {
+            setIntegrationMessage(`❌ Connection failed: ${err.message}`);
+        } finally {
+            setTestingWebhook(false);
+        }
+    };
+
+    const webhookBaseUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/api/webhook/inbound/`
+        : '/api/webhook/inbound/';
 
     return (
         <AppShell title="Settings">
@@ -110,65 +226,29 @@ export default function SettingsPage() {
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Business Name</label>
-                        <input
-                            type="text"
-                            value={businessName}
-                            onChange={(e) => setBusinessName(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="Edge Talent"
-                        />
+                        <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)} className="rd-settings-input" placeholder="Edge Talent" />
                     </div>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Chatbot Name</label>
-                        <input
-                            type="text"
-                            value={chatbotName}
-                            onChange={(e) => setChatbotName(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="Alex"
-                        />
-                        <span className="rd-settings-hint">
-                            This is the name your chatbot uses when talking to leads
-                        </span>
+                        <input type="text" value={chatbotName} onChange={(e) => setChatbotName(e.target.value)} className="rd-settings-input" placeholder="Alex" />
+                        <span className="rd-settings-hint">This is the name your chatbot uses when talking to leads</span>
                     </div>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="you@company.com"
-                        />
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rd-settings-input" placeholder="you@company.com" />
                     </div>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Monthly Ad Spend (£)</label>
-                        <input
-                            type="number"
-                            value={adSpend}
-                            onChange={(e) => setAdSpend(e.target.value)}
-                            className="rd-settings-input"
-                            placeholder="2000"
-                            min="0"
-                            step="100"
-                        />
-                        <span className="rd-settings-hint">
-                            Used to calculate cost per lead and cost per booking on the dashboard
-                        </span>
+                        <input type="number" value={adSpend} onChange={(e) => setAdSpend(e.target.value)} className="rd-settings-input" placeholder="2000" min="0" step="100" />
+                        <span className="rd-settings-hint">Used to calculate cost per lead and cost per booking on the dashboard</span>
                     </div>
 
-                    {message && (
-                        <div className="rd-settings-message">{message}</div>
-                    )}
+                    {message && <div className="rd-settings-message">{message}</div>}
 
-                    <button
-                        onClick={handleSaveProfile}
-                        disabled={saving}
-                        className="rd-settings-save"
-                    >
+                    <button onClick={handleSaveProfile} disabled={saving} className="rd-settings-save">
                         {saving ? 'Saving…' : 'Save Changes'}
                     </button>
                 </div>
@@ -176,63 +256,173 @@ export default function SettingsPage() {
                 {/* ── Password Section ── */}
                 <div className="rd-settings-card">
                     <h2 className="rd-settings-card-title">Change Password</h2>
-                    <p className="rd-settings-card-desc">
-                        Update your account password
-                    </p>
+                    <p className="rd-settings-card-desc">Update your account password</p>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">New Password</label>
                         <div className="rd-settings-input-wrap">
-                            <input
-                                type={showNewPw ? 'text' : 'password'}
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                className="rd-settings-input"
-                                placeholder="••••••••"
-                            />
-                            <button
-                                type="button"
-                                className="rd-settings-eye"
-                                onClick={() => setShowNewPw(!showNewPw)}
-                                aria-label="Toggle password visibility"
-                            >
-                                {showNewPw ? '🙈' : '👁️'}
-                            </button>
+                            <input type={showNewPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="rd-settings-input" placeholder="••••••••" />
+                            <button type="button" className="rd-settings-eye" onClick={() => setShowNewPw(!showNewPw)}>{showNewPw ? '🙈' : '👁️'}</button>
                         </div>
                     </div>
 
                     <div className="rd-settings-field">
                         <label className="rd-settings-label">Confirm New Password</label>
                         <div className="rd-settings-input-wrap">
+                            <input type={showConfirmPw ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="rd-settings-input" placeholder="••••••••" />
+                            <button type="button" className="rd-settings-eye" onClick={() => setShowConfirmPw(!showConfirmPw)}>{showConfirmPw ? '🙈' : '👁️'}</button>
+                        </div>
+                    </div>
+
+                    {passwordMessage && <div className="rd-settings-message">{passwordMessage}</div>}
+
+                    <button onClick={handleChangePassword} disabled={passwordSaving} className="rd-settings-save">
+                        {passwordSaving ? 'Updating…' : 'Update Password'}
+                    </button>
+                </div>
+
+                {/* ── CRM Integration Section ── */}
+                <div className="rd-settings-card">
+                    <h2 className="rd-settings-card-title">🔌 CRM Integration</h2>
+                    <p className="rd-settings-card-desc">
+                        Connect your CRM to send leads in and receive booking updates
+                    </p>
+
+                    {/* Inbound Webhook URL */}
+                    <div className="rd-settings-field">
+                        <label className="rd-settings-label">Inbound Webhook URL</label>
+                        <p className="rd-settings-hint" style={{ marginBottom: 8 }}>
+                            Configure your CRM to POST new leads to this URL
+                        </p>
+                        <div className="rd-settings-input-wrap">
                             <input
-                                type={showConfirmPw ? 'text' : 'password'}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                type="text"
+                                readOnly
+                                value={existingKeyPrefix
+                                    ? `${webhookBaseUrl}${'•'.repeat(40)}`
+                                    : 'Generate an API key first'
+                                }
                                 className="rd-settings-input"
-                                placeholder="••••••••"
+                                style={{ fontFamily: 'monospace', fontSize: 12 }}
                             />
+                            {existingKeyPrefix && apiKey && (
+                                <button
+                                    type="button"
+                                    className="rd-settings-eye"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`${webhookBaseUrl}${apiKey}`);
+                                        setIntegrationMessage('✅ Copied to clipboard!');
+                                    }}
+                                >
+                                    📋
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* API Key */}
+                    <div className="rd-settings-field">
+                        <label className="rd-settings-label">API Key</label>
+                        {apiKey ? (
+                            <div className="rd-webhook-key-display">
+                                <code>{apiKey}</code>
+                                <button
+                                    type="button"
+                                    className="rd-settings-eye"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(apiKey);
+                                        setIntegrationMessage('✅ Key copied!');
+                                    }}
+                                >
+                                    📋
+                                </button>
+                            </div>
+                        ) : existingKeyPrefix ? (
+                            <p className="rd-settings-hint">
+                                Active key: <code>{existingKeyPrefix}••••••••</code>
+                            </p>
+                        ) : null}
+                        <button
+                            onClick={handleGenerateKey}
+                            disabled={generatingKey}
+                            className="rd-settings-save"
+                            style={{ marginTop: 8, background: existingKeyPrefix ? '#64748b' : undefined }}
+                        >
+                            {generatingKey ? 'Generating…' : existingKeyPrefix ? 'Regenerate Key' : 'Generate API Key'}
+                        </button>
+                    </div>
+
+                    {/* Outbound Webhook */}
+                    <div className="rd-settings-field">
+                        <label className="rd-settings-label">Outbound Webhook URL</label>
+                        <p className="rd-settings-hint" style={{ marginBottom: 8 }}>
+                            We&apos;ll POST lead events (status changes, bookings) to this URL
+                        </p>
+                        <input
+                            type="url"
+                            value={outboundUrl}
+                            onChange={(e) => setOutboundUrl(e.target.value)}
+                            className="rd-settings-input"
+                            placeholder="https://your-crm.com/webhook/replydesk"
+                        />
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                            <button onClick={handleSaveOutbound} disabled={savingIntegration} className="rd-settings-save">
+                                {savingIntegration ? 'Saving…' : 'Save URL'}
+                            </button>
                             <button
-                                type="button"
-                                className="rd-settings-eye"
-                                onClick={() => setShowConfirmPw(!showConfirmPw)}
-                                aria-label="Toggle password visibility"
+                                onClick={handleTestOutbound}
+                                disabled={testingWebhook}
+                                className="rd-settings-save"
+                                style={{ background: '#f59e0b' }}
                             >
-                                {showConfirmPw ? '🙈' : '👁️'}
+                                {testingWebhook ? 'Testing…' : '🧪 Test'}
                             </button>
                         </div>
                     </div>
 
-                    {passwordMessage && (
-                        <div className="rd-settings-message">{passwordMessage}</div>
+                    {integrationMessage && (
+                        <div className="rd-settings-message">{integrationMessage}</div>
                     )}
 
-                    <button
-                        onClick={handleChangePassword}
-                        disabled={passwordSaving}
-                        className="rd-settings-save"
-                    >
-                        {passwordSaving ? 'Updating…' : 'Update Password'}
-                    </button>
+                    {/* Webhook Logs */}
+                    {webhookLogs.length > 0 && (
+                        <div className="rd-settings-field" style={{ marginTop: 16 }}>
+                            <label className="rd-settings-label">Recent Webhook Activity</label>
+                            <div className="rd-webhook-logs">
+                                {webhookLogs.slice(0, 10).map((log) => (
+                                    <div key={log.id} className="rd-webhook-log-item">
+                                        <span className={`rd-webhook-log-badge ${log.status_code < 300 ? 'success' : 'error'}`}>
+                                            {log.status_code || 'ERR'}
+                                        </span>
+                                        <span className="rd-webhook-log-dir">
+                                            {log.direction === 'inbound' ? '📥' : '📤'}
+                                        </span>
+                                        <span className="rd-webhook-log-time">
+                                            {new Date(log.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                        {log.duration_ms ? (
+                                            <span className="rd-webhook-log-dur">{log.duration_ms}ms</span>
+                                        ) : null}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Payload Format Docs */}
+                    <div className="rd-settings-field" style={{ marginTop: 16 }}>
+                        <label className="rd-settings-label">Inbound Payload Format</label>
+                        <pre className="rd-webhook-code">{`POST ${webhookBaseUrl}<your-api-key>
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "phone": "+447123456789",
+  "email": "jane@example.com",
+  "source": "Instagram Ad",
+  "notes": "Interested in headshots"
+}`}</pre>
+                    </div>
                 </div>
             </div>
         </AppShell>

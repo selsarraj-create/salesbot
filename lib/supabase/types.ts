@@ -19,6 +19,7 @@ export interface Tenant {
     is_active?: boolean;
     monthly_ad_spend?: number;
     chatbot_name?: string;
+    outbound_webhook_url?: string;
 }
 
 export type UserRole = 'super_admin' | 'owner' | 'manager' | 'agent';
