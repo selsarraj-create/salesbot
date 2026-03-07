@@ -45,38 +45,60 @@
 .rd-sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 0 12px 16px;
+    gap: 6px;
+    padding: 0 12px 20px;
 }
 
 .rd-sidebar-nav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 500;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
     color: #94a3b8;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.01em;
 }
 
 .rd-sidebar-nav-item:hover {
     color: #e2e8f0;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(2px);
 }
 
 .rd-sidebar-nav-item.rd-active {
     color: #fff;
-    background: #3b82f6;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.rd-sidebar-nav-item.rd-active .rd-sidebar-nav-icon-wrap {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rd-sidebar-nav-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.rd-sidebar-nav-item:hover .rd-sidebar-nav-icon-wrap {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .rd-sidebar-nav-icon {
-    font-size: 16px;
-    width: 20px;
-    text-align: center;
+    font-size: 15px;
+    line-height: 1;
 }
 
 /* ── Leads section ── */
@@ -226,17 +248,19 @@
 /* ── Sidebar footer (sign out) ── */
 .rd-sidebar-footer {
     margin-top: auto;
-    padding: 16px;
+    padding: 14px 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
 }
 
 .rd-sidebar-user {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 8px 14px;
+    margin-bottom: 4px;
 }
 
 .rd-sidebar-user-email {
@@ -250,46 +274,48 @@
 .rd-sidebar-signout {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
     border: none;
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.08);
     color: #f87171;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     font-family: inherit;
 }
 
 .rd-sidebar-signout:hover {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
+    transform: translateX(2px);
 }
 
-/* ── Settings link ── */
+/* ── Settings / Docs links ── */
 .rd-sidebar-settings {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: rgba(99, 102, 241, 0.08);
-    color: #a5b4fc;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: transparent;
+    color: #94a3b8;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     text-decoration: none;
     font-family: inherit;
 }
 
 .rd-sidebar-settings:hover {
-    background: rgba(99, 102, 241, 0.18);
-    color: #c7d2fe;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    transform: translateX(2px);
 }
 
 /* ═══════════════════════════════════════════

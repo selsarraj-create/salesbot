@@ -118,7 +118,9 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
                             href={item.href}
                             className={`rd-sidebar-nav-item ${isActive ? 'rd-active' : ''}`}
                         >
-                            <span className="rd-sidebar-nav-icon">{item.icon}</span>
+                            <div className="rd-sidebar-nav-icon-wrap">
+                                <span className="rd-sidebar-nav-icon">{item.icon}</span>
+                            </div>
                             <span>{item.label}</span>
                         </Link>
                     );
