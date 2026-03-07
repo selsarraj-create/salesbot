@@ -97,18 +97,23 @@ export default function SettingsPage() {
 
         try {
             if (tenant) {
-                const { error: tenantError } = await supabase
-                    .from('tenants' as any)
-                    .update({
-                        name: businessName,
-                        chatbot_name: chatbotName,
-                        monthly_ad_spend: adSpend ? parseFloat(adSpend) : 0,
-                        quiet_hours_start: quietStart || null,
-                        quiet_hours_end: quietEnd || null,
-                        quiet_hours_tz: quietTz,
-                    } as any)
-                    .eq('id', tenant.id);
+                const updatePayload = {
+                    name: businessName,
+                    chatbot_name: chatbotName,
+                    monthly_ad_spend: adSpend ? parseFloat(adSpend) : 0,
+                    quiet_hours_start: quietStart || null,
+                    quiet_hours_end: quietEnd || null,
+                    quiet_hours_tz: quietTz,
+                };
+                console.log('[Settings] Saving tenant update:', updatePayload);
 
+                const { data, error: tenantError } = await supabase
+                    .from('tenants' as any)
+                    .update(updatePayload as any)
+                    .eq('id', tenant.id)
+                    .select();
+
+                console.log('[Settings] Update result:', { data, error: tenantError });
                 if (tenantError) throw tenantError;
             }
 
