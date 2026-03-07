@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { verifyAuth } from '@/lib/auth/api-auth';
+import { isQuietHours } from '@/lib/utils/quiet-hours';
+
+const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // Send a WhatsApp message via Twilio (WhatsApp Sandbox)
 export async function POST(req: Request) {
@@ -11,6 +18,20 @@ export async function POST(req: Request) {
 
         if (!to || !message) {
             return NextResponse.json({ error: 'Missing "to" or "message"' }, { status: 400 });
+        }
+
+        // Check quiet hours for this tenant
+        const { data: tenantData } = await supabaseAdmin
+            .from('tenants')
+            .select('quiet_hours_start, quiet_hours_end, quiet_hours_tz')
+            .eq('id', auth.tenantId)
+            .single();
+
+        if (tenantData && isQuietHours(tenantData.quiet_hours_start, tenantData.quiet_hours_end, tenantData.quiet_hours_tz || 'Europe/London')) {
+            return NextResponse.json({
+                error: `Message blocked — quiet hours active (${tenantData.quiet_hours_start} – ${tenantData.quiet_hours_end} ${tenantData.quiet_hours_tz})`,
+                quiet_hours: true,
+            }, { status: 403 });
         }
 
         const accountSid = process.env.TWILIO_ACCOUNT_SID;

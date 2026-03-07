@@ -20,6 +20,9 @@ export interface Tenant {
     monthly_ad_spend?: number;
     chatbot_name?: string;
     outbound_webhook_url?: string;
+    quiet_hours_start?: string;  // e.g. "21:00"
+    quiet_hours_end?: string;    // e.g. "08:00"
+    quiet_hours_tz?: string;     // e.g. "Europe/London"
 }
 
 export type UserRole = 'super_admin' | 'owner' | 'manager' | 'agent';

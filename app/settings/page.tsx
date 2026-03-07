@@ -42,12 +42,20 @@ export default function SettingsPage() {
     const [testingWebhook, setTestingWebhook] = useState(false);
     const [savingIntegration, setSavingIntegration] = useState(false);
 
+    // Quiet hours state
+    const [quietStart, setQuietStart] = useState('');
+    const [quietEnd, setQuietEnd] = useState('');
+    const [quietTz, setQuietTz] = useState('Europe/London');
+
     useEffect(() => {
         if (tenant) {
             setBusinessName(tenant.name || '');
             setChatbotName(tenant.chatbot_name || 'Alex');
             setAdSpend(String(tenant.monthly_ad_spend || ''));
             setOutboundUrl(tenant.outbound_webhook_url || '');
+            setQuietStart(tenant.quiet_hours_start || '');
+            setQuietEnd(tenant.quiet_hours_end || '');
+            setQuietTz(tenant.quiet_hours_tz || 'Europe/London');
         }
         if (user) {
             setEmail(user.email || '');
@@ -95,6 +103,9 @@ export default function SettingsPage() {
                         name: businessName,
                         chatbot_name: chatbotName,
                         monthly_ad_spend: adSpend ? parseFloat(adSpend) : 0,
+                        quiet_hours_start: quietStart || null,
+                        quiet_hours_end: quietEnd || null,
+                        quiet_hours_tz: quietTz,
                     } as any)
                     .eq('id', tenant.id);
 
@@ -252,6 +263,55 @@ export default function SettingsPage() {
                     <button onClick={handleSaveProfile} disabled={saving} className="rd-settings-save">
                         {saving ? 'Saving…' : 'Save Changes'}
                     </button>
+                </div>
+
+                {/* ── Quiet Hours Section ── */}
+                <div className="rd-settings-card">
+                    <h2 className="rd-settings-card-title">Quiet Hours</h2>
+                    <p className="rd-settings-card-desc">Messages will not be sent to leads during these hours. Sandbox is not affected.</p>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div className="rd-settings-field">
+                            <label className="rd-settings-label">Start Time</label>
+                            <input type="time" value={quietStart} onChange={(e) => setQuietStart(e.target.value)} className="rd-settings-input" />
+                        </div>
+                        <div className="rd-settings-field">
+                            <label className="rd-settings-label">End Time</label>
+                            <input type="time" value={quietEnd} onChange={(e) => setQuietEnd(e.target.value)} className="rd-settings-input" />
+                        </div>
+                    </div>
+
+                    <div className="rd-settings-field">
+                        <label className="rd-settings-label">Timezone</label>
+                        <select value={quietTz} onChange={(e) => setQuietTz(e.target.value)} className="rd-settings-input">
+                            <option value="Europe/London">Europe/London (GMT/BST)</option>
+                            <option value="America/New_York">America/New York (EST/EDT)</option>
+                            <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                            <option value="America/Denver">America/Denver (MST/MDT)</option>
+                            <option value="America/Los_Angeles">America/Los Angeles (PST/PDT)</option>
+                            <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                            <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                            <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                            <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                        </select>
+                    </div>
+
+                    {quietStart && quietEnd && (
+                        <div style={{ padding: '12px 16px', borderRadius: '12px', background: 'rgba(59,130,246,0.08)', color: '#3b82f6', fontSize: '13px', fontWeight: 500 }}>
+                            🌙 Messages will be paused from <strong>{quietStart}</strong> to <strong>{quietEnd}</strong> ({quietTz})
+                        </div>
+                    )}
+
+                    {quietStart && quietEnd && (
+                        <button
+                            onClick={() => { setQuietStart(''); setQuietEnd(''); }}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 500, padding: '8px 0' }}
+                        >
+                            Disable Quiet Hours
+                        </button>
+                    )}
                 </div>
 
                 {/* ── Password Section ── */}
