@@ -24,6 +24,7 @@ export default function BookingsFeed() {
                 .from('leads')
                 .select('id, lead_code, name, created_at, shoot_date')
                 .eq('status', 'Booked')
+                .neq('is_test', true)
                 .order('created_at', { ascending: false })
                 .limit(10);
 

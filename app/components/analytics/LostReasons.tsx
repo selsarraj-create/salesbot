@@ -21,7 +21,8 @@ export default function LostReasons() {
             const { data: leads } = await supabase
                 .from('leads')
                 .select('status, follow_up_count, last_contacted_at')
-                .neq('status', 'Booked');
+                .neq('status', 'Booked')
+                .neq('is_test', true);
 
             if (!leads) return;
 

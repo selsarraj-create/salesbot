@@ -61,10 +61,18 @@ export async function GET(req: Request) {
         const leadIds = Array.from(new Set(filteredMessages.map((m: any) => m.lead_id)));
         const { data: leads } = await supabase
             .from('leads')
-            .select('id, lead_code, status, priority_score, quality_score, manual_score, judge_rationale')
+            .select('id, lead_code, status, priority_score, quality_score, manual_score, judge_rationale, is_test')
             .in('id', leadIds);
 
-        const leadsMap = new Map(leads?.map((l: any) => [l.id, l]) || []);
+        // Remove messages from test leads
+        const testLeadIds = new Set((leads || []).filter((l: any) => l.is_test).map((l: any) => l.id));
+        filteredMessages = filteredMessages.filter((m: any) => !testLeadIds.has(m.lead_id));
+
+        if (filteredMessages.length === 0) {
+            return NextResponse.json({ queue: [] });
+        }
+
+        const leadsMap = new Map(leads?.filter((l: any) => !l.is_test).map((l: any) => [l.id, l]) || []);
 
         // Fetch previous context
         const richQueue = (await Promise.all(filteredMessages.map(async (msg: any) => {

@@ -20,7 +20,8 @@ export default function ConversionFunnel() {
         async function fetchFunnel() {
             const { data: leads, error } = await supabase
                 .from('leads')
-                .select('status');
+                .select('status')
+                .neq('is_test', true);
 
             if (error || !leads) return;
 

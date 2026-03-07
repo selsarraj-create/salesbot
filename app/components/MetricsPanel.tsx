@@ -19,7 +19,8 @@ export default function MetricsPanel() {
         async function fetchMetrics() {
             const { data: leads, error } = await supabase
                 .from('leads')
-                .select('status');
+                .select('status')
+                .neq('is_test', true);
 
             if (error) { console.error('Error fetching metrics:', error); return; }
 

@@ -19,7 +19,7 @@ export default function AiPerformance() {
 
         async function fetchStats() {
             // Fetch leads
-            const { data: leads } = await supabase.from('leads').select('status');
+            const { data: leads } = await supabase.from('leads').select('status').neq('is_test', true);
             const all = (leads as any[]) || [];
             const total = all.length;
             const booked = all.filter(l => l.status === 'Booked').length;

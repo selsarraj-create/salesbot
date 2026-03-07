@@ -69,6 +69,7 @@ export default function LeadsSidebar({ selectedLeadId, onSelectLead }: LeadsSide
             const { data, error } = await supabase
                 .from('leads')
                 .select('*')
+                .neq('is_test', true)
                 .order('priority_score', { ascending: false, nullsFirst: false })
                 .order('updated_at', { ascending: false });
 
