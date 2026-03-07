@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, MessageSquare, Sliders } from 'lucide-react';
+import { useAuth } from '@/lib/auth/auth-context';
 import SidebarFooter from './SidebarFooter';
 import '../dashboard.css';
 
@@ -20,6 +21,8 @@ interface AppShellProps {
 
 export default function AppShell({ children, title, hideTopbar }: AppShellProps) {
     const pathname = usePathname();
+    const { tenant } = useAuth();
+    const businessName = tenant?.name || '';
 
     return (
         <div className="rd-app">
@@ -59,14 +62,13 @@ export default function AppShell({ children, title, hideTopbar }: AppShellProps)
                 {!hideTopbar && (
                     <header className="rd-topbar">
                         <h1 className="rd-topbar-title">{title}</h1>
-                        <div className="rd-topbar-right">
-                            <button className="rd-topbar-icon" aria-label="Notifications">
-                                🔔
-                            </button>
-                            <div className="rd-topbar-avatar">
-                                <span>RD</span>
+                        {businessName && (
+                            <div className="rd-topbar-right">
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>
+                                    {businessName}
+                                </span>
                             </div>
-                        </div>
+                        )}
                     </header>
                 )}
 
