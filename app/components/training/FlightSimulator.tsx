@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -98,7 +99,7 @@ export default function FlightSimulator() {
 
                 // Kickoff: Bot Initiates Conversation (Outbound)
                 console.log('[FlightSimulator] Triggering Bot Initiation...');
-                const initRes = await fetch('/api/sandbox', {
+                const initRes = await authFetch('/api/sandbox', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -150,7 +151,7 @@ export default function FlightSimulator() {
         if (!lastMsg || lastMsg.sender === 'bot') {
             try {
                 console.log('[FlightSimulator] Calling Attacker API...');
-                const res = await fetch('/api/simulation/run', {
+                const res = await authFetch('/api/simulation/run', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -179,7 +180,7 @@ export default function FlightSimulator() {
 
                 // --- STEP 2: DEFENDER (Alex/Sandbox) ---
                 console.log('[FlightSimulator] Calling Defender API...');
-                const sandboxRes = await fetch('/api/sandbox', {
+                const sandboxRes = await authFetch('/api/sandbox', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -354,7 +355,7 @@ export default function FlightSimulator() {
         const scenario = scenarios.find(s => s.id === selectedScenarioId);
 
         try {
-            const res = await fetch('/api/simulation/grade', {
+            const res = await authFetch('/api/simulation/grade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -19,6 +19,21 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        // Lightweight auth: verify the caller owns this userId
+        const authHeader = req.headers.get('authorization');
+        if (authHeader?.startsWith('Bearer ')) {
+            const token = authHeader.substring(7);
+            const verifyClient = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+                global: { headers: { Authorization: `Bearer ${token}` } },
+            });
+            const { data: { user } } = await verifyClient.auth.getUser(token);
+            if (!user || user.id !== userId) {
+                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            }
+        } else {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
         // 1. Check if slug is taken

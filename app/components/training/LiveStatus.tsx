@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ export default function LiveStatus() {
     const checkStatus = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/cron/concierge');
+            const res = await authFetch('/api/cron/concierge');
             const data = await res.json();
             if (data.conditions) {
                 setStatus(data.conditions);

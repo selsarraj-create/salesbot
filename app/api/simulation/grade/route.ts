@@ -2,13 +2,17 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 let _sb: any;
-const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return (_sb as any)[p]; } });
 
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const { chat_log, scenario_name, scenario_id, lead_persona_name } = await req.json();
 
         // 1. The Judge Prompt (Deep Reasoning Mode)

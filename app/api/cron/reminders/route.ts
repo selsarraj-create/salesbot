@@ -8,6 +8,13 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
+        // Verify cron secret
+        const authHeader = req.headers.get('authorization');
+        const cronSecret = process.env.CRON_SECRET;
+        if (cronSecret && (!authHeader || authHeader !== `Bearer ${cronSecret}`)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         console.log('[Smart Reminders] Checking for upcoming shoots...');
 
         // 1. Calculate 48h window

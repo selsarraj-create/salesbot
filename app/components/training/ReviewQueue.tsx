@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,7 +57,7 @@ export default function ReviewQueue() {
                 failures_only: failuresOnly.toString()
             });
 
-            const res = await fetch(`/api/training/queue?${params}`);
+            const res = await authFetch(`/api/training/queue?${params}`);
             if (!res.ok) throw new Error('Failed to fetch queue');
 
             const data = await res.json();
@@ -72,7 +73,7 @@ export default function ReviewQueue() {
 
     const handleAction = async (action: 'approve' | 'intervene' | 'gold' | 'skip', item: ReviewItem, correctionText?: string) => {
         try {
-            const res = await fetch('/api/training/queue', {
+            const res = await authFetch('/api/training/queue', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -106,7 +107,7 @@ export default function ReviewQueue() {
         if (!confirm(`Archive ${selectedItems.size} items?`)) return;
 
         try {
-            const res = await fetch('/api/training/queue', {
+            const res = await authFetch('/api/training/queue', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

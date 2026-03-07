@@ -1,11 +1,15 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const body = await req.json();
         const { history, persona, scenario_name } = body;
 

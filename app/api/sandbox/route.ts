@@ -3,10 +3,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { gradeConversation } from '@/lib/intelligence/judge';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 // Initialize Supabase Client (service role, lazy-init to avoid build-time crash)
 let _sb: any;
-const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return (_sb as any)[p]; } });
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -84,6 +85,9 @@ async function fetchBestProtocol() {
 
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         // Automatic Asset Synchronization (Cold Start & Conflict Resolution)
         // We fetch the latest 'ALEX_PROTOCOL' from the DB to ensure we are always on vLatest.
         const dynamicProtocol = await fetchBestProtocol();

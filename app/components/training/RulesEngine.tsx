@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +32,7 @@ export default function RulesEngine() {
 
     const fetchRules = async () => {
         try {
-            const res = await fetch('/api/training/rules');
+            const res = await authFetch('/api/training/rules');
             const data = await res.json();
             if (data.rules) setRules(data.rules);
         } catch (error) {
@@ -45,7 +46,7 @@ export default function RulesEngine() {
         if (!newRule.trim()) return;
 
         try {
-            const res = await fetch('/api/training/rules', {
+            const res = await authFetch('/api/training/rules', {
                 method: 'POST',
                 body: JSON.stringify({
                     rule_text: newRule,
@@ -74,7 +75,7 @@ export default function RulesEngine() {
             // Optimistic update
             setRules(prev => prev.map(r => r.id === id ? { ...r, is_active: !currentStatus } : r));
 
-            await fetch('/api/training/rules', {
+            await authFetch('/api/training/rules', {
                 method: 'PATCH',
                 body: JSON.stringify({ id, is_active: !currentStatus })
             });
@@ -88,7 +89,7 @@ export default function RulesEngine() {
         if (!confirm('Delete this rule?')) return;
 
         try {
-            const res = await fetch(`/api/training/rules?id=${id}`, { method: 'DELETE' });
+            const res = await authFetch(`/api/training/rules?id=${id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.error || 'Delete failed');
@@ -117,7 +118,7 @@ export default function RulesEngine() {
 
     const saveRule = async (id: string) => {
         try {
-            const res = await fetch('/api/training/rules', {
+            const res = await authFetch('/api/training/rules', {
                 method: 'PATCH',
                 body: JSON.stringify({ id, rule_text: editText })
             });

@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { isRateLimited } from '@/lib/auth/api-auth';
 
 let _sb: any;
-const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return (_sb as any)[p]; } });
 
 /**
  * POST /api/webhook/inbound/[key]
@@ -63,6 +64,11 @@ export async function POST(
             .from('api_keys')
             .update({ last_used_at: new Date().toISOString() })
             .eq('key_hash', keyHash);
+
+        // Rate limiting: 60 requests/minute per API key
+        if (isRateLimited(keyPrefix, 60)) {
+            return NextResponse.json({ error: 'Rate limit exceeded. Max 60 requests/minute.' }, { status: 429 });
+        }
 
         // Parse payload
         const body = await req.json();

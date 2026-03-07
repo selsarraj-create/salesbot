@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +35,7 @@ export default function AICalibrationPanel() {
 
     const fetchConfig = async () => {
         try {
-            const res = await fetch('/api/config/ai');
+            const res = await authFetch('/api/config/ai');
             const data = await res.json();
             if (data.config) {
                 setConfig(data.config);
@@ -59,7 +60,7 @@ export default function AICalibrationPanel() {
     const saveConfig = async (newConfig: AIConfig) => {
         setSaving(true);
         try {
-            const res = await fetch('/api/config/ai', {
+            const res = await authFetch('/api/config/ai', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newConfig)

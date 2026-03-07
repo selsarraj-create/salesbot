@@ -1,14 +1,19 @@
 import { getServerSupabase } from '@/lib/supabase/server-client';
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase() as any;
         const { data, error } = await supabase
             .from('ai_config')
             .select('*')
+            .eq('tenant_id', auth.tenantId)
             .single();
 
         if (error) throw error;
@@ -21,6 +26,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase() as any;
         const body = await req.json();
         const { temperature, top_p, frequency_penalty, full_context_mode, thinking_budget, show_thoughts } = body;
@@ -36,7 +44,7 @@ export async function POST(req: Request) {
         const { data, error } = await supabase
             .from('ai_config')
             .update(updates)
-            .eq('id', 1)
+            .eq('tenant_id', auth.tenantId)
             .select()
             .single();
 

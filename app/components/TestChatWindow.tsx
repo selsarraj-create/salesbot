@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -97,7 +98,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
             // Extract metadata safely
             const meta = (lead?.lead_metadata as any) || {};
 
-            const res = await fetch('/api/sandbox', {
+            const res = await authFetch('/api/sandbox', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -127,7 +128,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
     // Send a message via Twilio WhatsApp
     const sendWhatsApp = async (to: string, message: string) => {
         try {
-            const res = await fetch('/api/whatsapp-send', {
+            const res = await authFetch('/api/whatsapp-send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ to, message })
@@ -216,7 +217,7 @@ export default function TestChatWindow({ lead, onDelete }: TestChatWindowProps) 
         setThinking(true);
 
         try {
-            const response = await fetch('/api/sandbox', {
+            const response = await authFetch('/api/sandbox', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

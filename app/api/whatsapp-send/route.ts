@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 // Send a WhatsApp message via Twilio (WhatsApp Sandbox)
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const { to, message } = await req.json();
 
         if (!to || !message) {
@@ -19,7 +23,7 @@ export async function POST(req: Request) {
 
         // Twilio REST API — send WhatsApp message
         const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-        const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+        const basicAuth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
 
         const body = new URLSearchParams({
             To: `whatsapp:${to}`,
@@ -30,7 +34,7 @@ export async function POST(req: Request) {
         const twilioRes = await fetch(twilioUrl, {
             method: 'POST',
             headers: {
-                'Authorization': `Basic ${auth}`,
+                'Authorization': `Basic ${basicAuth}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: body.toString(),

@@ -1,20 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 let _sb: any;
-const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return (_sb as any)[p]; } });
 
 /**
  * GET /api/webhook/logs?tenant_id=xxx
- * Returns recent webhook logs for a tenant.
+ * Returns recent webhook logs for the authenticated user's tenant.
  */
 export async function GET(req: Request) {
     try {
+        // Verify auth
+        const auth = await verifyAuth(req);
+        if (!auth) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { searchParams } = new URL(req.url);
         const tenantId = searchParams.get('tenant_id');
 
-        if (!tenantId) {
-            return NextResponse.json({ error: 'tenant_id required' }, { status: 400 });
+        // Ensure user can only read their own tenant's logs
+        if (tenantId !== auth.tenantId) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         const { data, error } = await supabase

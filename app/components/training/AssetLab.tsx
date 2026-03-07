@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,7 @@ export default function AssetLab() {
         if (!confirm('Are you sure you want to delete this asset? This will remove it from AI learning forever.')) return;
 
         try {
-            const res = await fetch(`/api/training/assets?id=${id}`, { method: 'DELETE' });
+            const res = await authFetch(`/api/training/assets?id=${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Delete failed');
             setAssets(prev => prev.filter(a => a.id !== id));
         } catch (error) {
@@ -61,7 +62,7 @@ export default function AssetLab() {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const response = await fetch('/api/training/upload', {
+                const response = await authFetch('/api/training/upload', {
                     method: 'POST',
                     body: formData
                 });

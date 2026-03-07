@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import { authFetch } from '@/lib/auth/auth-fetch';
 import Link from 'next/link';
 
 export default function SignupPage() {
@@ -41,7 +42,7 @@ export default function SignupPage() {
             const userId = authData.user.id;
 
             // 2. Create tenant (using service role via API)
-            const res = await fetch('/api/onboarding', {
+            const res = await authFetch('/api/onboarding', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

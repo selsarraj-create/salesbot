@@ -1,19 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 let _sb: any;
-const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return _sb[p]; } });
+const supabase: any = new Proxy({}, { get: (_t, p) => { if (!_sb) _sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!); return (_sb as any)[p]; } });
 
 /**
  * POST /api/webhook/generate-key
- * Generates a new API key for a tenant.
+ * Generates a new API key for the authenticated user's tenant.
  */
 export async function POST(req: Request) {
     try {
+        // Verify auth
+        const auth = await verifyAuth(req);
+        if (!auth) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const { tenant_id } = await req.json();
-        if (!tenant_id) {
-            return NextResponse.json({ error: 'tenant_id required' }, { status: 400 });
+
+        // Ensure user can only generate keys for their own tenant
+        if (tenant_id !== auth.tenantId) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         // Generate a random key
@@ -34,7 +43,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // Return the raw key — only shown ONCE
         return NextResponse.json({
             success: true,
             api_key: rawKey,

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth/auth-context';
+import { authFetch } from '@/lib/auth/auth-fetch';
 
 interface WebhookLog {
     id: string;
@@ -71,7 +72,7 @@ export default function SettingsPage() {
 
             // Fetch logs
             try {
-                const res = await fetch(`/api/webhook/logs?tenant_id=${tenant!.id}`);
+                const res = await authFetch(`/api/webhook/logs?tenant_id=${tenant!.id}`);
                 const data = await res.json();
                 if (data.logs) setWebhookLogs(data.logs);
             } catch {
@@ -144,7 +145,7 @@ export default function SettingsPage() {
         if (!tenant) return;
         setGeneratingKey(true);
         try {
-            const res = await fetch('/api/webhook/generate-key', {
+            const res = await authFetch('/api/webhook/generate-key', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ tenant_id: tenant.id }),

@@ -1,12 +1,16 @@
 import { getServerSupabase as _getServerSupabase } from '@/lib/supabase/server-client';
 const getServerSupabase = () => _getServerSupabase() as any;
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 // Keywords that trigger a "Safety Lock"
 const SAFETY_KEYWORDS = ['agency', 'guarantee', 'promise', 'legal', 'scam'];
 
 export async function GET(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase();
         const { data: rules, error } = await supabase
             .from('system_rules')
@@ -23,6 +27,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase();
         const { rule_text, category } = await req.json();
 
@@ -57,6 +64,9 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
@@ -92,6 +102,9 @@ export async function DELETE(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase();
         const { id, is_active, rule_text } = await req.json();
 

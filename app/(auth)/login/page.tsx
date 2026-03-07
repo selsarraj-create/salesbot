@@ -132,8 +132,7 @@ export default function LoginPage() {
                     </Suspense>
 
                     <p className="rd-auth-footer-text">
-                        Don&apos;t have an account?{' '}
-                        <Link href="/signup" className="rd-auth-link">Create one</Link>
+                        Invite only — contact your admin for access.
                     </p>
                 </div>
             </div>

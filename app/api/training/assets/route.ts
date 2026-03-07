@@ -1,9 +1,13 @@
 
 import { getServerSupabase } from '@/lib/supabase/server-client';
 import { NextResponse } from 'next/server';
+import { verifyAuth } from '@/lib/auth/api-auth';
 
 export async function DELETE(req: Request) {
     try {
+        const auth = await verifyAuth(req);
+        if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
         const supabase = getServerSupabase();
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
