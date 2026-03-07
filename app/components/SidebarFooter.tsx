@@ -27,6 +27,9 @@ export default function SidebarFooter() {
             <Link href="/settings" className="rd-sidebar-settings">
                 ⚙️ Settings
             </Link>
+            <Link href="/docs" className="rd-sidebar-settings">
+                📖 Docs
+            </Link>
             <button onClick={handleSignOut} className="rd-sidebar-signout">
                 🚪 Sign Out
             </button>
