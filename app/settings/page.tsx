@@ -105,16 +105,15 @@ export default function SettingsPage() {
                     quiet_hours_end: quietEnd || null,
                     quiet_hours_tz: quietTz,
                 };
-                console.log('[Settings] Saving tenant update:', updatePayload);
 
-                const { data, error: tenantError } = await supabase
-                    .from('tenants' as any)
-                    .update(updatePayload as any)
-                    .eq('id', tenant.id)
-                    .select();
+                const res = await authFetch('/api/settings/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload),
+                });
 
-                console.log('[Settings] Update result:', { data, error: tenantError });
-                if (tenantError) throw tenantError;
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Failed to save');
             }
 
             if (email !== user?.email) {
